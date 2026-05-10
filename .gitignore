@@ -40,3 +40,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# md
+*.md
+.agent/
+screen.png
+
+
+# Document
+*.txt
+*.zip
+*.pdf
+*.docx

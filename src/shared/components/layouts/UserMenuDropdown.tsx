@@ -1,0 +1,205 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+import { ROUTES } from "@/shared/constants/constants/routes";
+import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
+import { messages } from "@/shared/i18n/config";
+import { cn } from "@/shared/lib/utils/cn";
+import type { AuthUser } from "@/shared/types/auth";
+
+interface UserMenuItem {
+  href: string;
+  label: string;
+}
+
+interface UserMenuSection {
+  items: UserMenuItem[];
+  title: string;
+}
+
+interface UserMenuContentProps {
+  className?: string;
+  onLogout: () => void | Promise<void>;
+  onNavigate: (path: string) => void;
+}
+
+interface UserMenuDropdownProps {
+  logoutHandler?: () => Promise<void>;
+  userData?: AuthUser | null;
+}
+
+export function getUserInitials(name?: string, email?: string): string {
+  if (name) {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  return email?.[0]?.toUpperCase() ?? "U";
+}
+
+export function getUserMenuSections(): UserMenuSection[] {
+  const t = messages.home.userMenu;
+
+  return [
+    {
+      title: t.jobManagement,
+      items: [
+        {
+          href: ROUTES.JOB_SEEKER_FAVORITES,
+          label: t.savedJobs,
+        },
+        {
+          href: ROUTES.JOB_SEEKER_APPLICATIONS,
+          label: t.appliedJobs,
+        },
+      ],
+    },
+    {
+      title: t.cvManagement,
+      items: [
+        {
+          href: ROUTES.JOB_SEEKER_CVS,
+          label: t.myCv,
+        },
+        {
+          href: ROUTES.RECRUITER_CV_ANALYSIS,
+          label: t.recruiterReview,
+        },
+      ],
+    },
+    {
+      title: t.accountSecurity,
+      items: [
+        {
+          href: ROUTES.JOB_SEEKER_PROFILE,
+          label: t.profileSettings,
+        },
+        {
+          href: ROUTES.JOB_SEEKER_CHANGE_PASSWORD,
+          label: t.changePassword,
+        },
+      ],
+    },
+  ];
+}
+
+export function UserMenuContent({
+  className,
+  onLogout,
+  onNavigate,
+}: UserMenuContentProps) {
+  const sections = getUserMenuSections();
+  const t = messages.home.userMenu;
+
+  return (
+    <div className={cn("py-1", className)}>
+      {sections.map((section, sectionIndex) => (
+        <div
+          className={cn(sectionIndex > 0 && "border-t border-border")}
+          key={section.title}
+        >
+          <p className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {section.title}
+          </p>
+          {section.items.map((item) => (
+            <button
+              className="block w-full px-4 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              key={item.href}
+              onClick={() => onNavigate(item.href)}
+              type="button"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ))}
+
+      <div className="border-t border-border py-1">
+        <button
+          className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-error transition-colors hover:bg-error-soft"
+          onClick={onLogout}
+          type="button"
+        >
+          {t.logout}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function UserMenuDropdown({
+  logoutHandler,
+  userData,
+}: UserMenuDropdownProps = {}) {
+  const { user, logout } = useCurrentUser();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const t = messages.home.userMenu;
+  const currentUser = userData ?? user;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleLogout() {
+    setIsOpen(false);
+
+    if (logoutHandler) {
+      await logoutHandler();
+      return;
+    }
+
+    await logout();
+  }
+
+  function navigateTo(path: string) {
+    setIsOpen(false);
+    router.push(path);
+  }
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <button
+        className="flex items-center gap-2 rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
+      >
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+          {getUserInitials(currentUser?.fullName, currentUser?.email)}
+        </div>
+      </button>
+
+      {isOpen && currentUser ? (
+        <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-surface py-2 shadow-xl">
+          <div className="border-b border-border px-4 py-4">
+            <p className="font-semibold text-foreground">
+              {currentUser.fullName || t.guestName}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {currentUser.email}
+            </p>
+          </div>
+
+          <UserMenuContent onLogout={handleLogout} onNavigate={navigateTo} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
