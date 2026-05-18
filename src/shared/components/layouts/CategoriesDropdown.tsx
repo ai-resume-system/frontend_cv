@@ -5,13 +5,23 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
+import { cn } from "@/shared/lib/utils/cn";
+import type { CareerCategory } from "@/shared/types/category";
 
-export function CategoriesDropdown() {
+interface CategoriesDropdownProps {
+  categories: CareerCategory[];
+  error: string | null;
+  loading: boolean;
+}
+
+export function CategoriesDropdown({
+  categories,
+  error,
+  loading,
+}: CategoriesDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { categories, error, loading } = useCareerCategories({ limit: 10 });
   const t = HOME_MESSAGES;
 
   useEffect(() => {
@@ -38,9 +48,10 @@ export function CategoriesDropdown() {
         <span>{t.nav.jobs}</span>
         <ChevronDown
           aria-hidden="true"
-          className={`h-4 w-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={cn(
+            "h-4 w-4 transition-transform duration-200",
+            isOpen && "rotate-180",
+          )}
         />
       </button>
 

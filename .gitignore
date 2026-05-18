@@ -43,10 +43,10 @@ next-env.d.ts
 
 
 # md
-*.md
+# *.md
 .agent/
 screen.png
-/plan
+# /plan
 
 
 # Document

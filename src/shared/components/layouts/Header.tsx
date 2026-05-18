@@ -174,7 +174,11 @@ export function Header() {
           </div>
 
           <nav className="hidden h-full items-center justify-center gap-1 text-sm font-medium md:flex">
-            <CategoriesDropdown />
+            <CategoriesDropdown
+              categories={categories}
+              error={error}
+              loading={loading}
+            />
             <Link
               className="flex h-10 items-center gap-1.5 rounded-lg px-3.5 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
               href={ROUTES.RECRUITER_HOME}
