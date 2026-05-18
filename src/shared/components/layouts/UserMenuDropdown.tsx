@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
-import { messages } from "@/shared/i18n/config";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 import type { AuthUser } from "@/shared/types/auth";
 
@@ -44,7 +44,7 @@ export function getUserInitials(name?: string, email?: string): string {
 }
 
 export function getUserMenuSections(): UserMenuSection[] {
-  const t = messages.home.userMenu;
+  const t = HOME_MESSAGES.userMenu;
 
   return [
     {
@@ -95,7 +95,7 @@ export function UserMenuContent({
   onNavigate,
 }: UserMenuContentProps) {
   const sections = getUserMenuSections();
-  const t = messages.home.userMenu;
+  const t = HOME_MESSAGES.userMenu;
 
   return (
     <div className={cn("py-1", className)}>
@@ -141,7 +141,7 @@ export function UserMenuDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const t = messages.home.userMenu;
+  const t = HOME_MESSAGES.userMenu;
   const currentUser = userData ?? user;
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export function UserMenuDropdown({
         type="button"
       >
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-          {getUserInitials(currentUser?.fullName, currentUser?.email)}
+          {getUserInitials(currentUser?.profile?.fullName, currentUser?.email)}
         </div>
       </button>
 
@@ -190,10 +190,10 @@ export function UserMenuDropdown({
         <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-surface py-2 shadow-xl">
           <div className="border-b border-border px-4 py-4">
             <p className="font-semibold text-foreground">
-              {currentUser.fullName || t.guestName}
+              {currentUser?.profile?.fullName || t.guestName}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {currentUser.email}
+              {currentUser?.email}
             </p>
           </div>
 

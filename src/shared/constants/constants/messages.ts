@@ -1,4 +1,33 @@
-export const homeMessages = {
+export const AUTH_MESSAGES = {
+  validation: {
+    required: "Vui lòng nhập đầy đủ thông tin bắt buộc.",
+    email: "Email không hợp lệ.",
+    passwordLength: "Mật khẩu cần tối thiểu 6 ký tự.",
+    passwordMatch: "Mật khẩu xác nhận không khớp.",
+    otpLength: "Mã OTP phải gồm 6 chữ số.",
+  },
+} as const;
+
+export const COMMON_MESSAGES = {
+  appName: "Fuse",
+  nav: {
+    jobs: "Việc làm",
+    cv: "CV AI",
+    employers: "Nhà tuyển dụng",
+    login: "Đăng nhập",
+    register: "Đăng ký",
+  },
+  actions: {
+    findJobs: "Tìm việc ngay",
+    postJob: "Đăng tin tuyển dụng",
+    chooseRole: "Chọn loại tài khoản",
+    continue: "Tiếp tục",
+    submit: "Gửi thông tin",
+    backHome: "Về trang chủ",
+  },
+} as const;
+
+export const HOME_MESSAGES = {
   nav: {
     jobs: "Việc làm",
     employers: "Nhà tuyển dụng",
@@ -11,42 +40,6 @@ export const homeMessages = {
     { value: "850", label: "Doanh nghiệp" },
     { value: "15k", label: "Kết nối AI" },
     { value: "98%", label: "Tỉ lệ chính xác" },
-  ],
-  hotJobs: {
-    title: "Việc làm HOT nhất",
-    subtitle: "Được FUSE đề xuất dựa trên nhu cầu thị trường",
-    viewAll: "Xem tất cả",
-    viewDetail: "Xem chi tiết",
-    empty: "Chưa có việc làm phù hợp để hiển thị.",
-    error: "Chưa tải được danh sách việc làm, đang hiển thị dữ liệu mẫu.",
-    fallbackCompany: "Doanh nghiệp tuyển dụng",
-    fallbackLocation: "Linh hoạt",
-    fallbackWorkType: "Toàn thời gian",
-    matchLabel: "Match",
-    salaryFrom: "Từ",
-  },
-  jobs: [
-    {
-      title: "Senior AI Engineer",
-      company: "Tech Vision Corp",
-      location: "TP. Hồ Chí Minh",
-      match: "92%",
-      type: "Full-time",
-    },
-    {
-      title: "Senior Product Designer",
-      company: "Meta Solutions",
-      location: "Đà Nẵng",
-      match: "88%",
-      type: "Remote",
-    },
-    {
-      title: "Data Analyst Manager",
-      company: "Vinfast Global",
-      location: "Hà Nội",
-      match: "84%",
-      type: "Hybrid",
-    },
   ],
   partners: {
     title: "Đối tác chiến lược toàn cầu",
@@ -85,28 +78,6 @@ export const homeMessages = {
       { icon: "◆", label: "Giáo dục" },
       { icon: "⬡", label: "Logistics" },
     ],
-  },
-  cta: {
-    title: "Bạn cần tư vấn nghề nghiệp?",
-    description:
-      "Trao đổi với chuyên gia tư vấn để nhận định hướng cá nhân hóa cho bước đi nghề nghiệp tiếp theo.",
-    hotline: "0869297732",
-    mentor: "Chat với AI Mentor",
-  },
-  footer: {
-    description:
-      "Nền tảng tìm kiếm việc làm hàng đầu được tối ưu bằng trí tuệ nhân tạo, mang lại sự kết nối hoàn hảo giữa ứng viên và doanh nghiệp.",
-    communityTitle: "Cộng đồng FUSE",
-    aboutUsTitle: "Về chúng tôi",
-    intro: "Giới thiệu",
-    privacy: "Chính sách bảo mật",
-    terms: "Điều khoản",
-    careerTitle: "Xây dựng sự nghiệp",
-    bestJobs: "Việc làm tốt nhất",
-    contactTitle: "Liên hệ",
-    hotline: "Hotline",
-    email: "Email",
-    zalo: "Zalo",
   },
   userMenu: {
     guestName: "Người dùng",

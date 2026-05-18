@@ -6,7 +6,6 @@ interface CategoryCardProps {
   href?: string;
 }
 
-// Khám phá theo ngành nghê
 export function CategoryCard({
   icon,
   label,

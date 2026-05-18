@@ -1,16 +1,16 @@
 import { Phone } from "lucide-react";
 import Link from "next/link";
 
-import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
-import { Footer } from "@/shared/components/layouts/Footer";
 import { Header } from "@/shared/components/layouts/Header";
+import { Footer } from "@/shared/components/layouts/Footer";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
+import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
-import { messages } from "@/shared/i18n/config";
-
-import { HotJobsSection } from "./HotJobsSection";
+import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
+// import { HotJobsSection } from "./HotJobsSection";
 
 export default function HomePage() {
-  const t = messages.home;
+  const t = HOME_MESSAGES;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -35,7 +35,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <HotJobsSection />
+      {/* <HotJobsSection /> */}
 
       <section className="bg-muted px-8 py-20">
         <div className="mx-auto max-w-7xl text-center">
@@ -121,16 +121,19 @@ export default function HomePage() {
           <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:justify-between">
             <div className="text-center md:text-left">
               <h2 className="text-4xl font-extrabold text-white">
-                {t.cta.title}
+                Bạn cần tư vấn nghề nghiệp?
               </h2>
-              <p className="mt-4 text-lg text-white/80">{t.cta.description}</p>
+              <p className="mt-4 text-lg text-white/80">
+                Trao đổi với chuyên gia tư vấn để nhận định hướng cá nhân hóa
+                cho bước đi nghề nghiệp tiếp theo.
+              </p>
             </div>
             <Link
               className="flex items-center gap-4 rounded-2xl bg-surface px-10 py-5 text-2xl font-semibold text-primary transition-transform hover:scale-105"
-              href={`tel:${t.cta.hotline}`}
+              href={`tel:${INFOMATION_WEB.PHONE}`}
             >
               <Phone aria-hidden="true" className="h-6 w-6" />
-              {t.cta.hotline}
+              {INFOMATION_WEB.PHONE}
             </Link>
           </div>
         </div>

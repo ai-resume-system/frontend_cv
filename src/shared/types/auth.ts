@@ -1,65 +1,67 @@
+import type { EOtpType } from "@/shared/constants/enums/otp.enum";
 import type { EUserRole } from "@/shared/constants/enums/user.enum";
+
+export interface IBaseRegisterPayload {
+  email: string;
+  password: string;
+}
+
+export interface IRegisterJobSeekerPayload extends IBaseRegisterPayload {
+  fullName?: string;
+}
+
+export interface IRegisterRecruiterPayload extends IBaseRegisterPayload {
+  phone?: string;
+  company_name?: string;
+  location?: string;
+}
+
+export interface IVerifyOtpPayload {
+  email: string;
+  otp: string;
+  type: EOtpType;
+}
+
+export interface ILoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface IResponseLogin {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    role: EUserRole;
+  };
+}
+
+export interface ISendOtpPayload {
+  email: string;
+  type: EOtpType;
+}
+
+// Tam thời
 
 export interface AuthUser {
   id: string;
   email: string;
-  role: EUserRole;
+  phone: string;
   status: string;
-  fullName?: string;
-  avatarUrl?: string;
-  phone?: string;
-  companyName?: string;
-  bio?: string;
-}
-
-export interface RegisterPayload {
-  email: string;
-  password: string;
-  phone?: string;
-}
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-export interface AuthMessageResponse {
-  message: string;
-}
-
-export interface ApiMeta {
-  message: string;
-  status: boolean;
-}
-
-export interface ApiResponse<TData> {
-  data: TData;
-  meta: ApiMeta;
-}
-
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: AuthUser;
-}
-
-export interface RefreshTokenPayload {
-  refreshToken: string;
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface ApiErrorResponse {
-  message?: string;
-  code?: number | string;
-}
-
-export interface UserProfileResponse extends AuthUser {
-  bio?: string;
-  phone?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  role: string;
+  profile: {
+    fullName: string;
+    avatarUrl: string;
+    bio: string;
+  };
+  company: {
+    careerCategoriesId: string;
+    companyName: string;
+    taxCode: string;
+    logoUrl: string;
+    bannerUrl: string;
+    location: string;
+    description: string;
+    websiteUrl: string;
+  };
 }

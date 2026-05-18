@@ -1,11 +1,5 @@
-import { EUserRole } from "@/shared/constants/enums/user.enum";
-import { AuthForm } from "@/shared/features/auth/AuthForm";
-import { AuthShell } from "@/shared/features/auth/AuthShell";
+import { JobSeekerAuthForm } from "@/portals/jobseeker/features/auth/JobSeekerAuthForm";
 
 export default function JobSeekerLoginRoute() {
-  return (
-    <AuthShell>
-      <AuthForm mode="login" role={EUserRole.JOB_SEEKER} />
-    </AuthShell>
-  );
+  return <JobSeekerAuthForm mode="login" />;
 }

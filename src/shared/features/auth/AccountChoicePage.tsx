@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { BellRing } from "lucide-react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { messages } from "@/shared/i18n/config";
+import { AUTH_MESSAGES } from "@/shared/constants/constants/messages";
 
 type AccountMode = "login" | "register";
 type AccountRole = "jobseeker" | "recruiter";
@@ -14,6 +14,7 @@ type AccountRole = "jobseeker" | "recruiter";
 interface AccountChoicePageProps {
   mode?: AccountMode;
   onSelectJobSeeker?: () => void;
+  onSelectRecruiter?: () => void;
   variant?: "modal" | "page";
 }
 
@@ -50,34 +51,34 @@ function getModeFromSearchParams(
 export function AccountChoicePage({
   mode,
   onSelectJobSeeker,
+  onSelectRecruiter,
   variant = "page",
 }: AccountChoicePageProps) {
   const searchParams = useSearchParams();
   const resolvedMode = getModeFromSearchParams(mode, searchParams.get("mode"));
-  const t = messages.auth.choice;
   const roleOptions: RoleOption[] = [
     {
-      buttonLabel: t.recruiterButton,
+      buttonLabel: "Tôi là nhà tuyển dụng",
       image: "/Recruiter.png",
-      imageAlt: t.recruiterTitle,
+      imageAlt: "Nhà tuyển dụng",
       role: "recruiter",
     },
     {
-      buttonLabel: t.jobSeekerButton,
+      buttonLabel: "Tôi là người tìm việc",
       image: "/Job_Seeker.png",
-      imageAlt: t.jobSeekerTitle,
+      imageAlt: "Người tìm việc",
       role: "jobseeker",
     },
   ];
 
   const content = (
-    <div className="w-full max-w-[860px] overflow-hidden rounded-[24px] border border-border bg-surface shadow-2xl">
-      <header className="border-b border-border pt-6 pb-3 text-center sm:pt-8 sm:pb-4">
+    <div className="relative z-10 w-full max-w-[860px] overflow-hidden rounded-[24px] border border-border bg-surface shadow-2xl">
+      <header className="pt-6 pb-3 text-center sm:pt-8 sm:pb-4">
         <h1 className="font-display text-xl font-extrabold leading-tight text-foreground">
-          {t.greeting}
+          Chào mừng bạn đến với FUSE
         </h1>
         <p className="mt-3 inline-flex items-center justify-center gap-2 text-sm leading-6 text-muted-foreground ">
-          {t.helper}
+          Bạn hãy dành ra vài giây để xác nhận thông tin dưới đây nhé!
           <BellRing
             aria-hidden="true"
             className="h-5 w-5 rotate-12 text-warning"
@@ -86,7 +87,10 @@ export function AccountChoicePage({
       </header>
 
       <div className="px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-7">
-        <p className="text-center leading-8 text-foreground">{t.instruction}</p>
+        <p className="text-center leading-6 text-foreground">
+          Để tối ưu tốt nhất cho trải nghiệm của bạn với FUSE,
+          <br /> vui lòng lựa chọn nhóm phù hợp nhất với bạn?
+        </p>
 
         <div className="mx-auto mt-8 grid max-w-[680px] gap-8 sm:grid-cols-2 sm:gap-12">
           {roleOptions.map((option) => {
@@ -98,10 +102,13 @@ export function AccountChoicePage({
                 className="group flex flex-col items-center text-center"
                 key={option.role}
               >
-                {isJobSeeker && variant === "modal" ? (
+                {(isJobSeeker && variant === "modal" && onSelectJobSeeker) ||
+                (!isJobSeeker && variant === "modal" && onSelectRecruiter) ? (
                   <button
                     className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
-                    onClick={onSelectJobSeeker}
+                    onClick={
+                      isJobSeeker ? onSelectJobSeeker : onSelectRecruiter
+                    }
                     type="button"
                   >
                     <RoleImage option={option} />
@@ -115,17 +122,20 @@ export function AccountChoicePage({
                   </Link>
                 )}
 
-                {isJobSeeker && variant === "modal" ? (
+                {(isJobSeeker && variant === "modal" && onSelectJobSeeker) ||
+                (!isJobSeeker && variant === "modal" && onSelectRecruiter) ? (
                   <button
-                    className="mt-8 rounded-full bg-primary px-7 py-3.5 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                    onClick={onSelectJobSeeker}
+                    className="mt-8 rounded-full bg-primary px-6 py-3 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    onClick={
+                      isJobSeeker ? onSelectJobSeeker : onSelectRecruiter
+                    }
                     type="button"
                   >
                     {option.buttonLabel}
                   </button>
                 ) : (
                   <Link
-                    className="mt-8 rounded-full bg-primary px-7 py-3.5 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="mt-8 rounded-full bg-primary px-6 py-3 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     href={href}
                   >
                     {option.buttonLabel}
@@ -141,7 +151,7 @@ export function AccountChoicePage({
 
   if (variant === "modal") {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-foreground/45 px-10 py-6 backdrop-blur-[1px] sm:px-6">
+      <div className="fixed inset-0 z-100 isolate flex items-center justify-center bg-foreground/60 px-10 py-6 backdrop-blur-[2px] sm:px-6">
         {content}
       </div>
     );
@@ -159,14 +169,14 @@ export function AccountChoicePage({
 
 function RoleImage({ option }: { option: RoleOption }) {
   return (
-    <span className="grid h-48 w-48 sm:h-56 sm:w-56 place-items-end rounded-full border border-gray-200 shadow-2xl transition-all duration-300 group-hover:shadow-[0_20px_50px_rgba(0,102,255,0.3)] group-focus-within:shadow-[0_20px_50px_rgba(0,102,255,0.3)]">
+    <span className="relative grid h-48 w-48 sm:h-56 sm:w-56 place-items-end overflow-hidden rounded-full border border-gray-200 shadow-2xl transition-all duration-300 group-hover:shadow-[0_20px_50px_rgba(0,102,255,0.3)] group-focus-within:shadow-[0_20px_50px_rgba(0,102,255,0.3)]">
       <Image
         alt={option.imageAlt}
-        className="h-48 w-48 sm:h-56 sm:w-56 translate-y-1 object-contain transition-transform duration-300 group-hover:scale-105 group-focus-within:scale-110"
-        height={224}
+        className="translate-y-1 object-contain transition-transform duration-300 group-hover:scale-105 group-focus-within:scale-110"
+        fill
         priority
+        sizes="(max-width: 640px) 12rem, 14rem"
         src={option.image}
-        width={224}
       />
     </span>
   );

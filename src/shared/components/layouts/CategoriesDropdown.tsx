@@ -6,13 +6,13 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
-import { messages } from "@/shared/i18n/config";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 
 export function CategoriesDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { categories, error, loading } = useCareerCategories({ limit: 10 });
-  const t = messages.home;
+  const t = HOME_MESSAGES;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

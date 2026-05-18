@@ -11,7 +11,7 @@ import {
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { messages } from "@/shared/i18n/config";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const communityLinks = [
@@ -38,8 +38,6 @@ const communityLinks = [
 ] as const;
 
 export function Footer() {
-  const t = messages.home.footer;
-
   return (
     <footer className="bg-muted">
       <div className="mx-auto grid max-w-7xl gap-10 py-12 sm:px-8 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.85fr] lg:px-12">
@@ -51,12 +49,13 @@ export function Footer() {
             </span>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-            {t.description}
+            Nền tảng tìm kiếm việc làm hàng đầu được tối ưu bằng trí tuệ nhân
+            tạo, mang lại sự kết nối hoàn hảo giữa ứng viên và doanh nghiệp.
           </p>
 
           <div className="mt-8">
             <h3 className="mb-4 text-base font-semibold text-muted-foreground">
-              {t.communityTitle}
+              Cộng đồng FUSE
             </h3>
             <div className="flex gap-3">
               {communityLinks.map((item) => {
@@ -77,21 +76,21 @@ export function Footer() {
 
         <FooterNav
           links={[
-            { href: "#", label: t.intro },
-            { href: "#", label: t.privacy },
-            { href: "#", label: t.terms },
+            { href: "#", label: "Giới thiệu" },
+            { href: "#", label: "Chính sách bảo mật" },
+            { href: "#", label: "Điều khoản sử dụng" },
           ]}
-          title={t.aboutUsTitle}
+          title="Về chúng tôi"
         />
 
         <FooterNav
-          links={[{ href: ROUTES.JOBS, label: t.bestJobs }]}
-          title={t.careerTitle}
+          links={[{ href: ROUTES.JOBS, label: "Việc làm tốt nhất" }]}
+          title="Xây dựng sự nghiệp"
         />
 
         <section>
           <h3 className="mb-4 text-base font-semibold text-muted-foreground">
-            {t.contactTitle}
+            Liên hệ
           </h3>
           <div className="flex flex-col gap-3 text-sm text-muted-foreground">
             <Link
@@ -99,21 +98,21 @@ export function Footer() {
               href={`tel:${INFOMATION_WEB.PHONE}`}
             >
               <Phone aria-hidden="true" className="h-4 w-4" />
-              {t.hotline}: {INFOMATION_WEB.PHONE}
+              Hotline: {INFOMATION_WEB.PHONE}
             </Link>
             <Link
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               href={`mailto:${INFOMATION_WEB.EMAIL}`}
             >
               <Mail aria-hidden="true" className="h-4 w-4" />
-              {t.email}: {INFOMATION_WEB.EMAIL}
+              Email: {INFOMATION_WEB.EMAIL}
             </Link>
             <Link
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               href="#"
             >
               <MessageCircle aria-hidden="true" className="h-4 w-4" />
-              {t.zalo}: {INFOMATION_WEB.PHONE}
+              Zalo: {INFOMATION_WEB.PHONE}
             </Link>
           </div>
         </section>

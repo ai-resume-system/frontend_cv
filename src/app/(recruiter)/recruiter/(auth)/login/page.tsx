@@ -1,14 +1,5 @@
-﻿import { EUserRole } from "@/shared/constants/enums/user.enum";
-import { AuthForm } from "@/shared/features/auth/AuthForm";
-import { AuthShell } from "@/shared/features/auth/AuthShell";
+import { RecruiterAuthForm } from "@/portals/recruiter/features/auth/RecruiterAuthForm";
 
 export default function RecruiterLoginRoute() {
-  return (
-    <AuthShell reverse>
-      <AuthForm mode="login" role={EUserRole.RECRUITER} />
-    </AuthShell>
-  );
+  return <RecruiterAuthForm mode="login" />;
 }
-
-
-

@@ -1,3 +1,5 @@
+import { EJobStatus, EJobType } from "../constants/enums/job.enum";
+
 export interface JobCompany {
   id?: string;
   name?: string;
@@ -8,28 +10,26 @@ export interface JobCompany {
 export interface JobLocation {
   province?: string;
   city?: string;
-  address?: string;
+  location?: string;
 }
 
 export interface Job {
   id: string;
+  companyId: string;
+  careerCategoryId?: string;
   title: string;
-  company?: JobCompany | string;
-  companyName?: string;
-  location?: JobLocation | string;
-  province?: string;
-  city?: string;
-  salary?: string;
+  description?: string;
+  location?: string;
   salaryMin?: number;
   salaryMax?: number;
-  currency?: string;
-  workType?: string;
-  jobType?: string;
-  employmentType?: string;
-  matchScore?: number;
-  aiMatchScore?: number;
-  createdAt?: string;
-  updatedAt?: string;
+  experienceYears?: number;
+  jobType: EJobType;
+  expiredAt?: Date;
+  rejectReason?: string;
+  status: EJobStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
 }
 
 export interface JobListResponse {

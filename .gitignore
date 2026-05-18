@@ -46,6 +46,7 @@ next-env.d.ts
 *.md
 .agent/
 screen.png
+/plan
 
 
 # Document

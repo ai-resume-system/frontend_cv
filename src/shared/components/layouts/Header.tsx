@@ -15,19 +15,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
+import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { useAuth } from "@/shared/hooks/ui/useAuth";
-import { messages } from "@/shared/i18n/config";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 
-import { CategoriesDropdown } from "./CategoriesDropdown";
 import {
   getUserInitials,
   UserMenuContent,
   UserMenuDropdown,
 } from "./UserMenuDropdown";
+import { CategoriesDropdown } from "./CategoriesDropdown";
 
 type DrawerState = "menu" | "user" | null;
 type NavIcon = typeof BriefcaseBusiness;
@@ -51,7 +52,7 @@ export function Header() {
   const [activeDrawer, setActiveDrawer] = useState<DrawerState>(null);
   const [expandedNavHref, setExpandedNavHref] = useState<string | null>(null);
   const router = useRouter();
-  const t = messages.home;
+  const t = HOME_MESSAGES;
 
   const mainNavItems = useMemo(
     () => [
@@ -132,6 +133,16 @@ export function Header() {
     await logout();
   }
 
+  function navigateToAuth(path: string, mode: "login" | "register") {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(SESSION_STORAGE_KEYS.AUTH_SELECTED_ROLE);
+      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.AUTH_FLOW_MODE, mode);
+      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.AUTH_ROLE_PROMPT, "1");
+    }
+
+    router.push(path);
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-surface/95 shadow-sm backdrop-blur-md">
@@ -190,24 +201,30 @@ export function Header() {
                   type="button"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    {getUserInitials(user?.fullName, user?.email)}
+                    {getUserInitials(user?.profile?.fullName, user?.email)}
                   </div>
                 </button>
               </>
             ) : (
               <>
-                <Link
+                <button
                   className="hidden h-10 items-center gap-1.5 rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
-                  href={ROUTES.JOB_SEEKER_REGISTER}
+                  onClick={() =>
+                    navigateToAuth(ROUTES.JOB_SEEKER_REGISTER, "register")
+                  }
+                  type="button"
                 >
                   <span>{t.nav.register}</span>
-                </Link>
-                <Link
+                </button>
+                <button
                   className="inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  href={ROUTES.JOB_SEEKER_LOGIN}
+                  onClick={() =>
+                    navigateToAuth(ROUTES.JOB_SEEKER_LOGIN, "login")
+                  }
+                  type="button"
                 >
                   <span>{t.nav.login}</span>
-                </Link>
+                </button>
               </>
             )}
           </div>
@@ -387,11 +404,11 @@ export function Header() {
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-                {getUserInitials(user?.fullName, user?.email)}
+                {getUserInitials(user?.profile?.fullName, user?.email)}
               </div>
               <div className="min-w-0">
                 <p className="truncate font-semibold text-foreground">
-                  {user?.fullName || t.userMenu.guestName}
+                  {user?.profile?.fullName || t.userMenu.guestName}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {user?.email}

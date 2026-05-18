@@ -1,15 +1,14 @@
 "use client";
 
-import { Heart, MapPin, Sparkles } from "lucide-react";
+import { Heart, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { Badge } from "@/shared/components/ui/Badge";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { messages } from "@/shared/i18n/config";
+import { EJobType, JOB_TYPE_LABELS } from "@/shared/constants/enums/job.enum";
 import { cn } from "@/shared/lib/utils/cn";
 import Image from "next/image";
-import { Badge } from "@/shared/components/ui/Badge";
-import { EJobType, JOB_TYPE_LABELS } from "@/shared/constants/enums/job.enum";
 
 interface JobCardProps {
   company: string;
@@ -55,8 +54,6 @@ function JobCardContent({
   type,
   salary,
 }: JobCardProps) {
-  const t = messages.home.hotJobs;
-
   return (
     <>
       <div className="mb-5 flex items-start justify-between gap-2">
