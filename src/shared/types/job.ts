@@ -1,40 +1,53 @@
-import { EJobStatus, EJobType } from "../constants/enums/job.enum";
+import type { IResponseApiList } from "@/shared/types/api";
 
-export interface JobCompany {
-  id?: string;
-  name?: string;
-  companyName?: string;
-  logoUrl?: string;
+import { EJobStatus } from "../constants/enums/job.enum";
+
+export interface JobApiCompany {
+  id: string;
+  companyName: string;
+  logoUrl: string | null;
+  location: string | null;
+  websiteUrl: string | null;
 }
 
-export interface JobLocation {
-  province?: string;
-  city?: string;
-  location?: string;
+export interface JobApiCareerCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface JobApiItem {
+  id: string;
+  title: string;
+  shortDescription: string | null;
+  location: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  experienceYears: number | null;
+  expiredAt: string | null;
+  status: EJobStatus;
+  createdAt: string;
+  updatedAt: string;
+  company?: JobApiCompany | null;
+  careerCategory?: JobApiCareerCategory | null;
 }
 
 export interface Job {
   id: string;
-  companyId: string;
-  careerCategoryId?: string;
   title: string;
-  description?: string;
+  shortDescription?: string;
   location?: string;
   salaryMin?: number;
   salaryMax?: number;
   experienceYears?: number;
-  jobType: EJobType;
   expiredAt?: Date;
-  rejectReason?: string;
   status: EJobStatus;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date;
+  company?: JobApiCompany;
+  companyName?: string;
+  careerCategory?: JobApiCareerCategory;
+  careerCategoryName?: string;
 }
 
-export interface JobListResponse {
-  data: Job[];
-  total: number;
-  page: number;
-  limit: number;
-}
+export type JobListResponse = IResponseApiList<JobApiItem>;

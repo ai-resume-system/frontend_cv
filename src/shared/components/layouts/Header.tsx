@@ -62,7 +62,7 @@ export function Header() {
         label: t.nav.jobs,
       },
       {
-        href: ROUTES.RECRUITER_HOME,
+        href: ROUTES.JOB_SEEKER_COMPANY,
         icon: UserRound,
         label: t.nav.employers,
       },

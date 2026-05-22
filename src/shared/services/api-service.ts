@@ -1,11 +1,12 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
+import { LOCAL_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { env } from "@/shared/lib/config/env";
 import type {
-  ApiErrorResponse,
+  ApiFieldErrorResponse,
   RefreshTokenPayload,
-  RefreshTokenResponse,
+  RefreshTokenResponseData,
 } from "@/shared/types/auth";
-import { LOCAL_STORAGE_KEYS } from "../constants/constants/local-storage";
+import type { IResponseApiItem } from "@/shared/types/api";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -30,8 +31,35 @@ function getStoredToken(key: string): string | null {
   return window.localStorage.getItem(key);
 }
 
-function setStoredTokens(tokens: RefreshTokenResponse): void {
+function getStoredUserSnapshot(): unknown {
+  if (!isBrowser()) return null;
+
+  const rawUser = window.localStorage.getItem(LOCAL_STORAGE_KEYS.USER);
+
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawUser);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredTokens(tokens: RefreshTokenResponseData): void {
   if (!isBrowser()) return;
+
+  const cachedUser = getStoredUserSnapshot();
+  const mergedUser =
+    cachedUser &&
+    typeof cachedUser === "object" &&
+    cachedUser !== null &&
+    "id" in cachedUser &&
+    cachedUser.id === tokens.user.id
+      ? { ...cachedUser, ...tokens.user }
+      : tokens.user;
+
   window.localStorage.setItem(
     LOCAL_STORAGE_KEYS.ACCESS_TOKEN,
     tokens.accessToken,
@@ -39,6 +67,10 @@ function setStoredTokens(tokens: RefreshTokenResponse): void {
   window.localStorage.setItem(
     LOCAL_STORAGE_KEYS.REFRESH_TOKEN,
     tokens.refreshToken,
+  );
+  window.localStorage.setItem(
+    LOCAL_STORAGE_KEYS.USER,
+    JSON.stringify(mergedUser),
   );
 }
 
@@ -79,25 +111,29 @@ async function readJson<T>(response: Response): Promise<T> {
 }
 
 async function parseApiError(response: Response): Promise<Error> {
-  const payload = await readJson<ApiErrorResponse>(response).catch(
-    (): ApiErrorResponse => ({}),
+  const payload = await readJson<ApiFieldErrorResponse>(response).catch(
+    (): ApiFieldErrorResponse => ({}),
   );
   const message = payload.message ?? `Request failed: ${response.status}`;
 
   return Object.assign(new Error(message), {
     code: payload.code,
+    fields: payload.error?.fields,
     status: response.status,
   });
 }
 
 function isTokenExpiredError(error: Error): boolean {
-  const apiError = error as Error & { code?: number | string; status?: number };
+  // const apiError = error as Error & { code?: number | string; status?: number };
 
-  return (
-    apiError.status === 401 &&
-    (apiError.code === ACCESS_TOKEN_EXPIRED_CODE ||
-      apiError.code === `${ACCESS_TOKEN_EXPIRED_CODE}`)
-  );
+  // return (
+  //   apiError.status === 401 &&
+  //   (apiError.code === ACCESS_TOKEN_EXPIRED_CODE ||
+  //     apiError.code === `${ACCESS_TOKEN_EXPIRED_CODE}`)
+  // );
+
+  const apiError = error as Error & { status?: number };
+  return apiError.status === 401;
 }
 
 function isRefreshTokenExpiredError(error: Error): boolean {
@@ -134,8 +170,9 @@ async function refreshAccessToken(): Promise<boolean> {
     return false;
   }
 
-  const tokens = await readJson<RefreshTokenResponse>(response);
-  setStoredTokens(tokens);
+  const payloadResponse =
+    await readJson<IResponseApiItem<RefreshTokenResponseData>>(response);
+  setStoredTokens(payloadResponse.data);
   return true;
 }
 

@@ -20,6 +20,7 @@ type SharedFieldProps = {
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
   wrapperClassName?: string;
+  required?: boolean;
 };
 
 type InputFieldProps = SharedFieldProps &
@@ -45,7 +46,10 @@ export type BaseFieldProps =
   | TextareaFieldProps
   | SelectFieldProps;
 
-type NativeInputProps = Omit<InputFieldProps, keyof SharedFieldProps | "as" | "options">;
+type NativeInputProps = Omit<
+  InputFieldProps,
+  keyof SharedFieldProps | "as" | "options"
+>;
 type NativeTextareaProps = Omit<
   TextareaFieldProps,
   keyof SharedFieldProps | "as" | "options"
@@ -85,6 +89,9 @@ export function BaseField(props: BaseFieldProps) {
     trailingIcon,
     wrapperClassName,
   } = props;
+  const hintId = props.id ? `${props.id}-hint` : undefined;
+  const errorId = props.id ? `${props.id}-error` : undefined;
+  const describedBy = error ? errorId : hint ? hintId : undefined;
 
   if ("type" in props && props.type === "checkbox") {
     const { className, type, label: checkboxLabel } = props;
@@ -101,8 +108,13 @@ export function BaseField(props: BaseFieldProps) {
         )}
       >
         <input
+          aria-describedby={describedBy}
+          aria-invalid={Boolean(error)}
           className={cn(
-            "h-5 w-5 rounded-md border border-outline-variant bg-surface text-primary focus:ring-2 focus:ring-primary/20",
+            "h-5 w-5 rounded-md border bg-surface text-primary focus:ring-2",
+            error
+              ? "border-error focus:ring-error/20"
+              : "border-outline-variant focus:ring-primary/20",
             className,
           )}
           type={type}
@@ -114,20 +126,33 @@ export function BaseField(props: BaseFieldProps) {
   }
 
   const fieldBaseClass = cn(
-    "w-full rounded-2xl border border-transparent bg-surface-container-low px-4 text-[15px] text-on-surface outline-none transition focus:border-primary/20 focus:bg-white focus:ring-2 focus:ring-primary/10 placeholder:text-outline/75",
+    "w-full rounded-2xl border bg-surface-container-low px-4 text-[15px] text-on-surface outline-none transition placeholder:text-outline/75",
+    error
+      ? "border-error focus:border-error focus:ring-2 focus:ring-error/10"
+      : "border-primary/30 focus:border-primary/20 focus:bg-white focus:ring-2 focus:ring-primary/10",
     Boolean(leadingIcon) && "pl-12",
     Boolean(trailingIcon) && "pr-12",
     "as" in props && props.as === "textarea" ? "min-h-28 py-3" : "h-14",
     inputClassName,
+    // // Custom cho textarea
+    // inputClassName = "resize-none h-32"; // Không cho đổi kích thước
+    // inputClassName = "resize-y min-h-28 max-h-80"; // Cho kéo dọc, nhưng giới hạn thấp nhất là 28 (112px) và cao nhất là 80 (320px)
+    // inputClassName="resize-none min-h-16 py-2" // Thấp hơn, padding top/bottom nhỏ lại
   );
 
   const renderControl = () => {
     if ("as" in props && props.as === "textarea") {
       const { className } = props;
-      const textareaProps = omitProps(props, [...SHARED_FIELD_KEYS, "className", "as"] as const);
+      const textareaProps = omitProps(props, [
+        ...SHARED_FIELD_KEYS,
+        "className",
+        "as",
+      ] as const);
 
       return (
         <textarea
+          aria-describedby={describedBy}
+          aria-invalid={Boolean(error)}
           className={cn(fieldBaseClass, className)}
           {...(textareaProps as NativeTextareaProps)}
         />
@@ -136,13 +161,17 @@ export function BaseField(props: BaseFieldProps) {
 
     if ("as" in props && props.as === "select") {
       const { className, options } = props;
-      const selectProps = omitProps(
-        props,
-        [...SHARED_FIELD_KEYS, "className", "as", "options"] as const,
-      );
+      const selectProps = omitProps(props, [
+        ...SHARED_FIELD_KEYS,
+        "className",
+        "as",
+        "options",
+      ] as const);
 
       return (
         <select
+          aria-describedby={describedBy}
+          aria-invalid={Boolean(error)}
           className={cn(fieldBaseClass, className)}
           {...(selectProps as NativeSelectProps)}
         >
@@ -163,6 +192,8 @@ export function BaseField(props: BaseFieldProps) {
 
     return (
       <input
+        aria-describedby={describedBy}
+        aria-invalid={Boolean(error)}
         className={cn(fieldBaseClass, className)}
         {...(inputProps as NativeInputProps)}
       />
@@ -176,13 +207,17 @@ export function BaseField(props: BaseFieldProps) {
           className="block text-sm font-semibold text-on-surface"
           htmlFor={props.id}
         >
-          {label}
+          {label} {props.required ? <span className="text-error">*</span> : ""}
         </label>
       ) : null}
-
       <div className="relative">
         {leadingIcon ? (
-          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-outline">
+          <span
+            className={cn(
+              "pointer-events-none absolute inset-y-0 left-4 flex items-center",
+              error ? "text-error" : "text-outline",
+            )}
+          >
             {leadingIcon}
           </span>
         ) : null}
@@ -196,9 +231,15 @@ export function BaseField(props: BaseFieldProps) {
         ) : null}
       </div>
 
-      {error ? <p className="text-sm text-error">{error}</p> : null}
+      {error ? (
+        <p className="text-sm text-error" id={errorId}>
+          {error}
+        </p>
+      ) : null}
       {!error && hint ? (
-        <p className="text-sm text-on-surface-variant">{hint}</p>
+        <p className="text-sm text-on-surface-variant" id={hintId}>
+          {hint}
+        </p>
       ) : null}
     </div>
   );

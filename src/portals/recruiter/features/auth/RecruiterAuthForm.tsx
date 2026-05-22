@@ -38,8 +38,9 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
 
   const {
     alternateHref,
-    fieldErrors,
     form,
+    getFieldError,
+    handleFieldBlur,
     goToRegisterForm,
     handleLogin,
     handleOtpChange,
@@ -145,27 +146,29 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                   {/* Content */}
                   {registerStep === "form" ? (
                     <div className="animate-in fade-in slide-in-from-right-2 duration-300">
-                      <form className="space-y-5" onSubmit={handleRegister}>
+                      <form className="space-y-5" noValidate onSubmit={handleRegister}>
                         <BaseField
-                          error={fieldErrors.company_name}
+                          error={getFieldError("company_name")}
                           id="company_name"
                           label="Tên công ty"
                           leadingIcon={<Building2 className="h-5 w-5" />}
                           placeholder="Nhập tên doanh nghiệp"
                           value={form.company_name}
+                          onBlur={() => handleFieldBlur("company_name")}
                           onChange={(event) =>
                             updateField("company_name", event.target.value)
                           }
                         />
 
                         <BaseField
-                          error={fieldErrors.email}
+                          error={getFieldError("email")}
                           id="email"
                           label="Email công ty"
                           leadingIcon={<Mail className="h-5 w-5" />}
                           placeholder="name@company.com"
                           type="email"
                           value={form.email}
+                          onBlur={() => handleFieldBlur("email")}
                           onChange={(event) =>
                             updateField("email", event.target.value)
                           }
@@ -173,7 +176,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
 
                         <div className="grid gap-5 md:grid-cols-2">
                           <BaseField
-                            error={fieldErrors.password}
+                            error={getFieldError("password")}
                             id="password"
                             label="Mật khẩu"
                             leadingIcon={<Lock className="h-5 w-5" />}
@@ -195,13 +198,14 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                             }
                             type={showPassword ? "text" : "password"}
                             value={form.password}
+                            onBlur={() => handleFieldBlur("password")}
                             onChange={(event) =>
                               updateField("password", event.target.value)
                             }
                           />
 
                           <BaseField
-                            error={fieldErrors.confirmPassword}
+                            error={getFieldError("confirmPassword")}
                             id="confirmPassword"
                             label="Xác nhận mật khẩu"
                             leadingIcon={<Lock className="h-5 w-5" />}
@@ -223,6 +227,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                             }
                             type={showConfirmPassword ? "text" : "password"}
                             value={form.confirmPassword}
+                            onBlur={() => handleFieldBlur("confirmPassword")}
                             onChange={(event) =>
                               updateField("confirmPassword", event.target.value)
                             }
@@ -338,22 +343,23 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                     </p>
                   </div>
 
-                  <form className="space-y-6" onSubmit={handleLogin}>
+                  <form className="space-y-6" noValidate onSubmit={handleLogin}>
                     <BaseField
-                      error={fieldErrors.email}
+                      error={getFieldError("email")}
                       id="loginEmail"
                       label="Email công ty"
                       leadingIcon={<Mail className="h-5 w-5" />}
                       placeholder="name@company.com"
                       type="email"
                       value={form.email}
+                      onBlur={() => handleFieldBlur("email")}
                       onChange={(event) =>
                         updateField("email", event.target.value)
                       }
                     />
 
                     <BaseField
-                      error={fieldErrors.password}
+                      error={getFieldError("password")}
                       id="loginPassword"
                       label="Mật khẩu"
                       leadingIcon={<Lock className="h-5 w-5" />}
@@ -373,6 +379,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                       }
                       type={showPassword ? "text" : "password"}
                       value={form.password}
+                      onBlur={() => handleFieldBlur("password")}
                       onChange={(event) =>
                         updateField("password", event.target.value)
                       }
@@ -389,12 +396,14 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                         }
                       />
 
-                      <button
+                      <BaseButton
+                        variant="ghost"
                         className="text-sm font-semibold text-primary"
                         type="button"
+                        href={ROUTES.RECRUITER_FORGOT_PASSWORD}
                       >
                         Quên mật khẩu?
-                      </button>
+                      </BaseButton>
                     </div>
 
                     <BaseButton

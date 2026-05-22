@@ -1,24 +1,74 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
 import { apiService } from "@/shared/services/api-service";
-import type { AuthUser } from "@/shared/types/auth";
+import type {
+  AuthUser,
+  ChangePasswordPayload,
+  UpdateMyProfilePayload,
+  UpdateMyProfileResponse,
+} from "@/shared/types/auth";
+import type { IResponseApiItem } from "@/shared/types/api";
 import { LOCAL_STORAGE_KEYS } from "../constants/constants/local-storage";
+
+export const AUTH_USER_UPDATED_EVENT = "auth-user-updated";
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
 
-function clearCachedAuth(): void {
+function dispatchAuthUserUpdated(): void {
+  if (!isBrowser()) return;
+  window.dispatchEvent(new CustomEvent(AUTH_USER_UPDATED_EVENT));
+}
+
+export function clearCachedAuth(): void {
   if (!isBrowser()) return;
   window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
   window.localStorage.removeItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
   window.localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
+  dispatchAuthUserUpdated();
 }
 
-export function fetchCurrentUser(): Promise<AuthUser> {
-  return apiService.get<AuthUser>(API_ROUTES.ACCOUNT.ME, {
+export function setCachedUser(user: AuthUser): void {
+  if (!isBrowser()) return;
+  window.localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(user));
+  dispatchAuthUserUpdated();
+}
+
+export async function fetchCurrentUser(): Promise<AuthUser> {
+  const response = await apiService.get<IResponseApiItem<AuthUser>>(
+    API_ROUTES.ACCOUNT.ME,
+    {
+      auth: true,
+      cache: "no-store",
+    },
+  );
+
+  return response.data;
+}
+
+export async function updateMyProfile(
+  payload: UpdateMyProfilePayload,
+): Promise<UpdateMyProfileResponse> {
+  const response = await apiService.patch<
+    IResponseApiItem<UpdateMyProfileResponse>,
+    UpdateMyProfilePayload
+  >(API_ROUTES.ACCOUNT.ME_PROFILE, payload, {
     auth: true,
-    cache: "no-store",
   });
+
+  return response.data;
+}
+
+export async function changeMyPassword(
+  payload: ChangePasswordPayload,
+): Promise<void> {
+  await apiService.patch<IResponseApiItem<null>, ChangePasswordPayload>(
+    API_ROUTES.ACCOUNT.ME_CHANGE_PASSWORD,
+    payload,
+    {
+      auth: true,
+    },
+  );
 }
 
 export async function logoutUser(): Promise<void> {

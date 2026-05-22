@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "next dev --port 3000",
+    "build": "next build --port 3000",
+    "start": "next start --port 3000",
     "lint": "eslint"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-easy-crop": "^5.5.7",
     "react-quill": "^2.0.0",
     "react-toastify": "^11.1.0",
     "sweetalert2": "^11.26.24"

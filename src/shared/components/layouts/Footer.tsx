@@ -11,7 +11,6 @@ import {
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const communityLinks = [
@@ -39,7 +38,7 @@ const communityLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-muted">
+    <footer className="bg-muted border border-t-gray-300">
       <div className="mx-auto grid max-w-7xl gap-10 py-12 sm:px-8 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.85fr] lg:px-12">
         <section>
           <div className="mb-4 flex items-center gap-2 font-extrabold text-primary">

@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { BellRing } from "lucide-react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { AUTH_MESSAGES } from "@/shared/constants/constants/messages";
 
 type AccountMode = "login" | "register";
 type AccountRole = "jobseeker" | "recruiter";

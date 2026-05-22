@@ -1,45 +1,89 @@
 "use client";
 
-import { Heart, MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Heart, MapPin } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/Badge";
+import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { EJobType, JOB_TYPE_LABELS } from "@/shared/constants/enums/job.enum";
+import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
+import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
-import Image from "next/image";
+import type { Job } from "@/shared/types/job";
 
 interface JobCardProps {
   company: string;
   href?: string;
+  jobId?: string;
+  jobData?: Job;
   location: string;
   match?: string;
   salary?: string;
   title: string;
-  type: string;
+  type?: string;
 }
 
-function FavoriteButton() {
-  const [isFavorite, setIsFavorite] = useState(false);
+interface FavoriteButtonProps {
+  jobData?: Job;
+  jobId: string;
+}
+
+function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavoriteJobs();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const saved = isFavorite(jobId);
 
   return (
     <button
-      aria-pressed={isFavorite}
+      aria-label={saved ? "Bỏ lưu việc làm" : "Lưu việc làm"}
+      aria-pressed={saved}
       className={cn("absolute top-5 right-5 z-10")}
-      onClick={(event) => {
+      disabled={isSubmitting}
+      onClick={async (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setIsFavorite((current) => !current);
+
+        if (!isLoggedIn) {
+          if (typeof window !== "undefined") {
+            const redirectPath = `${window.location.pathname}${window.location.search}`;
+            window.sessionStorage.setItem(
+              SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+              redirectPath,
+            );
+          }
+
+          router.push(ROUTES.JOB_SEEKER_LOGIN);
+          return;
+        }
+
+        try {
+          setIsSubmitting(true);
+          await toggleFavorite(jobId, jobData);
+        } catch (error) {
+          showErrorAlert(
+            error instanceof Error
+              ? error.message
+              : "Không thể cập nhật danh sách yêu thích.",
+          );
+        } finally {
+          setIsSubmitting(false);
+        }
       }}
       type="button"
     >
-      <span className="flex h-9 w-9 items-center justify-center hover:bg-primary-soft  rounded-full transition-all duration-200 ">
+      <span className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 hover:bg-primary-soft">
         <Heart
           aria-hidden="true"
           className={cn(
             "h-5 w-5 text-primary/40 transition-colors",
-            isFavorite && "fill-primary-selected text-primary-selected",
+            saved && "fill-primary-selected text-primary-selected",
+            isSubmitting && "opacity-60",
           )}
         />
       </span>
@@ -51,18 +95,17 @@ function JobCardContent({
   title,
   company,
   location,
-  type,
   salary,
 }: JobCardProps) {
   return (
     <>
       <div className="mb-5 flex items-start justify-between gap-2">
         <Image
-          src="/logo.png"
           alt=""
-          width={70}
+          className="rounded-2xl border border-gray-300 transition-colors"
           height={70}
-          className="transition-colors border border-gray-300 rounded-2xl"
+          src="/logo.png"
+          width={70}
         />
       </div>
       <div>
@@ -75,15 +118,14 @@ function JobCardContent({
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         {salary ? (
-          <span className="rounded-full bg-secondary-soft px-3 py-1 text-sm font-medium text-foreground">
+          <Badge className="text-sm bg-secondary-soft text-primary">
             {salary}
-          </span>
+          </Badge>
         ) : null}
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <Badge className="text-sm bg-gray-300/70 text-muted-foreground gap-1">
           <MapPin aria-hidden="true" className="h-4 w-4" />
           {location}
-        </div>
-        <Badge>{JOB_TYPE_LABELS[type as EJobType]}</Badge>
+        </Badge>
       </div>
     </>
   );
@@ -108,7 +150,9 @@ export function JobCardLink(props: JobCardProps) {
         <JobCardContent {...props} />
       </Link>
 
-      <FavoriteButton />
+      {props.jobId ? (
+        <FavoriteButton jobData={props.jobData} jobId={props.jobId} />
+      ) : null}
     </article>
   );
 }

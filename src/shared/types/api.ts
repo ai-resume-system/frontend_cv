@@ -5,18 +5,15 @@ export interface IResponseApiPagination {
   totalPages?: number;
 }
 
-export interface IResponseApiMeta {
-  status: boolean;
+export interface IResponseApiItem<T> {
+  status: string;
   message: string;
+  data: T;
 }
 
 export interface IResponseApiList<T> {
-  meta: IResponseApiMeta;
+  status: string;
+  message: string;
   data: T[];
   pagination?: IResponseApiPagination;
-}
-
-export interface IResponseApiItem<T> {
-  meta: IResponseApiMeta;
-  data: T;
 }

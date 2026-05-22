@@ -37,8 +37,9 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
 
   const {
     alternateHref,
-    fieldErrors,
     form,
+    getFieldError,
+    handleFieldBlur,
     goToRegisterForm,
     handleLogin,
     handleOtpChange,
@@ -71,7 +72,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
         </div>
 
         <div className="flex w-full flex-1 lg:w-1/2">
-          <div className="flex min-h-screen w-full flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16">
+          <div className="flex min-h-screen w-full flex-col px-4 sm:px-6 lg:px-10 xl:px-12 2xl:px-16 py-4 sm:py-5 lg:py-6 xl:py-8">
             <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:min-h-[72px]">
               <Link
                 className="flex min-w-0 items-center gap-2 sm:gap-3"
@@ -120,189 +121,203 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
             <main className="flex flex-1 items-center justify-center">
               <div className="w-full max-w-lg xl:max-w-xl">
                 {isRegister ? (
-                  <div className="space-y-6 sm:space-y-8 lg:space-y-10">
-                    <div className="mb-6 sm:mb-8 lg:mb-10">
-                      <div className="flex items-center justify-between gap-4">
-                        <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
-                          {registerStep === "otp"
-                            ? "Xác thực tài khoản"
-                            : "Chào mừng bạn đến với Fuse"}
-                        </h1>
+                  <>
+                    <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+                      <div className="mb-6 sm:mb-8 lg:mb-10">
+                        <div className="flex items-center justify-between gap-4">
+                          <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
+                            {registerStep === "otp"
+                              ? "Xác thực tài khoản"
+                              : "Chào mừng bạn đến với Fuse"}
+                          </h1>
 
-                        {registerStep === "otp" && (
-                          <button
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface cursor-pointer"
-                            type="button"
-                            onClick={goToRegisterForm}
-                          >
-                            <ArrowLeft className="h-4 w-4" />
-                            Quay lại
-                          </button>
-                        )}
-                      </div>
-
-                      <p className="mt-3 max-w-xl text-sm leading-7 text-on-surface-variant sm:mt-4 sm:text-base sm:leading-8 lg:text-lg">
-                        {registerStep === "otp"
-                          ? "Nhập mã OTP 6 chữ số đã được gửi đến email của bạn để hoàn tất đăng ký."
-                          : "Bắt đầu hành trình của bạn với hệ sinh thái FUSE."}
-                      </p>
-                    </div>
-
-                    {registerStep === "form" ? (
-                      <div className="animate-in fade-in slide-in-from-right-2 duration-300">
-                        <form className="space-y-5" onSubmit={handleRegister}>
-                          <BaseField
-                            error={fieldErrors.fullName}
-                            id="fullName"
-                            label="Họ và tên"
-                            leadingIcon={<UserRound className="h-5 w-5" />}
-                            placeholder="Nhập họ và tên của bạn"
-                            value={form.fullName}
-                            onChange={(event) =>
-                              updateField("fullName", event.target.value)
-                            }
-                          />
-
-                          <BaseField
-                            error={fieldErrors.email}
-                            id="email"
-                            label="Địa chỉ Email"
-                            leadingIcon={<Mail className="h-5 w-5" />}
-                            placeholder="name@email.com"
-                            type="email"
-                            value={form.email}
-                            onChange={(event) =>
-                              updateField("email", event.target.value)
-                            }
-                          />
-
-                          <div className="grid gap-5 md:grid-cols-2">
-                            <BaseField
-                              error={fieldErrors.password}
-                              id="password"
-                              label="Mật khẩu"
-                              leadingIcon={<Lock className="h-5 w-5" />}
-                              placeholder="••••••••"
-                              trailingIcon={
-                                <button
-                                  className="cursor-pointer rounded-full p-1 text-outline"
-                                  type="button"
-                                  onClick={() =>
-                                    setShowPassword((current) => !current)
-                                  }
-                                >
-                                  {showPassword ? (
-                                    <EyeOff className="h-5 w-5" />
-                                  ) : (
-                                    <Eye className="h-5 w-5" />
-                                  )}
-                                </button>
-                              }
-                              type={showPassword ? "text" : "password"}
-                              value={form.password}
-                              onChange={(event) =>
-                                updateField("password", event.target.value)
-                              }
-                            />
-
-                            <BaseField
-                              error={fieldErrors.confirmPassword}
-                              id="confirmPassword"
-                              label="Xác nhận mật khẩu"
-                              leadingIcon={<Lock className="h-5 w-5" />}
-                              placeholder="••••••••"
-                              trailingIcon={
-                                <button
-                                  className="cursor-pointer rounded-full p-1 text-outline"
-                                  type="button"
-                                  onClick={() =>
-                                    setShowConfirmPassword(
-                                      (current) => !current,
-                                    )
-                                  }
-                                >
-                                  {showConfirmPassword ? (
-                                    <EyeOff className="h-5 w-5" />
-                                  ) : (
-                                    <Eye className="h-5 w-5" />
-                                  )}
-                                </button>
-                              }
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={form.confirmPassword}
-                              onChange={(event) =>
-                                updateField(
-                                  "confirmPassword",
-                                  event.target.value,
-                                )
-                              }
-                            />
-                          </div>
-
-                          <BaseButton
-                            endIcon={<ArrowRight className="h-5 w-5" />}
-                            fullWidth
-                            loading={isSubmitting}
-                            type="submit"
-                          >
-                            Tạo tài khoản
-                          </BaseButton>
-                        </form>
-                      </div>
-                    ) : (
-                      <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-                        <form className="space-y-5" onSubmit={handleVerifyOtp}>
-                          <div className="grid grid-cols-6 gap-3 w-full">
-                            {Array.from({ length: 6 }).map((_, index) => (
-                              <input
-                                className="w-full aspect-square rounded-xl sm:rounded-2xl bg-surface-container-low text-center text-lg font-bold border border-primary-hover/90 text-on-surface outline-none ring-0 transition focus:bg-white focus:ring-2 focus:ring-primary/20 sm:text-xl p-0 min-w-0"
-                                id={`otp-${index}`}
-                                key={index}
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={otpValue[index] ?? ""}
-                                onChange={(event) =>
-                                  handleOtpChange(index, event.target.value)
-                                }
-                                onKeyDown={(event) =>
-                                  handleOtpKeyDown(index, event)
-                                }
-                                onPaste={handleOtpPaste}
-                              />
-                            ))}
-                          </div>
-
-                          {otpError ? (
-                            <p className="text-sm text-error">{otpError}</p>
-                          ) : null}
-
-                          <BaseButton
-                            fullWidth
-                            loading={isSubmitting}
-                            type="submit"
-                          >
-                            Xác nhận
-                          </BaseButton>
-
-                          <div className="text-center text-sm text-on-surface-variant">
-                            <span>Bạn chưa nhận được mã?</span>
-
+                          {registerStep === "otp" && (
                             <button
-                              className="ml-1 cursor-pointer font-semibold text-primary disabled:text-outline"
-                              disabled={otpCountdown > 0}
+                              className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface cursor-pointer"
                               type="button"
-                              onClick={handleResendOtp}
+                              onClick={goToRegisterForm}
                             >
-                              {otpCountdown > 0
-                                ? `Gửi lại mã sau ${otpCountdown}s`
-                                : "Gửi lại mã"}
+                              <ArrowLeft className="h-4 w-4" />
+                              Quay lại
                             </button>
-                          </div>
-                        </form>
-                      </div>
-                    )}
+                          )}
+                        </div>
 
-                    <p className="text-center text-sm text-on-surface-variant">
+                        <p className="mt-2 max-w-xl text-sm text-on-surface-variant sm:mt-3 sm:text-base lg:text-lg">
+                          {registerStep === "otp"
+                            ? "Nhập mã OTP 6 chữ số đã được gửi đến email của bạn để hoàn tất đăng ký."
+                            : "Bắt đầu hành trình của bạn với hệ sinh thái FUSE."}
+                        </p>
+                      </div>
+
+                      {registerStep === "form" ? (
+                        <div className="animate-in fade-in slide-in-from-right-2 duration-300">
+                          <form
+                            className="space-y-5"
+                            noValidate
+                            onSubmit={handleRegister}
+                          >
+                            <BaseField
+                              error={getFieldError("fullName")}
+                              id="fullName"
+                              label="Họ và tên"
+                              leadingIcon={<UserRound className="h-5 w-5" />}
+                              placeholder="Nhập họ và tên của bạn"
+                              value={form.fullName}
+                              onBlur={() => handleFieldBlur("fullName")}
+                              onChange={(event) =>
+                                updateField("fullName", event.target.value)
+                              }
+                            />
+
+                            <BaseField
+                              error={getFieldError("email")}
+                              id="email"
+                              label="Địa chỉ Email"
+                              leadingIcon={<Mail className="h-5 w-5" />}
+                              placeholder="name@email.com"
+                              type="email"
+                              value={form.email}
+                              onBlur={() => handleFieldBlur("email")}
+                              onChange={(event) =>
+                                updateField("email", event.target.value)
+                              }
+                            />
+
+                            <div className="grid gap-5 md:grid-cols-2">
+                              <BaseField
+                                error={getFieldError("password")}
+                                id="password"
+                                label="Mật khẩu"
+                                leadingIcon={<Lock className="h-5 w-5" />}
+                                placeholder="••••••••"
+                                trailingIcon={
+                                  <button
+                                    className="cursor-pointer rounded-full p-1 text-outline"
+                                    type="button"
+                                    onClick={() =>
+                                      setShowPassword((current) => !current)
+                                    }
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                      <Eye className="h-5 w-5" />
+                                    )}
+                                  </button>
+                                }
+                                type={showPassword ? "text" : "password"}
+                                value={form.password}
+                                onBlur={() => handleFieldBlur("password")}
+                                onChange={(event) =>
+                                  updateField("password", event.target.value)
+                                }
+                              />
+
+                              <BaseField
+                                error={getFieldError("confirmPassword")}
+                                id="confirmPassword"
+                                label="Xác nhận mật khẩu"
+                                leadingIcon={<Lock className="h-5 w-5" />}
+                                placeholder="••••••••"
+                                trailingIcon={
+                                  <button
+                                    className="cursor-pointer rounded-full p-1 text-outline"
+                                    type="button"
+                                    onClick={() =>
+                                      setShowConfirmPassword(
+                                        (current) => !current,
+                                      )
+                                    }
+                                  >
+                                    {showConfirmPassword ? (
+                                      <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                      <Eye className="h-5 w-5" />
+                                    )}
+                                  </button>
+                                }
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={form.confirmPassword}
+                                onBlur={() =>
+                                  handleFieldBlur("confirmPassword")
+                                }
+                                onChange={(event) =>
+                                  updateField(
+                                    "confirmPassword",
+                                    event.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <BaseButton
+                              endIcon={<ArrowRight className="h-5 w-5" />}
+                              fullWidth
+                              loading={isSubmitting}
+                              type="submit"
+                            >
+                              Tạo tài khoản
+                            </BaseButton>
+                          </form>
+                        </div>
+                      ) : (
+                        <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                          <form
+                            className="space-y-5"
+                            onSubmit={handleVerifyOtp}
+                          >
+                            <div className="grid grid-cols-6 gap-3 w-full">
+                              {Array.from({ length: 6 }).map((_, index) => (
+                                <input
+                                  className="w-full aspect-square rounded-xl sm:rounded-2xl bg-surface-container-low text-center text-lg font-bold border border-primary-hover/90 text-on-surface outline-none ring-0 transition focus:bg-white focus:ring-2 focus:ring-primary/20 sm:text-xl p-0 min-w-0"
+                                  id={`otp-${index}`}
+                                  key={index}
+                                  inputMode="numeric"
+                                  maxLength={1}
+                                  value={otpValue[index] ?? ""}
+                                  onChange={(event) =>
+                                    handleOtpChange(index, event.target.value)
+                                  }
+                                  onKeyDown={(event) =>
+                                    handleOtpKeyDown(index, event)
+                                  }
+                                  onPaste={handleOtpPaste}
+                                />
+                              ))}
+                            </div>
+
+                            {otpError ? (
+                              <p className="text-sm text-error">{otpError}</p>
+                            ) : null}
+
+                            <BaseButton
+                              fullWidth
+                              loading={isSubmitting}
+                              type="submit"
+                            >
+                              Xác nhận
+                            </BaseButton>
+
+                            <div className="text-center text-sm text-on-surface-variant">
+                              <span>Bạn chưa nhận được mã?</span>
+
+                              <button
+                                className="ml-1 cursor-pointer font-semibold text-primary disabled:text-outline"
+                                disabled={otpCountdown > 0}
+                                type="button"
+                                onClick={handleResendOtp}
+                              >
+                                {otpCountdown > 0
+                                  ? `Gửi lại mã sau ${otpCountdown}s`
+                                  : "Gửi lại mã"}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                    <p className=" mt-4 text-center text-sm text-on-surface-variant">
                       Bạn đã có tài khoản?{" "}
                       <Link
                         className="font-semibold text-primary"
@@ -311,7 +326,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                         Đăng nhập
                       </Link>
                     </p>
-                  </div>
+                  </>
                 ) : (
                   <div className="space-y-6 sm:space-y-8 lg:space-y-10">
                     <div className="mb-8 sm:mb-10 lg:mb-12">
@@ -323,22 +338,27 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                       </p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                    <form
+                      className="space-y-6"
+                      noValidate
+                      onSubmit={handleLogin}
+                    >
                       <BaseField
-                        error={fieldErrors.email}
+                        error={getFieldError("email")}
                         id="loginEmail"
                         label="Địa chỉ Email"
                         leadingIcon={<Mail className="h-5 w-5" />}
                         placeholder="name@email.com"
                         type="email"
                         value={form.email}
+                        onBlur={() => handleFieldBlur("email")}
                         onChange={(event) =>
                           updateField("email", event.target.value)
                         }
                       />
 
                       <BaseField
-                        error={fieldErrors.password}
+                        error={getFieldError("password")}
                         id="loginPassword"
                         label="Mật khẩu"
                         leadingIcon={<Lock className="h-5 w-5" />}
@@ -360,6 +380,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                         }
                         type={showPassword ? "text" : "password"}
                         value={form.password}
+                        onBlur={() => handleFieldBlur("password")}
                         onChange={(event) =>
                           updateField("password", event.target.value)
                         }
@@ -375,12 +396,14 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                           }
                         />
 
-                        <button
+                        <BaseButton
+                          variant="ghost"
                           className="text-sm font-semibold text-primary"
                           type="button"
+                          href={ROUTES.JOB_SEEKER_FORGOT_PASSWORD}
                         >
                           Quên mật khẩu?
-                        </button>
+                        </BaseButton>
                       </div>
 
                       <BaseButton

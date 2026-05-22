@@ -7,14 +7,16 @@ import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
-// import { HotJobsSection } from "./HotJobsSection";
+import { FloatingFavoriteButton } from "./FloatingFavoriteButton";
+import { HotJobsSection } from "./HotJobsSection";
 
 export default function HomePage() {
   const t = HOME_MESSAGES;
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-background text-foreground custom-scrollbar">
       <Header />
+      <FloatingFavoriteButton />
       <HomeSlideshow />
 
       <section className="bg-surface px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -35,7 +37,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* <HotJobsSection /> */}
+      <HotJobsSection />
 
       <section className="bg-muted px-8 py-20">
         <div className="mx-auto max-w-7xl text-center">

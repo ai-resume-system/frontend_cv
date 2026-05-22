@@ -8,6 +8,7 @@ import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 import type { AuthUser } from "@/shared/types/auth";
+import { ArrowDown, ChevronDown } from "lucide-react";
 
 interface UserMenuItem {
   href: string;
@@ -64,7 +65,7 @@ export function getUserMenuSections(): UserMenuSection[] {
       title: t.cvManagement,
       items: [
         {
-          href: ROUTES.JOB_SEEKER_CVS,
+          href: ROUTES.JOB_SEEKER_CV,
           label: t.myCv,
         },
         {
@@ -81,7 +82,7 @@ export function getUserMenuSections(): UserMenuSection[] {
           label: t.profileSettings,
         },
         {
-          href: ROUTES.JOB_SEEKER_CHANGE_PASSWORD,
+          href: ROUTES.JOB_SEEKER_PROFILE_CHANGE_PASSWORD,
           label: t.changePassword,
         },
       ],
@@ -181,9 +182,17 @@ export function UserMenuDropdown({
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+        {/* <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
           {getUserInitials(currentUser?.profile?.fullName, currentUser?.email)}
-        </div>
+        </div> */}
+        <img
+          height={40}
+          width={40}
+          alt="Avatar"
+          src={currentUser?.profile?.avatarUrl || "/user-default.png"}
+          className="relative h-10 w-10 rounded-full border border-surface-container-lowest/50 object-cover"
+        />
+        <ChevronDown className="absolute -bottom-1 -right-2" size={20} />
       </button>
 
       {isOpen && currentUser ? (

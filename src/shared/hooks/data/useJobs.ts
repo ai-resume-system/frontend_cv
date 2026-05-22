@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-import { fetchJobs } from "@/shared/services/job.service";
+import {
+  fetchJobs,
+  type FetchJobsParams,
+} from "@/shared/services/job.service";
+import type { IResponseApiPagination } from "@/shared/types/api";
 import type { Job } from "@/shared/types/job";
 
-interface UseJobsOptions {
-  page?: number;
-  limit?: number;
-}
+type UseJobsOptions = FetchJobsParams;
 
-export function useJobs({ page = 1, limit = 3 }: UseJobsOptions = {}) {
+export function useJobs({ page = 1, limit = 10, careerCategoryId, q }: UseJobsOptions = {}) {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [pagination, setPagination] = useState<IResponseApiPagination | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,9 +26,10 @@ export function useJobs({ page = 1, limit = 3 }: UseJobsOptions = {}) {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchJobs({ page, limit });
+        const data = await fetchJobs({ page, limit, careerCategoryId, q });
         if (!cancelled) {
-          setJobs(data);
+          setJobs(data.jobs);
+          setPagination(data.pagination);
         }
       } catch (err) {
         if (!cancelled) {
@@ -42,7 +47,7 @@ export function useJobs({ page = 1, limit = 3 }: UseJobsOptions = {}) {
     return () => {
       cancelled = true;
     };
-  }, [limit, page]);
+  }, [careerCategoryId, limit, page, q]);
 
-  return { jobs, loading, error };
+  return { jobs, pagination, loading, error };
 }

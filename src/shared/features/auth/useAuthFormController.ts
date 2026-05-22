@@ -19,6 +19,10 @@ import { EOtpType } from "@/shared/constants/enums/otp.enum";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
 import {
+  fetchCurrentUser,
+  setCachedUser,
+} from "@/shared/services/account.service";
+import {
   login,
   registerJobSeeker,
   registerRecruiter,
@@ -44,6 +48,10 @@ interface UseAuthFormControllerOptions {
   mode: AuthMode;
   role: EUserRole.JOB_SEEKER | EUserRole.RECRUITER;
 }
+
+type AuthFieldName = keyof AuthFormState;
+type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
+type AuthTouchedFields = Partial<Record<AuthFieldName, boolean>>;
 
 const initialFormState: AuthFormState = {
   location: "",
@@ -79,9 +87,9 @@ export function useAuthFormController({
   const [otpValue, setOtpValue] = useState("");
   const [otpCountdown, setOtpCountdown] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<
-    Partial<Record<keyof AuthFormState, string>>
-  >({});
+  const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
+  const [touchedFields, setTouchedFields] = useState<AuthTouchedFields>({});
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [showRolePicker, setShowRolePicker] = useState(false);
 
@@ -120,54 +128,159 @@ export function useAuthFormController({
     setShowRolePicker(shouldPromptRole);
   }, [role]);
 
-  function updateField<K extends keyof AuthFormState>(
-    key: K,
-    value: AuthFormState[K],
-  ) {
-    setForm((current) => ({ ...current, [key]: value }));
-    setFieldErrors((current) => ({ ...current, [key]: undefined }));
+  function validateField(
+    field: AuthFieldName,
+    nextForm: AuthFormState,
+  ): string | undefined {
+    const value = nextForm[field];
+
+    switch (field) {
+      case "email":
+        if (!nextForm.email.trim()) {
+          return t.validation.required;
+        }
+
+        if (!isEmail(nextForm.email)) {
+          return t.validation.email;
+        }
+
+        return undefined;
+
+      case "password":
+        if (!nextForm.password.trim()) {
+          return t.validation.required;
+        }
+
+        if (nextForm.password.length < 6) {
+          return t.validation.passwordLength;
+        }
+
+        return undefined;
+
+      case "fullName":
+        if (isRegister && !isRecruiter && !nextForm.fullName.trim()) {
+          return t.validation.required;
+        }
+
+        return undefined;
+
+      case "company_name":
+        if (isRegister && isRecruiter && !nextForm.company_name.trim()) {
+          return t.validation.required;
+        }
+
+        return undefined;
+
+      case "confirmPassword":
+        if (!isRegister) {
+          return undefined;
+        }
+
+        if (!nextForm.confirmPassword.trim()) {
+          return t.validation.required;
+        }
+
+        if (nextForm.confirmPassword !== nextForm.password) {
+          return t.validation.passwordMatch;
+        }
+
+        return undefined;
+
+      case "location":
+      case "phone":
+      case "rememberMe":
+        return undefined;
+
+      default:
+        return value ? undefined : undefined;
+    }
   }
 
-  function validateForm() {
-    const errors: Partial<Record<keyof AuthFormState, string>> = {};
+  function validateForm(nextForm: AuthFormState): AuthFieldErrors {
+    const errors: AuthFieldErrors = {};
 
-    if (!form.email.trim()) {
-      errors.email = t.validation.required;
-    } else if (!isEmail(form.email)) {
-      errors.email = t.validation.email;
-    }
+    const fields: AuthFieldName[] = isRegister
+      ? [
+          "email",
+          "password",
+          "confirmPassword",
+          ...(isRecruiter
+            ? (["company_name"] as const)
+            : (["fullName"] as const)),
+        ]
+      : ["email", "password"];
 
-    if (!form.password.trim()) {
-      errors.password = t.validation.required;
-    } else if (form.password.length < 6) {
-      errors.password = t.validation.passwordLength;
-    }
+    for (const field of fields) {
+      const error = validateField(field, nextForm);
 
-    if (isRegister) {
-      if (!isRecruiter && !form.fullName.trim()) {
-        errors.fullName = t.validation.required;
-      }
-
-      if (isRecruiter && !form.company_name.trim()) {
-        errors.company_name = t.validation.required;
-      }
-
-      if (!form.confirmPassword.trim()) {
-        errors.confirmPassword = t.validation.required;
-      } else if (form.confirmPassword !== form.password) {
-        errors.confirmPassword = t.validation.passwordMatch;
+      if (error) {
+        errors[field] = error;
       }
     }
 
     return errors;
   }
 
+  function getFieldError(field: AuthFieldName) {
+    if (!touchedFields[field] && !hasSubmitted) {
+      return undefined;
+    }
+
+    return fieldErrors[field];
+  }
+
+  function handleFieldBlur(field: AuthFieldName) {
+    setTouchedFields((current) => ({
+      ...current,
+      [field]: true,
+    }));
+    setFieldErrors((current) => ({
+      ...current,
+      [field]: validateField(field, form),
+    }));
+  }
+
+  function updateField<K extends AuthFieldName>(
+    key: K,
+    value: AuthFormState[K],
+  ) {
+    setForm((current) => {
+      const nextForm = { ...current, [key]: value };
+
+      setFieldErrors((currentErrors) => {
+        const nextErrors = { ...currentErrors };
+
+        if (touchedFields[key] || hasSubmitted) {
+          nextErrors[key] = validateField(key, nextForm);
+        } else {
+          nextErrors[key] = undefined;
+        }
+
+        if (
+          key === "password" &&
+          (touchedFields.confirmPassword || hasSubmitted)
+        ) {
+          nextErrors.confirmPassword = validateField(
+            "confirmPassword",
+            nextForm,
+          );
+        }
+
+        return nextErrors;
+      });
+
+      return nextForm;
+    });
+  }
+
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setHasSubmitted(true);
 
-    const errors = validateForm();
+    const errors = validateForm(form);
+    setFieldErrors(errors);
+
     if (errors.email || errors.password) {
-      setFieldErrors(errors);
       return;
     }
 
@@ -191,11 +304,30 @@ export function useAuthFormController({
         LOCAL_STORAGE_KEYS.USER,
         JSON.stringify(response.user),
       );
+      try {
+        const currentUser = await fetchCurrentUser();
+        setCachedUser(currentUser);
+      } catch {}
+
+      const redirectPath =
+        !isRecruiter && typeof window !== "undefined"
+          ? window.sessionStorage.getItem(
+              SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+            )
+          : null;
+
+      if (redirectPath && !isRecruiter) {
+        window.sessionStorage.removeItem(
+          SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+        );
+        router.push(redirectPath);
+        return;
+      }
 
       router.push(isRecruiter ? ROUTES.RECRUITER_DASHBOARD : ROUTES.HOME);
     } catch (error) {
       showErrorAlert(
-        error instanceof Error ? error.message : "KhÃ´ng thá»ƒ Ä‘Äƒng nháº­p.",
+        error instanceof Error ? error.message : "Không thể đăng nhập.",
       );
     } finally {
       setIsSubmitting(false);
@@ -204,10 +336,12 @@ export function useAuthFormController({
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setHasSubmitted(true);
 
-    const errors = validateForm();
+    const errors = validateForm(form);
+    setFieldErrors(errors);
+
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
       return;
     }
 
@@ -239,6 +373,9 @@ export function useAuthFormController({
       setOtpCountdown(OTP_RESEND_SECONDS);
       setOtpValue("");
       setOtpError("");
+      setTouchedFields({});
+      setHasSubmitted(false);
+      setFieldErrors({});
     } catch (error) {
       showErrorAlert(
         error instanceof Error
@@ -268,7 +405,7 @@ export function useAuthFormController({
       });
 
       await showAppAlert({
-        confirmButtonText: "Đi tới đăng nhập",
+        confirmButtonText: "Đăng nhập",
         text: "Tài khoản của bạn đã được xác thực. Tiếp tục đăng nhập để bắt đầu sử dụng FUSE.",
         title: "Tạo tài khoản thành công",
       });
@@ -286,7 +423,7 @@ export function useAuthFormController({
       const message =
         error instanceof Error
           ? error.message
-          : "XÃ¡c thá»±c OTP tháº¥t báº¡i.";
+          : "XA?A?c thA?A?A?c OTP thA?A?A?t bA?A?A?i.";
 
       setOtpError(message);
       await showErrorAlert(message);
@@ -310,7 +447,7 @@ export function useAuthFormController({
       showErrorAlert(
         error instanceof Error
           ? error.message
-          : "KhÃ´ng thá»ƒ gá»­i láº¡i OTP.",
+          : "KhA?A'ng thA?A??' gA?A?A-i lA?A?A?i OTP.",
       );
     }
   }
@@ -390,7 +527,9 @@ export function useAuthFormController({
     alternateHref,
     fieldErrors,
     form,
+    getFieldError,
     goToRegisterForm,
+    handleFieldBlur,
     handleLogin,
     handleOtpChange,
     handleOtpKeyDown,

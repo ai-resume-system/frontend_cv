@@ -44,7 +44,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-primary text-white shadow-sm hover:bg-primary-hover focus-visible:outline-primary",
   secondary:
-    "border border-primary/15 bg-surface text-primary hover:bg-primary-soft focus-visible:outline-primary",
+    "border border-primary/50 bg-surface text-primary hover:bg-primary-soft focus-visible:outline-primary",
   ghost: "text-foreground hover:bg-muted focus-visible:outline-primary",
   ai: "bg-ai-strong text-white shadow-sm hover:bg-primary focus-visible:outline-ai-strong",
 };
@@ -95,17 +95,28 @@ export function BaseButton(props: TotalButtonProps) {
 
   // Trường hợp 1: Là một liên kết (Navigation)
   if ("href" in props && props.href) {
-    const { href, ...linkProps } = rest as Omit<ButtonLinkProps, keyof BaseProps>;
+    const { href, ...linkProps } = rest as Omit<
+      ButtonLinkProps,
+      keyof BaseProps
+    >;
 
     return (
-      <Link href={href} className={mergedClasses} {...(linkProps as NativeLinkProps)}>
+      <Link
+        href={href}
+        className={mergedClasses}
+        {...(linkProps as NativeLinkProps)}
+      >
         {renderContent()}
       </Link>
     );
   }
 
   // Trường hợp 2: Là một nút bấm thuần túy (Action/Form)
-  const { type = "button", disabled, ...buttonProps } = rest as NativeButtonProps;
+  const {
+    type = "button",
+    disabled,
+    ...buttonProps
+  } = rest as NativeButtonProps;
 
   return (
     <button
