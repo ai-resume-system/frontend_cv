@@ -10,10 +10,12 @@ import {
 } from "@/shared/services/account.service";
 import type { AuthUser } from "@/shared/types/auth";
 
-import type { ProfileFormErrors, ProfileFormValues } from "./profile.types";
+import type {
+  ProfileFormErrors,
+  ProfileFormValues,
+} from "../../../../shared/types/profile";
 
 const EMPTY_PROFILE_FORM: ProfileFormValues = {
-  avatarUrl: "",
   bio: "",
   email: "",
   fullName: "",
@@ -25,7 +27,6 @@ type TouchedFields = Partial<Record<ProfileField, boolean>>;
 
 function buildProfileForm(user: AuthUser): ProfileFormValues {
   return {
-    avatarUrl: user.profile?.avatarUrl ?? "",
     bio: user.profile?.bio ?? "",
     email: user.email,
     fullName: user.profile?.fullName ?? "",
@@ -58,7 +59,7 @@ function readFirstFieldError(
 }
 
 export function useProfileForm() {
-  const { loading, setUser, user } = useCurrentUser();
+  const { loading, refreshUser, setUser, user } = useCurrentUser();
   const [form, setForm] = useState<ProfileFormValues>(EMPTY_PROFILE_FORM);
   const [errors, setErrors] = useState<ProfileFormErrors>({});
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
@@ -122,7 +123,6 @@ export function useProfileForm() {
 
     try {
       const response = await updateMyProfile({
-        avatarUrl: form.avatarUrl.trim() || undefined,
         bio: form.bio.trim(),
         fullName: form.fullName.trim(),
         phone: form.phone.trim(),
@@ -132,7 +132,7 @@ export function useProfileForm() {
         ...user,
         phone: response.phone || form.phone.trim(),
         profile: {
-          avatarUrl: response.avatarUrl ?? form.avatarUrl.trim(),
+          avatarUrl: user.profile?.avatarUrl ?? null,
           bio: response.bio ?? form.bio.trim(),
           fullName: response.fullName ?? form.fullName.trim(),
         },
@@ -191,6 +191,7 @@ export function useProfileForm() {
     handleSubmit,
     isLoading: loading,
     isSubmitting,
+    refreshUser,
     resetForm,
     updateField,
     user,

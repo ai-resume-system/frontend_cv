@@ -30,6 +30,13 @@ interface RecruiterAuthFormProps {
   mode: AuthMode;
 }
 
+function formatCountdown(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
   const controller = useAuthFormController({
     mode,
@@ -51,7 +58,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
     handleVerifyOtp,
     isRegister,
     isSubmitting,
-    otpCountdown,
+    otpExpiryCountdown,
     otpError,
     otpValue,
     registerStep,
@@ -146,7 +153,11 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                   {/* Content */}
                   {registerStep === "form" ? (
                     <div className="animate-in fade-in slide-in-from-right-2 duration-300">
-                      <form className="space-y-5" noValidate onSubmit={handleRegister}>
+                      <form
+                        className="space-y-5"
+                        noValidate
+                        onSubmit={handleRegister}
+                      >
                         <BaseField
                           error={getFieldError("company_name")}
                           id="company_name"
@@ -158,6 +169,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                           onChange={(event) =>
                             updateField("company_name", event.target.value)
                           }
+                          required
                         />
 
                         <BaseField
@@ -172,6 +184,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                           onChange={(event) =>
                             updateField("email", event.target.value)
                           }
+                          required
                         />
 
                         <div className="grid gap-5 md:grid-cols-2">
@@ -202,6 +215,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                             onChange={(event) =>
                               updateField("password", event.target.value)
                             }
+                            required
                           />
 
                           <BaseField
@@ -231,31 +245,38 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                             onChange={(event) =>
                               updateField("confirmPassword", event.target.value)
                             }
+                            required
                           />
                         </div>
 
                         <div className="grid gap-5 md:grid-cols-2">
                           <BaseField
+                            error={getFieldError("phone")}
                             id="phone"
                             label="Số điện thoại"
                             leadingIcon={<Phone className="h-5 w-5" />}
                             placeholder="Nhập số điện thoại"
                             type="tel"
                             value={form.phone}
+                            onBlur={() => handleFieldBlur("phone")}
                             onChange={(event) =>
                               updateField("phone", event.target.value)
                             }
+                            required
                           />
 
                           <BaseField
+                            error={getFieldError("location")}
                             id="location"
                             label="Địa chỉ"
                             leadingIcon={<MapPin className="h-5 w-5" />}
                             placeholder="Địa chỉ công ty"
                             value={form.location}
+                            onBlur={() => handleFieldBlur("location")}
                             onChange={(event) =>
                               updateField("location", event.target.value)
                             }
+                            required
                           />
                         </div>
 
@@ -306,15 +327,14 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
 
                         <div className="text-center text-sm text-on-surface-variant">
                           <span>Bạn chưa nhận được mã?</span>
-
                           <button
                             className="ml-1 cursor-pointer font-semibold text-primary disabled:text-outline"
-                            disabled={otpCountdown > 0}
+                            disabled={otpExpiryCountdown > 0}
                             type="button"
                             onClick={handleResendOtp}
                           >
-                            {otpCountdown > 0
-                              ? `Gửi lại mã sau ${otpCountdown}s`
+                            {otpExpiryCountdown > 0
+                              ? `Gửi lại mã sau ${formatCountdown(otpExpiryCountdown)}}s`
                               : "Gửi lại mã"}
                           </button>
                         </div>

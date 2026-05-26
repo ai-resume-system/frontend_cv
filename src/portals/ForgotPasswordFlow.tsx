@@ -52,6 +52,9 @@ function formatCountdown(seconds: number): string {
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
+const OTP_EXPIRES_IN_SECONDS = 300;
+const FORGOT_PASSWORD_RESEND_SECONDS = 60;
+
 function getStepLabel(step: IForgotPasswordStep): string {
   switch (step) {
     case "email":
@@ -121,7 +124,8 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signKey, setSignKey] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [otpCountdown, setOtpCountdown] = useState(180);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpExpiryCountdown, setOtpExpiryCountdown] = useState(0);
   const [emailError, setEmailError] = useState("");
   const [passwordErrors, setPasswordErrors] = useState<
     Partial<Record<PasswordFieldName, string>>
@@ -148,6 +152,18 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
     return () => window.clearInterval(timer);
   }, [step, otpCountdown]);
+
+  useEffect(() => {
+    if (step !== "otp" || otpExpiryCountdown <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setOtpExpiryCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [step, otpExpiryCountdown]);
 
   async function requestOtp() {
     const response = await sendOtp({
@@ -221,7 +237,8 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
       setOtpValue(Array(6).fill(""));
       setSignKey("");
       setStep("otp");
-      setOtpCountdown(180);
+      setOtpCountdown(FORGOT_PASSWORD_RESEND_SECONDS);
+      setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
     } catch (err) {
       setStepError(
         err instanceof Error ? err.message : "Không thể gửi mã xác thực.",
@@ -259,6 +276,8 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
       setSignKey(nextSignKey);
       setStep("password");
       setStepError("");
+      setOtpCountdown(0);
+      setOtpExpiryCountdown(0);
       setPasswordErrors({});
       setPasswordTouched({});
       setPasswordSubmitted(false);
@@ -320,7 +339,8 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
     try {
       await requestOtp();
-      setOtpCountdown(180);
+      setOtpCountdown(FORGOT_PASSWORD_RESEND_SECONDS);
+      setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
       setOtpValue(Array(6).fill(""));
       setSignKey("");
     } catch (err) {
@@ -458,23 +478,23 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
                 <p className="text-sm text-error">{stepError}</p>
               ) : null}
 
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <button
-                  className="cursor-pointer font-semibold text-primary disabled:text-outline"
-                  disabled={otpCountdown > 0 || isSubmitting}
-                  type="button"
-                  onClick={handleResendOtp}
-                >
-                  Gửi lại mã
-                </button>
-                <span className="font-medium text-on-surface-variant">
-                  Còn lại {formatCountdown(otpCountdown)}
-                </span>
-              </div>
-
               <BaseButton fullWidth loading={isSubmitting} type="submit">
                 Xác minh truy cập
               </BaseButton>
+
+              <div className="text-center text-sm text-on-surface-variant">
+                <span>Bạn chưa nhận được mã?</span>
+                <button
+                  className="ml-1 cursor-pointer font-semibold text-primary disabled:text-outline"
+                  disabled={otpExpiryCountdown > 0}
+                  type="button"
+                  onClick={handleResendOtp}
+                >
+                  {otpExpiryCountdown > 0
+                    ? `OTP hết hạn sau ${formatCountdown(otpExpiryCountdown)}`
+                    : "Gửi lại mã"}
+                </button>
+              </div>
             </form>
           </div>
         );

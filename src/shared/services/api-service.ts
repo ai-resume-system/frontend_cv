@@ -1,9 +1,15 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
-import { LOCAL_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { env } from "@/shared/lib/config/env";
+import {
+  clearAuthStore,
+  getAccessToken,
+  redirectToLogin,
+  setAccessToken,
+  setCurrentUser,
+} from "@/shared/services/auth-store";
 import type {
+  AuthUser,
   ApiFieldErrorResponse,
-  RefreshTokenPayload,
   RefreshTokenResponseData,
 } from "@/shared/types/auth";
 import type { IResponseApiItem } from "@/shared/types/api";
@@ -19,67 +25,7 @@ interface JsonRequestConfig extends Omit<ApiRequestConfig, "body"> {
   body?: unknown;
 }
 
-const ACCESS_TOKEN_EXPIRED_CODE = 1006;
 const REFRESH_TOKEN_EXPIRED_CODE = 1007;
-
-function isBrowser(): boolean {
-  return typeof window !== "undefined";
-}
-
-function getStoredToken(key: string): string | null {
-  if (!isBrowser()) return null;
-  return window.localStorage.getItem(key);
-}
-
-function getStoredUserSnapshot(): unknown {
-  if (!isBrowser()) return null;
-
-  const rawUser = window.localStorage.getItem(LOCAL_STORAGE_KEYS.USER);
-
-  if (!rawUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawUser);
-  } catch {
-    return null;
-  }
-}
-
-function setStoredTokens(tokens: RefreshTokenResponseData): void {
-  if (!isBrowser()) return;
-
-  const cachedUser = getStoredUserSnapshot();
-  const mergedUser =
-    cachedUser &&
-    typeof cachedUser === "object" &&
-    cachedUser !== null &&
-    "id" in cachedUser &&
-    cachedUser.id === tokens.user.id
-      ? { ...cachedUser, ...tokens.user }
-      : tokens.user;
-
-  window.localStorage.setItem(
-    LOCAL_STORAGE_KEYS.ACCESS_TOKEN,
-    tokens.accessToken,
-  );
-  window.localStorage.setItem(
-    LOCAL_STORAGE_KEYS.REFRESH_TOKEN,
-    tokens.refreshToken,
-  );
-  window.localStorage.setItem(
-    LOCAL_STORAGE_KEYS.USER,
-    JSON.stringify(mergedUser),
-  );
-}
-
-function clearStoredAuth(): void {
-  if (!isBrowser()) return;
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
-}
 
 function buildApiUrl(path: string): string {
   return `${env.NEXT_PUBLIC_API_URL}${path}`;
@@ -124,14 +70,6 @@ async function parseApiError(response: Response): Promise<Error> {
 }
 
 function isTokenExpiredError(error: Error): boolean {
-  // const apiError = error as Error & { code?: number | string; status?: number };
-
-  // return (
-  //   apiError.status === 401 &&
-  //   (apiError.code === ACCESS_TOKEN_EXPIRED_CODE ||
-  //     apiError.code === `${ACCESS_TOKEN_EXPIRED_CODE}`)
-  // );
-
   const apiError = error as Error & { status?: number };
   return apiError.status === 401;
 }
@@ -146,34 +84,75 @@ function isRefreshTokenExpiredError(error: Error): boolean {
   );
 }
 
-async function refreshAccessToken(): Promise<boolean> {
-  const refreshToken = getStoredToken(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
+async function fetchCurrentUserAfterRefresh(
+  accessToken: string,
+): Promise<AuthUser> {
+  const response = await fetch(buildApiUrl(API_ROUTES.ACCOUNT.ME), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: "no-store",
+    credentials: "include",
+  });
 
-  if (!refreshToken) {
-    clearStoredAuth();
-    return false;
+  if (!response.ok) {
+    throw await parseApiError(response);
   }
 
-  const payload: RefreshTokenPayload = { refreshToken };
+  const payload = await readJson<IResponseApiItem<AuthUser>>(response);
+  return payload.data;
+}
+
+let ongoingRefresh: Promise<boolean> | null = null;
+
+async function doRefresh(): Promise<boolean> {
   const response = await fetch(buildApiUrl(API_ROUTES.AUTH.REFRESH_TOKEN), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
     cache: "no-store",
+    credentials: "include",
   });
 
   if (!response.ok) {
     const error = await parseApiError(response);
     if (isRefreshTokenExpiredError(error) || response.status === 401) {
-      clearStoredAuth();
+      clearAuthStore();
     }
     return false;
   }
 
   const payloadResponse =
     await readJson<IResponseApiItem<RefreshTokenResponseData>>(response);
-  setStoredTokens(payloadResponse.data);
-  return true;
+  const nextAccessToken = payloadResponse.data.accessToken;
+  setAccessToken(nextAccessToken);
+
+  try {
+    const currentUser = await fetchCurrentUserAfterRefresh(nextAccessToken);
+    setCurrentUser(currentUser);
+    return true;
+  } catch (error) {
+    const apiError = error as Error & { status?: number };
+
+    if (apiError.status === 401 || apiError.status === 403) {
+      clearAuthStore();
+      return false;
+    }
+
+    setCurrentUser(null);
+    return true;
+  }
+}
+
+async function refreshAccessToken(): Promise<boolean> {
+  if (ongoingRefresh) {
+    return ongoingRefresh;
+  }
+
+  ongoingRefresh = doRefresh().finally(() => {
+    ongoingRefresh = null;
+  });
+
+  return ongoingRefresh;
 }
 
 class ApiService {
@@ -234,9 +213,17 @@ class ApiService {
     const requestHeaders = new Headers(headers);
 
     if (auth) {
-      const accessToken = getStoredToken(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+      const accessToken = getAccessToken();
 
       if (!accessToken) {
+        if (!retried) {
+          const refreshed = await refreshAccessToken();
+
+          if (refreshed) {
+            return this.request<TResponse>(path, method, config, true);
+          }
+        }
+
         throw new Error("Not authenticated");
       }
 
@@ -257,6 +244,7 @@ class ApiService {
       cache:
         requestConfig.cache ??
         (method === "GET" ? requestConfig.cache : "no-store"),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -268,6 +256,9 @@ class ApiService {
         if (refreshed) {
           return this.request<TResponse>(path, method, config, true);
         }
+
+        redirectToLogin();
+        throw error;
       }
 
       throw error;
@@ -278,3 +269,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+export { refreshAccessToken };

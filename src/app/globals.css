@@ -203,3 +203,25 @@ h3 {
   background: rgba(15, 23, 42, 0.35);
   background-clip: content-box;
 }
+
+@keyframes favorite-heart-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  15% {
+    transform: translateY(-2px) scale(1.05) rotate(-10deg);
+  }
+  30% {
+    transform: translateY(0) scale(1.1) rotate(10deg);
+  }
+  45% {
+    transform: translateY(-1px) scale(1.06) rotate(-8deg);
+  }
+  60% {
+    transform: translateY(0) scale(1.08) rotate(8deg);
+  }
+  75% {
+    transform: translateY(-1px) scale(1.03) rotate(-4deg);
+  }
+}

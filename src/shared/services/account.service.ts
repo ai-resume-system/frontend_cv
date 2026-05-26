@@ -1,5 +1,12 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
 import { apiService } from "@/shared/services/api-service";
+import {
+  AUTH_STORE_CHANGED_EVENT,
+  clearAuthStore,
+  getAccessToken,
+  getCurrentUser,
+  setCurrentUser,
+} from "@/shared/services/auth-store";
 import type {
   AuthUser,
   ChangePasswordPayload,
@@ -7,31 +14,14 @@ import type {
   UpdateMyProfileResponse,
 } from "@/shared/types/auth";
 import type { IResponseApiItem } from "@/shared/types/api";
-import { LOCAL_STORAGE_KEYS } from "../constants/constants/local-storage";
-
-export const AUTH_USER_UPDATED_EVENT = "auth-user-updated";
-
-function isBrowser(): boolean {
-  return typeof window !== "undefined";
-}
-
-function dispatchAuthUserUpdated(): void {
-  if (!isBrowser()) return;
-  window.dispatchEvent(new CustomEvent(AUTH_USER_UPDATED_EVENT));
-}
+export const AUTH_USER_UPDATED_EVENT = AUTH_STORE_CHANGED_EVENT;
 
 export function clearCachedAuth(): void {
-  if (!isBrowser()) return;
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
-  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
-  dispatchAuthUserUpdated();
+  clearAuthStore();
 }
 
 export function setCachedUser(user: AuthUser): void {
-  if (!isBrowser()) return;
-  window.localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(user));
-  dispatchAuthUserUpdated();
+  setCurrentUser(user);
 }
 
 export async function fetchCurrentUser(): Promise<AuthUser> {
@@ -71,39 +61,42 @@ export async function changeMyPassword(
   );
 }
 
-export async function logoutUser(): Promise<void> {
-  const token = getCachedToken();
+export async function deleteMyAvatar(): Promise<void> {
+  await apiService.delete<void>(API_ROUTES.ACCOUNT.ME_DELETE_AVATAR, {
+    auth: true,
+  });
+}
 
-  if (token) {
-    try {
-      await apiService.post<void, Record<string, never>>(
-        API_ROUTES.AUTH.LOGOUT,
-        {},
-        { auth: true },
-      );
-    } catch {
-      // Ignore logout API errors because local auth state must still be cleared.
-    }
+export async function deleteMyCompanyLogo(): Promise<void> {
+  await apiService.delete<void>(API_ROUTES.ACCOUNT.ME_DELETE_LOGO, {
+    auth: true,
+  });
+}
+
+export async function deleteMyCompanyBanner(): Promise<void> {
+  await apiService.delete<void>(API_ROUTES.ACCOUNT.ME_DELETE_BANNER, {
+    auth: true,
+  });
+}
+
+export async function logoutUser(): Promise<void> {
+  try {
+    await apiService.post<void, Record<string, never>>(
+      API_ROUTES.AUTH.LOGOUT,
+      {},
+      { auth: true },
+    );
+  } catch {
+    // Ignore logout API errors because local auth state must still be cleared.
   }
 
   clearCachedAuth();
 }
 
 export function getCachedUser(): AuthUser | null {
-  if (!isBrowser()) return null;
-
-  const userStr = window.localStorage.getItem(LOCAL_STORAGE_KEYS.USER);
-
-  if (!userStr) return null;
-
-  try {
-    return JSON.parse(userStr) as AuthUser;
-  } catch {
-    return null;
-  }
+  return getCurrentUser();
 }
 
 export function getCachedToken(): string | null {
-  if (!isBrowser()) return null;
-  return window.localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+  return getAccessToken();
 }

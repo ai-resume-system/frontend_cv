@@ -29,19 +29,11 @@ export interface IVerifyOtpPayload {
 export interface ILoginPayload {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface IResponseLogin {
   accessToken: string;
-  refreshToken: string;
-  user: {
-    id: string;
-    role: EUserRole;
-  };
-}
-
-export interface RefreshTokenPayload {
-  refreshToken: string;
 }
 
 export type RefreshTokenResponseData = IResponseLogin;
@@ -82,7 +74,7 @@ export interface AuthUser {
 
 export interface AuthUserProfile {
   fullName: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   bio: string;
 }
 
@@ -98,18 +90,15 @@ export interface AuthCompanyProfile {
 }
 
 export interface UpdateMyProfilePayload {
-  avatarUrl?: string;
   bio?: string;
   fullName: string;
   phone: string;
 }
 
 export interface UpdateMyProfileResponse {
-  id: string;
-  avatarUrl: string;
-  bio: string;
-  fullName: string;
-  phone: string;
+  fullName?: string;
+  bio?: string;
+  phone?: string;
 }
 
 export interface ChangePasswordPayload {
@@ -125,17 +114,4 @@ export interface ApiFieldErrorResponse extends ApiErrorResponse {
 
 export interface FieldErrors {
   [key: string]: string | undefined;
-}
-
-export interface AuthUserCacheSnapshot {
-  id: string;
-  email: string;
-  phone: string;
-  status: EUserStatus;
-  role: EUserRole;
-  profile: AuthUserProfile | null;
-  company: AuthCompanyProfile | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
 }

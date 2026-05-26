@@ -16,19 +16,16 @@ import { useEffect, useMemo, useState } from "react";
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { useAuth } from "@/shared/hooks/ui/useAuth";
-import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 
-import {
-  getUserInitials,
-  UserMenuContent,
-  UserMenuDropdown,
-} from "./UserMenuDropdown";
 import { CategoriesDropdown } from "./CategoriesDropdown";
+import { UserMenuContent, UserMenuDropdown } from "./UserMenuDropdown";
+import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
 
 type DrawerState = "menu" | "user" | null;
 type NavIcon = typeof BriefcaseBusiness;
@@ -47,7 +44,7 @@ interface MobileNavItem {
 
 export function Header() {
   const { isLoggedIn } = useAuth();
-  const { user, logout } = useCurrentUser();
+  const { user, logout, refreshUser } = useCurrentUser();
   const { categories, error, loading } = useCareerCategories({ limit: 10 });
   const [activeDrawer, setActiveDrawer] = useState<DrawerState>(null);
   const [expandedNavHref, setExpandedNavHref] = useState<string | null>(null);
@@ -87,6 +84,13 @@ export function Header() {
     ],
     [categories, mainNavItems],
   );
+
+  const avatarUrl = user?.profile?.avatarUrl || "/user-default.png";
+
+  const { handleError: handleAvatarError } = useAvatarRefreshOnError({
+    src: avatarUrl,
+    onRefresh: refreshUser,
+  });
 
   useEffect(() => {
     if (!activeDrawer) {
@@ -145,7 +149,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-surface/95 shadow-sm backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-white/95 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <button
@@ -204,9 +208,12 @@ export function Header() {
                   onClick={openUserDrawer}
                   type="button"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    {getUserInitials(user?.profile?.fullName, user?.email)}
-                  </div>
+                  <img
+                    alt="Avatar"
+                    className="h-11 w-11 rounded-full border-2 border-gray-300 object-cover"
+                    onError={handleAvatarError}
+                    src={avatarUrl}
+                  />
                 </button>
               </>
             ) : (
@@ -407,9 +414,12 @@ export function Header() {
         >
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-                {getUserInitials(user?.profile?.fullName, user?.email)}
-              </div>
+              <img
+                alt="Avatar"
+                className="relative h-13 w-13 rounded-full border border-gray-300 object-cover"
+                onError={handleAvatarError}
+                src={avatarUrl}
+              />
               <div className="min-w-0">
                 <p className="truncate font-semibold text-foreground">
                   {user?.profile?.fullName || t.userMenu.guestName}

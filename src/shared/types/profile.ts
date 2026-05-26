@@ -1,11 +1,10 @@
 import type { FieldErrors } from "@/shared/types/auth";
 
 export interface ProfileFormValues {
-  avatarUrl: string;
-  bio: string;
-  email: string;
-  fullName: string;
   phone: string;
+  fullName: string;
+  email: string;
+  bio: string;
 }
 
 export interface ChangePasswordFormValues {

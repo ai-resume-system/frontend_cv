@@ -10,18 +10,17 @@ import {
 } from "react";
 
 import { AUTH_MESSAGES } from "@/shared/constants/constants/messages";
-import {
-  LOCAL_STORAGE_KEYS,
-  SESSION_STORAGE_KEYS,
-} from "@/shared/constants/constants/local-storage";
+import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { EOtpType } from "@/shared/constants/enums/otp.enum";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
+import { fetchCurrentUser } from "@/shared/services/account.service";
 import {
-  fetchCurrentUser,
-  setCachedUser,
-} from "@/shared/services/account.service";
+  clearAuthStore,
+  setAccessToken,
+  setCurrentUser,
+} from "@/shared/services/auth-store";
 import {
   login,
   registerJobSeeker,
@@ -65,7 +64,7 @@ const initialFormState: AuthFormState = {
 };
 
 const OTP_LENGTH = 6;
-const OTP_RESEND_SECONDS = 59;
+const OTP_EXPIRES_IN_SECONDS = 300;
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -85,7 +84,7 @@ export function useAuthFormController({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerStep, setRegisterStep] = useState<RegisterStep>("form");
   const [otpValue, setOtpValue] = useState("");
-  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpExpiryCountdown, setOtpExpiryCountdown] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [touchedFields, setTouchedFields] = useState<AuthTouchedFields>({});
@@ -103,16 +102,28 @@ export function useAuthFormController({
   const alternateHref = isRegister ? loginTarget : registerTarget;
 
   useEffect(() => {
-    if (otpCountdown <= 0) {
+    if (otpExpiryCountdown <= 0) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      setOtpCountdown((current) => current - 1);
+      setOtpExpiryCountdown((current) => current - 1);
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [otpCountdown]);
+  }, [otpExpiryCountdown]);
+
+  useEffect(() => {
+    if (registerStep !== "otp" || otpExpiryCountdown <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setOtpExpiryCountdown((current) => current - 1);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [otpExpiryCountdown, registerStep]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -187,7 +198,17 @@ export function useAuthFormController({
         return undefined;
 
       case "location":
+        if (isRegister && isRecruiter && !nextForm.location.trim()) {
+          return t.validation.required;
+        }
+        return undefined;
+
       case "phone":
+        if (isRegister && isRecruiter && !nextForm.phone.trim()) {
+          return t.validation.required;
+        }
+        return undefined;
+
       case "rememberMe":
         return undefined;
 
@@ -205,7 +226,7 @@ export function useAuthFormController({
           "password",
           "confirmPassword",
           ...(isRecruiter
-            ? (["company_name"] as const)
+            ? (["company_name", "phone", "location"] as const)
             : (["fullName"] as const)),
         ]
       : ["email", "password"];
@@ -290,24 +311,19 @@ export function useAuthFormController({
       const response = await login({
         email: form.email,
         password: form.password,
+        rememberMe: form.rememberMe,
       });
 
-      window.localStorage.setItem(
-        LOCAL_STORAGE_KEYS.ACCESS_TOKEN,
-        response.accessToken,
-      );
-      window.localStorage.setItem(
-        LOCAL_STORAGE_KEYS.REFRESH_TOKEN,
-        response.refreshToken,
-      );
-      window.localStorage.setItem(
-        LOCAL_STORAGE_KEYS.USER,
-        JSON.stringify(response.user),
-      );
+      setAccessToken(response.accessToken);
+      setCurrentUser(null);
+
       try {
         const currentUser = await fetchCurrentUser();
-        setCachedUser(currentUser);
-      } catch {}
+        setCurrentUser(currentUser);
+      } catch (error) {
+        clearAuthStore();
+        throw error;
+      }
 
       const redirectPath =
         !isRecruiter && typeof window !== "undefined"
@@ -370,7 +386,7 @@ export function useAuthFormController({
       }
 
       setRegisterStep("otp");
-      setOtpCountdown(OTP_RESEND_SECONDS);
+      setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
       setOtpValue("");
       setOtpError("");
       setTouchedFields({});
@@ -421,9 +437,7 @@ export function useAuthFormController({
       router.push(loginTarget);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "XA?A?c thA?A?A?c OTP thA?A?A?t bA?A?A?i.";
+        error instanceof Error ? error.message : "Xác nhận thất bại";
 
       setOtpError(message);
       await showErrorAlert(message);
@@ -433,21 +447,15 @@ export function useAuthFormController({
   }
 
   async function handleResendOtp() {
-    if (otpCountdown > 0) {
-      return;
-    }
-
     try {
       await sendOtp({
         email: form.email,
         type: EOtpType.REGISTER,
       });
-      setOtpCountdown(OTP_RESEND_SECONDS);
+      setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
     } catch (error) {
       showErrorAlert(
-        error instanceof Error
-          ? error.message
-          : "KhA?A'ng thA?A??' gA?A?A-i lA?A?A?i OTP.",
+        error instanceof Error ? error.message : "Không thể gửi lại OTP.",
       );
     }
   }
@@ -491,6 +499,7 @@ export function useAuthFormController({
 
   function goToRegisterForm() {
     setRegisterStep("form");
+    setOtpExpiryCountdown(0);
     setOtpError("");
   }
 
@@ -542,7 +551,7 @@ export function useAuthFormController({
     isSubmitting,
     loginTarget,
     mode,
-    otpCountdown,
+    otpExpiryCountdown,
     otpError,
     otpValue,
     registerStep,

@@ -6,11 +6,9 @@ import {
   Pen,
   RotateCcw,
   Save,
-  Shield,
   ShieldCheck,
   User,
   User2,
-  UserRound,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,19 +17,19 @@ import { Footer } from "@/shared/components/layouts/Footer";
 import { Header } from "@/shared/components/layouts/Header";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
+import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
 
 import { AvatarUploadModal } from "./AvatarUploadModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 import { useProfileForm } from "./useProfileForm";
 
-const SIDEBAR_TABS = ["personal", "security", "cv"] as const;
-type SidebarTab = (typeof SIDEBAR_TABS)[number];
+type SidebarTab = "personal" | "security" | "cv";
 
-const SIDEBAR_ITEMS: {
+const SIDEBAR_ITEMS: Array<{
   key: SidebarTab;
   label: string;
   icon: React.ReactNode;
-}[] = [
+}> = [
   {
     key: "personal",
     label: "Thông tin cá nhân",
@@ -60,12 +58,9 @@ export function ProfilePage() {
   const hasChangePasswordQuery =
     searchParams.get("modal") === "change-password";
   const isModalVisible = isChangePasswordOpen || hasChangePasswordQuery;
-
-  const sectionRefs = {
-    personal: useRef<HTMLFormElement>(null),
-    security: useRef<HTMLElement>(null),
-    cv: useRef<HTMLElement>(null),
-  };
+  const personalSectionRef = useRef<HTMLElement>(null);
+  const securitySectionRef = useRef<HTMLElement>(null);
+  const cvSectionRef = useRef<HTMLElement>(null);
 
   const {
     form,
@@ -74,37 +69,59 @@ export function ProfilePage() {
     handleSubmit,
     isLoading,
     isSubmitting,
+    refreshUser,
     resetForm,
     user,
     updateField,
   } = useProfileForm();
 
-  useEffect(() => {
-    const elements = SIDEBAR_TABS.map((key) => sectionRefs[key].current).filter(
-      Boolean,
-    ) as Element[];
+  const avatarUrl = user?.profile?.avatarUrl || "/user-default.png";
+  const { handleError: handleAvatarError } = useAvatarRefreshOnError({
+    src: user?.profile?.avatarUrl ?? null,
+    onRefresh: refreshUser,
+  });
 
-    if (elements.length === 0) return;
+  useEffect(() => {
+    const sections: Array<[SidebarTab, HTMLElement | null]> = [
+      ["personal", personalSectionRef.current],
+      ["security", securitySectionRef.current],
+      ["cv", cvSectionRef.current],
+    ];
+    const elements = sections
+      .map(([, element]) => element)
+      .filter(Boolean) as Element[];
+
+    if (elements.length === 0) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (isClickScrolling.current) return;
+        if (isClickScrolling.current) {
+          return;
+        }
 
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const key = SIDEBAR_TABS.find(
-              (k) => sectionRefs[k].current === entry.target,
-            );
-            if (key) setActiveTab(key);
+          if (!entry.isIntersecting) {
+            continue;
+          }
+
+          const key = sections.find(
+            ([, element]) => element === entry.target,
+          )?.[0];
+
+          if (key) {
+            setActiveTab(key);
           }
         }
       },
       { rootMargin: "-20% 0px -60% 0px", threshold: 0 },
     );
 
-    elements.forEach((el) => observer.observe(el));
+    elements.forEach((element) => observer.observe(element));
+
     return () => observer.disconnect();
-  }, [user]);
+  }, [cvSectionRef, personalSectionRef, securitySectionRef]);
 
   function openChangePasswordModal() {
     setIsChangePasswordOpen(true);
@@ -112,45 +129,63 @@ export function ProfilePage() {
 
   function closeChangePasswordModal() {
     setIsChangePasswordOpen(false);
+
     if (hasChangePasswordQuery) {
       router.replace(pathname, { scroll: false });
     }
   }
 
-  const handleSidebarClick = useCallback((key: SidebarTab) => {
-    setActiveTab(key);
-    isClickScrolling.current = true;
+  const handleSidebarClick = useCallback(
+    (key: SidebarTab) => {
+      setActiveTab(key);
+      isClickScrolling.current = true;
 
-    const el = sectionRefs[key].current;
-    if (!el) return;
+      const element =
+        key === "personal"
+          ? personalSectionRef.current
+          : key === "security"
+            ? securitySectionRef.current
+            : cvSectionRef.current;
+      if (!element) {
+        return;
+      }
 
-    const targetY = el.getBoundingClientRect().top + window.scrollY - 112;
-    const startY = window.scrollY;
-    const distance = targetY - startY;
-    const duration = Math.min(1000, Math.max(400, Math.abs(distance) * 0.8));
-    let startTime: number | null = null;
+      const targetY =
+        element.getBoundingClientRect().top + window.scrollY - 112;
+      const startY = window.scrollY;
+      const distance = targetY - startY;
+      const duration = Math.min(1000, Math.max(400, Math.abs(distance) * 0.8));
+      let startTime: number | null = null;
 
-    function easeInOutCubic(t: number) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
+      function easeInOutCubic(value: number) {
+        return value < 0.5
+          ? 4 * value * value * value
+          : 1 - Math.pow(-2 * value + 2, 3) / 2;
+      }
 
-    function step(timestamp: number) {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = easeInOutCubic(progress);
+      function step(timestamp: number) {
+        if (!startTime) {
+          startTime = timestamp;
+        }
 
-      window.scrollTo(0, startY + distance * eased);
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutCubic(progress);
 
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      } else {
+        window.scrollTo(0, startY + distance * eased);
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+          return;
+        }
+
         isClickScrolling.current = false;
       }
-    }
 
-    requestAnimationFrame(step);
-  }, []);
+      requestAnimationFrame(step);
+    },
+    [cvSectionRef, personalSectionRef, securitySectionRef],
+  );
 
   if (isLoading && !user) {
     return (
@@ -163,9 +198,9 @@ export function ProfilePage() {
           </div>
           <div className="mt-10 flex gap-10">
             <div className="hidden w-64 space-y-2 lg:block">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3].map((item) => (
                 <div
-                  key={i}
+                  key={item}
                   className="h-12 animate-pulse rounded-lg bg-surface-container"
                 />
               ))}
@@ -206,21 +241,21 @@ export function ProfilePage() {
 
       <div className="mx-auto max-w-7xl px-8 py-12">
         <div className="flex flex-col gap-10 lg:flex-row">
-          {/* Sidebar - sticky with smooth active indicator */}
           <aside className="w-full lg:sticky lg:top-24 lg:w-64 lg:self-start">
-            <nav className="relative rounded-xl bg-surface-container-high border border-muted-foreground/20 p-1">
+            <nav className="relative rounded-xl border border-muted-foreground/20 bg-surface-container-high p-1">
               {SIDEBAR_ITEMS.map((item) => {
                 const isActive = activeTab === item.key;
+
                 return (
                   <button
                     key={item.key}
-                    type="button"
                     className={`relative flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-300 ease-out ${
                       isActive
                         ? "bg-surface-container-lowest font-bold text-primary shadow-sm"
                         : "font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                     }`}
                     onClick={() => handleSidebarClick(item.key)}
+                    type="button"
                   >
                     <span
                       className={`transition-transform duration-300 ease-out ${
@@ -236,145 +271,137 @@ export function ProfilePage() {
             </nav>
           </aside>
 
-          {/* Main Content */}
           <div className="flex-1 space-y-10">
-            {/* Section: Personal Info */}
-            <form
-              ref={sectionRefs.personal}
-              className="scroll-mt-28 rounded-xl bg-surface-container-lowest border-2 border-muted-foreground/20 p-8 shadow-sm transition-shadow duration-300 hover:shadow-md"
-              noValidate
-              onSubmit={handleSubmit}
-              id="profile-form"
+            <section
+              ref={personalSectionRef}
+              className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8"
             >
-              <div className="mb-8 flex items-center justify-between">
-                <div>
-                  <h2 className="flex items-center gap-4 font-display text-xl font-bold text-on-surface">
-                    <User className="h-5 w-5 text-primary" />
-                    Cài đặt thông tin cá nhân
-                  </h2>
-                  <p className="text-sm text-on-surface-variant mt-3">
-                    Cập nhật ảnh đại diện và chi tiết hồ sơ cá nhân của bạn. ({" "}
-                    <span className="text-red-500">(*)</span> Các thông tin bắt
-                    buộc )
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-10 md:flex-row">
-                {/* Avatar */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="group relative">
-                    {form.avatarUrl ? (
-                      <img
-                        alt="Avatar"
-                        className="h-32 w-32 rounded-full border-4 border-surface-container-low object-cover transition-transform duration-300"
-                        src={form.avatarUrl ?? "/user-default.png"}
-                      />
-                    ) : (
-                      <div className="flex h-32 w-32 items-center justify-center rounded-full border-3 border-primary/50 bg-surface-container transition-transform duration-300">
-                        <UserRound className="h-16 w-16 text-on-surface-variant" />
-                      </div>
-                    )}
+              <div className="flex flex-col xl:gap-6 xl:flex-row xl:items-start">
+                <div className="xl:w-[280px] xl:shrink-0 flex flex-col items-center text-center p-6">
+                  <div className="relative shrink-0">
+                    <img
+                      alt="Ảnh đại diện"
+                      className="h-32 w-32 rounded-full border-4 border-gray-300 object-cover shadow-md"
+                      onError={
+                        user.profile?.avatarUrl ? handleAvatarError : undefined
+                      }
+                      src={avatarUrl}
+                    />
                     <button
-                      type="button"
-                      className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-secondary-container p-2 text-on-primary shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                      className="absolute bottom-1 right-1 rounded-full bg-secondary-container p-2 text-on-primary shadow-lg transition-all hover:scale-110"
                       onClick={() => setIsAvatarUploadOpen(true)}
+                      type="button"
                     >
                       <Pen className="h-4 w-4" />
                     </button>
                   </div>
-                  <p className="text-md text-center text-outline">
-                    Chào mừng bạn,
-                    <br />
-                    <span className="font-semibold text-on-surface">
-                      {form.fullName}
-                    </span>
-                  </p>
+
+                  <div className="mt-5 space-y-1 hidden xl:flex xl:flex-col">
+                    <p className="text-on-surface-variant">
+                      Chào mừng bạn trở lại,
+                    </p>
+                    <p className="text-xl font-semibold text-on-surface">
+                      {form.fullName || "Người dùng"}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Form Fields */}
-                <div className="flex flex-1 grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="col-span-1">
+                <form
+                  className="flex-1"
+                  id="profile-form"
+                  noValidate
+                  onSubmit={handleSubmit}
+                >
+                  <div className="hidden xl:flex xl:flex-col xl:mb-4">
+                    <h2 className="font-display text-xl font-bold text-on-surface">
+                      Thông tin cá nhân
+                    </h2>
+                    <p className="mt-1 text-sm text-on-surface-variant">
+                      <span className="text-red-500">(*)</span> Các thông tin
+                      bắt buộc
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <BaseField
                       error={getVisibleError("fullName")}
                       id="profileFullName"
                       label="Họ và tên"
-                      placeholder="Nhập họ và tên"
-                      value={form.fullName}
                       onBlur={() => handleFieldBlur("fullName")}
-                      onChange={(e) => updateField("fullName", e.target.value)}
+                      onChange={(event) =>
+                        updateField("fullName", event.target.value)
+                      }
+                      placeholder="Nhập họ và tên"
                       required
+                      value={form.fullName}
                     />
-                  </div>
 
-                  <div className="col-span-1">
                     <BaseField
                       error={getVisibleError("phone")}
                       id="profilePhone"
                       label="Số điện thoại"
+                      onBlur={() => handleFieldBlur("phone")}
+                      onChange={(event) =>
+                        updateField("phone", event.target.value)
+                      }
                       placeholder="Nhập số điện thoại"
                       value={form.phone}
-                      onBlur={() => handleFieldBlur("phone")}
-                      onChange={(e) => updateField("phone", e.target.value)}
                     />
-                  </div>
 
-                  <div className="col-span-1 md:col-span-2">
-                    <BaseField
-                      id="profileEmail"
-                      inputClassName="cursor-not-allowed bg-surface-container text-on-surface-variant"
-                      label="Email cá nhân"
-                      readOnly
-                      value={form.email}
-                    />
-                  </div>
+                    <div className="col-span-1 md:col-span-2">
+                      <BaseField
+                        id="profileEmail"
+                        inputClassName="cursor-not-allowed bg-surface-container text-on-surface-variant"
+                        label="Email cá nhân"
+                        readOnly
+                        value={form.email}
+                      />
+                    </div>
 
-                  <div className="col-span-1 md:col-span-2">
-                    <BaseField
-                      as="textarea"
-                      id="profileBio"
-                      label="Giới thiệu bản thân (Bio)"
-                      placeholder="Viết ngắn gọn về kinh nghiệm, định hướng hoặc thế mạnh của bạn."
-                      value={form.bio}
-                      onChange={(e) => updateField("bio", e.target.value)}
-                      inputClassName="resize-none h-32"
-                    />
-                  </div>
+                    <div className="col-span-1 md:col-span-2">
+                      <BaseField
+                        as="textarea"
+                        id="profileBio"
+                        inputClassName="h-32 resize-none"
+                        label="Giới thiệu bản thân (Bio)"
+                        onChange={(event) =>
+                          updateField("bio", event.target.value)
+                        }
+                        placeholder="Viết ngắn gọn về kinh nghiệm, định hướng hoặc thế mạnh của bạn."
+                        value={form.bio}
+                      />
+                    </div>
 
-                  {/* Action Bar */}
-                  <div className="col-span-1 md:col-span-2">
-                    <div className="flex justify-end gap-4">
+                    <div className="col-span-1 flex justify-end gap-4 md:col-span-2">
                       <BaseButton
-                        variant="secondary"
-                        type="button"
                         onClick={resetForm}
                         startIcon={<RotateCcw className="h-4 w-4" />}
+                        type="button"
+                        variant="secondary"
                       >
                         Hủy bỏ
                       </BaseButton>
                       <BaseButton
-                        type="submit"
-                        form="profile-form"
                         loading={isSubmitting}
                         startIcon={<Save className="h-4 w-4" />}
+                        type="submit"
                       >
                         Lưu thay đổi
                       </BaseButton>
                     </div>
                   </div>
-                </div>
+                </form>
               </div>
-            </form>
+            </section>
 
-            {/* Section: Security */}
             <section
-              ref={sectionRefs.security}
-              className="scroll-mt-28 rounded-xl bg-surface-container-lowest border-2 border-muted-foreground/20 p-8 shadow-sm transition-shadow duration-300 hover:shadow-md"
+              ref={securitySectionRef}
+              className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-8 shadow-sm"
             >
               <div className="mb-8 flex items-center gap-3">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 <h2 className="font-display text-xl font-bold text-on-surface">
-                  Bảo mật &amp; Đăng nhập
+                  Bảo mật và đăng nhập
                 </h2>
               </div>
 
@@ -387,10 +414,10 @@ export function ProfilePage() {
                     </p>
                   </div>
                   <BaseButton
-                    variant="secondary"
-                    type="button"
                     onClick={openChangePasswordModal}
                     startIcon={<KeyRound className="h-4 w-4" />}
+                    type="button"
+                    variant="secondary"
                   >
                     Đổi mật khẩu
                   </BaseButton>
@@ -398,19 +425,33 @@ export function ProfilePage() {
               </div>
             </section>
 
-            {/* Section: CV Management placeholder */}
             <section
-              ref={sectionRefs.cv}
-              className="scroll-mt-28 rounded-xl bg-surface-container-lowest border-2 border-muted-foreground/20 p-8 shadow-sm transition-shadow duration-300 hover:shadow-md"
+              ref={cvSectionRef}
+              className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-8 shadow-sm"
             >
-              <div className="mb-4 flex items-center gap-3">
-                <FileText className="h-5 w-5 text-primary" />
-                <h2 className="font-display text-xl font-bold text-on-surface">
-                  Quản lý CV
-                </h2>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <h2 className="font-display text-xl font-bold text-on-surface">
+                    Quản lý CV
+                  </h2>
+                </div>
+                <a
+                  className="flex items-center gap-2 rounded-lg border border-muted-foreground/30 px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+                  href="/cv"
+                >
+                  <FileText className="h-4 w-4" />
+                  Quản lý danh sách
+                </a>
               </div>
               <p className="text-sm text-on-surface-variant">
-                Tính năng đang được phát triển.
+                Tải lên, xem và quản lý các CV của bạn.{" "}
+                <a
+                  className="text-primary underline hover:opacity-80"
+                  href="/cv"
+                >
+                  Mở trang quản lý CV
+                </a>
               </p>
             </section>
           </div>
@@ -419,10 +460,10 @@ export function ProfilePage() {
 
       <Footer />
       <AvatarUploadModal
+        currentAvatarUrl={avatarUrl}
         isOpen={isAvatarUploadOpen}
         onClose={() => setIsAvatarUploadOpen(false)}
-        onUploaded={(url) => updateField("avatarUrl", url)}
-        currentAvatarUrl={form.avatarUrl}
+        onUploaded={() => void refreshUser()}
       />
       <ChangePasswordModal
         isOpen={isModalVisible}

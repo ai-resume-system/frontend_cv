@@ -12,7 +12,7 @@ import {
 import type {
   ChangePasswordFormErrors,
   ChangePasswordFormValues,
-} from "./profile.types";
+} from "../../../../shared/types/profile";
 
 const EMPTY_CHANGE_PASSWORD_FORM: ChangePasswordFormValues = {
   confirmNewPassword: "",
@@ -34,8 +34,8 @@ function validateChangePasswordForm(
 
   if (!values.newPassword) {
     errors.newPassword = "Vui lòng nhập mật khẩu mới";
-  } else if (values.newPassword.length < 8) {
-    errors.newPassword = "Mật khẩu mới cần tối thiểu 8 ký tự";
+  } else if (values.newPassword.length < 6) {
+    errors.newPassword = "Mật khẩu mới cần tối thiểu 6 ký tự";
   }
 
   if (!values.confirmNewPassword) {

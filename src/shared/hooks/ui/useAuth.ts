@@ -1,10 +1,11 @@
 import { useSyncExternalStore } from "react";
+
+import type { EUserRole } from "@/shared/constants/enums/user.enum";
 import {
   AUTH_USER_UPDATED_EVENT,
-  getCachedToken,
   getCachedUser,
 } from "@/shared/services/account.service";
-import type { EUserRole } from "@/shared/constants/enums/user.enum";
+import { getAccessToken } from "@/shared/services/auth-store";
 import type { AuthUser } from "@/shared/types/auth";
 
 interface AuthState {
@@ -22,26 +23,23 @@ const DEFAULT_AUTH_STATE: AuthState = {
 let cachedAuthSnapshot: AuthState = DEFAULT_AUTH_STATE;
 let cachedAuthSnapshotKey = "guest";
 
-function readAuthFromStorage(): AuthState {
+function readAuthFromStore(): AuthState {
   if (typeof window === "undefined") {
     return DEFAULT_AUTH_STATE;
   }
 
-  const token = getCachedToken();
+  const token = getAccessToken();
   const user = getCachedUser();
 
-  if (!token || !user?.role) {
+  if (!token) {
     cachedAuthSnapshot = DEFAULT_AUTH_STATE;
     cachedAuthSnapshotKey = "guest";
     return cachedAuthSnapshot;
   }
 
-  const snapshotKey = JSON.stringify({
-    email: user.email,
-    role: user.role,
-    token,
-    userId: user.id,
-  });
+  const snapshotKey = user
+    ? `${token}:${user.id}:${user.role}:${user.updatedAt}`
+    : `${token}:guest-user`;
 
   if (snapshotKey === cachedAuthSnapshotKey) {
     return cachedAuthSnapshot;
@@ -51,18 +49,16 @@ function readAuthFromStorage(): AuthState {
   cachedAuthSnapshot = {
     isLoggedIn: true,
     user,
-    userRole: user.role as EUserRole,
+    userRole: user?.role ?? null,
   };
 
   return cachedAuthSnapshot;
 }
 
 function subscribeToAuthStore(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
   window.addEventListener(AUTH_USER_UPDATED_EVENT, onStoreChange);
 
   return () => {
-    window.removeEventListener("storage", onStoreChange);
     window.removeEventListener(AUTH_USER_UPDATED_EVENT, onStoreChange);
   };
 }
@@ -70,8 +66,7 @@ function subscribeToAuthStore(onStoreChange: () => void) {
 export function useAuth() {
   const authState = useSyncExternalStore(
     subscribeToAuthStore,
-    readAuthFromStorage,
-    // lỗi liên quan render token
+    readAuthFromStore,
     () => DEFAULT_AUTH_STATE,
   );
 

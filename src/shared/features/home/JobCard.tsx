@@ -7,6 +7,7 @@ import { Heart, MapPin } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/Badge";
+import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
@@ -64,7 +65,15 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
 
         try {
           setIsSubmitting(true);
-          await toggleFavorite(jobId, jobData);
+          const wasAdded = await toggleFavorite(jobId, jobData);
+
+          if (wasAdded && typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                detail: { jobId, title: jobData?.title },
+              }),
+            );
+          }
         } catch (error) {
           showErrorAlert(
             error instanceof Error
@@ -81,8 +90,8 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
         <Heart
           aria-hidden="true"
           className={cn(
-            "h-5 w-5 text-primary/40 transition-colors",
-            saved && "fill-primary-selected text-primary-selected",
+            "h-5 w-5 text-primary/40 transition-all duration-200",
+            saved && "fill-primary text-primary",
             isSubmitting && "opacity-60",
           )}
         />

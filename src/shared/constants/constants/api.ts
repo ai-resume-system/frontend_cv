@@ -16,6 +16,9 @@ export const API_ROUTES = {
     ME_PROFILE: `${API_PREFIX}/account/me/profile`,
     ME_COMPANY: `${API_PREFIX}/account/me/company`,
     ME_CHANGE_PASSWORD: `${API_PREFIX}/account/me/change-password`,
+    ME_DELETE_AVATAR: `${API_PREFIX}/account/me/avatar`,
+    ME_DELETE_LOGO: `${API_PREFIX}/account/me/logo`,
+    ME_DELETE_BANNER: `${API_PREFIX}/account/me/banner`,
   },
   CAREER_CATEGORY: {
     BASE: `${API_PREFIX}/career-categories`,
@@ -40,8 +43,8 @@ export const API_ROUTES = {
     JOB: (jobId: string) => `${API_PREFIX}/applications/jobs/${jobId}`,
   },
   FAVORITE_JOB: {
-    BASE: `${API_PREFIX}/favorite-jobs`,
-    DETAIL: (jobId: string) => `${API_PREFIX}/favorite-jobs/${jobId}`,
+    BASE: `${API_PREFIX}/favourite-jobs`,
+    DETAIL: (jobId: string) => `${API_PREFIX}/favourite-jobs/${jobId}`,
   },
   UPLOAD: {
     BASE: `${API_PREFIX}/uploads`,

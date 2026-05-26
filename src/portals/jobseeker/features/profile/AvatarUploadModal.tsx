@@ -2,7 +2,7 @@
 
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { ImagePlus, Trash2, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ImagePlus, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 import { BaseButton } from "@/shared/components/ui/BaseButton";
@@ -18,7 +18,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 interface AvatarUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUploaded: (url: string) => void;
+  onUploaded: () => void;
   currentAvatarUrl?: string;
 }
 
@@ -212,8 +212,8 @@ export function AvatarUploadModal({
     setIsUploading(true);
     try {
       const croppedFile = await getCroppedFile(imageSrc, croppedAreaPixels);
-      const result = await uploadFile(croppedFile, EUploadType.AVATAR);
-      onUploaded(result.objectKey);
+      await uploadFile(croppedFile, EUploadType.AVATAR);
+      onUploaded();
       await showAppAlert({
         text: "Ảnh đại diện đã được cập nhật thành công.",
         title: "Đổi ảnh thành công",
@@ -243,7 +243,7 @@ export function AvatarUploadModal({
       <div className="relative z-[91] w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 bg-primary px-6 py-4 sm:px-8">
-          <h2 className="text-lg font-bold uppercase tracking-wide text-on-primary">
+          <h2 className="text-center text-lg font-bold uppercase tracking-wide text-on-primary">
             Chỉnh sửa ảnh đại diện
           </h2>
           <button
@@ -337,7 +337,7 @@ export function AvatarUploadModal({
                 {/* Preview circle */}
                 <div className="flex flex-col items-center gap-4 sm:w-44">
                   <p className="text-sm font-semibold text-on-surface-variant">
-                    Ảnh hiển thị trên CV
+                    Ảnh hiển thị
                   </p>
                   <div className="h-36 w-36 overflow-hidden rounded-full border-4 border-primary/20 bg-surface-container">
                     {croppedPreview ? (
@@ -396,7 +396,6 @@ export function AvatarUploadModal({
           />
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-center gap-3 border-t border-border px-6 py-5 sm:px-8">
           <BaseButton
             type="button"
@@ -407,13 +406,15 @@ export function AvatarUploadModal({
           >
             Xong
           </BaseButton>
-          <button
+
+          <BaseButton
+            variant="secondary"
             type="button"
             onClick={handleClose}
-            className="text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-primary-hover"
+            className="text-sm font-semibold text-primary transition-colors hover:text-primary-hover"
           >
             Đóng lại (Không lưu)
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>

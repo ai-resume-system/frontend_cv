@@ -8,7 +8,8 @@ import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 import type { AuthUser } from "@/shared/types/auth";
-import { ArrowDown, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
 
 interface UserMenuItem {
   href: string;
@@ -138,12 +139,19 @@ export function UserMenuDropdown({
   logoutHandler,
   userData,
 }: UserMenuDropdownProps = {}) {
-  const { user, logout } = useCurrentUser();
+  const { user, logout, refreshUser } = useCurrentUser();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const t = HOME_MESSAGES.userMenu;
   const currentUser = userData ?? user;
+
+  const avatarUrl = currentUser?.profile?.avatarUrl || "/user-default.png";
+
+  const { handleError: handleAvatarError } = useAvatarRefreshOnError({
+    src: avatarUrl,
+    onRefresh: refreshUser,
+  });
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -178,21 +186,26 @@ export function UserMenuDropdown({
   return (
     <div ref={dropdownRef} className="relative">
       <button
-        className="flex items-center gap-2 rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="flex items-center rounded-full transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
-        {/* <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-          {getUserInitials(currentUser?.profile?.fullName, currentUser?.email)}
-        </div> */}
-        <img
-          height={40}
-          width={40}
-          alt="Avatar"
-          src={currentUser?.profile?.avatarUrl || "/user-default.png"}
-          className="relative h-10 w-10 rounded-full border border-surface-container-lowest/50 object-cover"
-        />
-        <ChevronDown className="absolute -bottom-1 -right-2" size={20} />
+        <span className="relative inline-flex">
+          <img
+            alt="Avatar"
+            className="h-11 w-11 rounded-full border-2 border-gray-300 object-cover"
+            onError={handleAvatarError}
+            src={avatarUrl}
+          />
+          <ChevronDown
+            className={cn(
+              "pointer-events-none absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 rounded-full bg-surface text-muted-foreground transition-transform duration-200",
+              isOpen && "rotate-180",
+            )}
+            size={14}
+            strokeWidth={2.5}
+          />
+        </span>
       </button>
 
       {isOpen && currentUser ? (

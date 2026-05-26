@@ -10,7 +10,7 @@ import {
 import type { AuthUser } from "@/shared/types/auth";
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => getCachedUser());
   const [loading, setLoading] = useState(false);
 
   const refreshUser = useCallback(async () => {
@@ -39,6 +39,7 @@ export function useCurrentUser() {
 
   useEffect(() => {
     const token = getCachedToken();
+    const cachedUser = getCachedUser();
 
     let cancelled = false;
 
@@ -49,7 +50,7 @@ export function useCurrentUser() {
     syncUserFromCache();
     window.addEventListener(AUTH_USER_UPDATED_EVENT, syncUserFromCache);
 
-    if (!token) {
+    if (!token || cachedUser) {
       return () => {
         cancelled = true;
         window.removeEventListener(AUTH_USER_UPDATED_EVENT, syncUserFromCache);

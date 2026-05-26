@@ -136,11 +136,9 @@ export function useFavoriteJobs() {
     }
 
     window.addEventListener(AUTH_USER_UPDATED_EVENT, handleAuthChange);
-    window.addEventListener("storage", handleAuthChange);
 
     return () => {
       window.removeEventListener(AUTH_USER_UPDATED_EVENT, handleAuthChange);
-      window.removeEventListener("storage", handleAuthChange);
     };
   }, []);
 

@@ -29,6 +29,13 @@ interface JobSeekerAuthFormProps {
   mode: AuthMode;
 }
 
+function formatCountdown(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
   const controller = useAuthFormController({
     mode,
@@ -50,7 +57,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
     handleVerifyOtp,
     isRegister,
     isSubmitting,
-    otpCountdown,
+    otpExpiryCountdown,
     otpError,
     otpValue,
     registerStep,
@@ -168,6 +175,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                               onChange={(event) =>
                                 updateField("fullName", event.target.value)
                               }
+                              required
                             />
 
                             <BaseField
@@ -182,6 +190,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                               onChange={(event) =>
                                 updateField("email", event.target.value)
                               }
+                              required
                             />
 
                             <div className="grid gap-5 md:grid-cols-2">
@@ -212,6 +221,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                                 onChange={(event) =>
                                   updateField("password", event.target.value)
                                 }
+                                required
                               />
 
                               <BaseField
@@ -248,6 +258,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
                                     event.target.value,
                                   )
                                 }
+                                required
                               />
                             </div>
 
@@ -301,15 +312,14 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
 
                             <div className="text-center text-sm text-on-surface-variant">
                               <span>Bạn chưa nhận được mã?</span>
-
                               <button
                                 className="ml-1 cursor-pointer font-semibold text-primary disabled:text-outline"
-                                disabled={otpCountdown > 0}
+                                disabled={otpExpiryCountdown > 0}
                                 type="button"
                                 onClick={handleResendOtp}
                               >
-                                {otpCountdown > 0
-                                  ? `Gửi lại mã sau ${otpCountdown}s`
+                                {otpExpiryCountdown > 0
+                                  ? `OTP hết hạn sau ${formatCountdown(otpExpiryCountdown)}`
                                   : "Gửi lại mã"}
                               </button>
                             </div>

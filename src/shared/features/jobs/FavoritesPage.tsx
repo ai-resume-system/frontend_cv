@@ -72,11 +72,16 @@ export function FavoritesPage() {
 
       <section className="bg-background px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10 max-w-3xl">
-            <h1 className="font-display text-4xl font-bold">Viec lam da luu</h1>
-            <p className="mt-3 text-muted-foreground">
-              Danh sach co hoi ban da luu de xem lai va ung tuyen sau.
-            </p>
+          <div className="mb-10 bg-red-500">
+            <div>
+              <h1 className="font-display text-4xl font-bold">
+                Danh sách việc làm đã lưu
+              </h1>
+              <p className="mt-3 text-muted-foreground">
+                Danh sách các bạn đã lưu để xem lại và ứng tuyển sau.
+              </p>
+            </div>
+            <p>Hiện lưu</p> việc làm
           </div>
 
           {isLoading && !isLoaded ? (
@@ -104,14 +109,12 @@ export function FavoritesPage() {
                 <FileHeart className="h-8 w-8 text-muted-foreground" />
               </div>
               <h2 className="mt-5 text-lg font-semibold text-foreground">
-                Ban chua luu viec lam nao
+                Bạn chưa lưu công việc nào
               </h2>
-              <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Hay nhan vao bieu tuong trai tim de luu lai cong viec ban quan
-                tam.
-              </p>
               <div className="mt-6">
-                <BaseButton href={ROUTES.JOBS}>Kham pha viec lam</BaseButton>
+                <BaseButton href={ROUTES.JOBS}>
+                  Khám phá việc làm ngày
+                </BaseButton>
               </div>
             </div>
           )}

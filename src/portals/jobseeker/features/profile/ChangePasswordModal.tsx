@@ -68,26 +68,23 @@ export function ChangePasswordModal({
       role="dialog"
       aria-modal="true"
     >
+      {/* Backdrop nền mờ phía sau */}
       <div className="absolute inset-0" onClick={handleClose} />
 
+      {/* Hộp thoại Modal chính */}
       <div
         className={cn(
-          "relative z-[91] w-full max-w-xl overflow-hidden rounded-[28px] border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]",
+          "relative z-[91] w-full max-w-xl rounded-2xl border border-border bg-surface-container-lowest p-6 shadow-[0_24px_60px_rgba(25,28,29,0.14)] sm:p-8",
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-5 sm:px-8">
-          <div>
-            <h2 className="font-headline text-2xl font-semibold text-on-surface">
-              Đổi mật khẩu
-            </h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-on-surface-variant">
-              Sau khi đổi mật khẩu, bạn sẽ cần đăng nhập lại để tiếp tục sử dụng
-              tài khoản.
-            </p>
-          </div>
+        {/* HEADER - Đã căn chỉnh chuẩn phẳng, khoảng cách rộng rãi, không gạch chân */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-headline text-xl font-semibold text-on-surface">
+            Thay đổi mật khẩu đăng nhập
+          </h2>
 
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border text-on-surface transition-colors hover:bg-surface-container"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-on-surface transition-colors hover:bg-surface-container"
             onClick={handleClose}
             type="button"
           >
@@ -95,11 +92,8 @@ export function ChangePasswordModal({
           </button>
         </div>
 
-        <form
-          className="space-y-5 px-6 py-6 sm:px-8 sm:py-8"
-          noValidate
-          onSubmit={handleSubmit}
-        >
+        {/* FORM NỘI DUNG */}
+        <form className="space-y-5" noValidate onSubmit={handleSubmit}>
           <BaseField
             error={getVisibleError("currentPassword")}
             id="currentPassword"
@@ -118,6 +112,7 @@ export function ChangePasswordModal({
             onChange={(event) =>
               updateField("currentPassword", event.target.value)
             }
+            required
           />
 
           <BaseField
@@ -136,6 +131,7 @@ export function ChangePasswordModal({
             value={form.newPassword}
             onBlur={() => handleFieldBlur("newPassword")}
             onChange={(event) => updateField("newPassword", event.target.value)}
+            required
           />
 
           <BaseField
@@ -156,23 +152,21 @@ export function ChangePasswordModal({
             onChange={(event) =>
               updateField("confirmNewPassword", event.target.value)
             }
+            required
           />
 
-          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-            <BaseButton
-              className="sm:min-w-32"
-              variant="secondary"
-              onClick={handleClose}
-              type="button"
-            >
+          <p className="text-xs text-on-surface-variant">
+            (Sau khi đổi mật khẩu, bạn sẽ cần đăng nhập lại để tiếp tục sử dụng
+            tài khoản)
+          </p>
+
+          {/* FOOTER BUTTONS */}
+          <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+            <BaseButton variant="secondary" onClick={handleClose} type="button">
               Hủy
             </BaseButton>
-            <BaseButton
-              className="sm:min-w-40"
-              loading={isSubmitting}
-              type="submit"
-            >
-              Xác nhận đổi mật khẩu
+            <BaseButton loading={isSubmitting} type="submit">
+              Xác nhận
             </BaseButton>
           </div>
         </form>
