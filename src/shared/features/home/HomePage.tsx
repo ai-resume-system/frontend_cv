@@ -1,27 +1,121 @@
 import { Phone } from "lucide-react";
 import Link from "next/link";
 
-import { Header } from "@/shared/components/layouts/Header";
-import { Footer } from "@/shared/components/layouts/Footer";
-import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
+import { Footer } from "@/shared/components/layouts/Footer";
+import { Header } from "@/shared/components/layouts/Header";
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
+import { fetchCareerCategoriesWithPagination } from "@/shared/services/category.service";
+import { fetchCompanies } from "@/shared/services/company.service";
+import { fetchJobs } from "@/shared/services/job.service";
+
 import { FloatingFavoriteButton } from "./FloatingFavoriteButton";
 import { HotJobsSection } from "./HotJobsSection";
 
-export default function HomePage() {
-  const t = HOME_MESSAGES;
+const CATEGORY_ICONS = ["💻", "💼", "🩺", "📣", "📚", "🚚"] as const;
+
+interface HomeStat {
+  label: string;
+  value: string;
+}
+
+function formatCompactNumber(value: number): string {
+  return new Intl.NumberFormat("vi-VN", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function buildHomeStats(params: {
+  totalJobs: number;
+  totalCompanies: number;
+  totalCategories: number;
+  totalLocations: number;
+}): HomeStat[] {
+  const { totalJobs, totalCompanies, totalCategories, totalLocations } = params;
+
+  return [
+    {
+      label: "Việc làm đang mới",
+      value: formatCompactNumber(totalJobs),
+    },
+    {
+      label: "Doanh nghiệp",
+      value: formatCompactNumber(totalCompanies),
+    },
+    {
+      label: "Ngành nghề",
+      value: formatCompactNumber(totalCategories),
+    },
+    {
+      label: "Khu vực tuyển dụng",
+      value: formatCompactNumber(totalLocations),
+    },
+  ];
+}
+
+export default async function HomePage() {
+  const [
+    jobsResult,
+    companiesResult,
+    categoriesResult,
+    jobsForLocationsResult,
+  ] = await Promise.all([
+    fetchJobs({
+      page: 1,
+      limit: 1,
+      sortBy: "createdAt",
+      sortOrder: "DESC",
+    }),
+    fetchCompanies({
+      page: 1,
+      limit: 1,
+    }),
+    fetchCareerCategoriesWithPagination({
+      page: 1,
+      limit: 6,
+    }),
+    fetchJobs({
+      page: 1,
+      limit: 100,
+      sortBy: "createdAt",
+      sortOrder: "DESC",
+    }),
+  ]);
+
+  const totalJobs = jobsResult.pagination?.totalItems ?? jobsResult.jobs.length;
+  const totalCompanies =
+    companiesResult.pagination?.totalItems ?? companiesResult.companies.length;
+  const totalCategories =
+    categoriesResult.pagination?.totalItems ??
+    categoriesResult.categories.length;
+
+  const totalLocations = new Set(
+    jobsForLocationsResult.jobs
+      .map((job) => job.location ?? job.company?.location ?? "")
+      .map((location) => location.trim())
+      .filter(Boolean),
+  ).size;
+
+  const stats = buildHomeStats({
+    totalJobs,
+    totalCompanies,
+    totalCategories,
+    totalLocations,
+  });
+
+  const categories = categoriesResult.categories.slice(0, 6);
 
   return (
-    <main className="min-h-screen bg-background text-foreground custom-scrollbar">
+    <main className="custom-scrollbar min-h-screen bg-background text-foreground">
       <Header />
       <FloatingFavoriteButton />
       <HomeSlideshow />
 
       <section className="bg-surface px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-          {t.stats.map((stat) => (
+          {stats.map((stat) => (
             <div
               className="rounded-xl border border-border bg-muted px-5 py-6 text-center shadow-sm transition-transform hover:-translate-y-1"
               key={stat.label}
@@ -39,82 +133,32 @@ export default function HomePage() {
 
       <HotJobsSection />
 
-      <section className="bg-muted px-8 py-20">
-        <div className="mx-auto max-w-7xl text-center">
-          <p className="mb-12 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            {t.partners.title}
-          </p>
-          <div className="flex flex-wrap justify-center gap-12 opacity-60 grayscale md:gap-20">
-            {t.partners.logos.map((logo) => (
-              <span className="text-2xl font-bold" key={logo}>
-                {logo}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background px-8 py-24">
-        <div className="mx-auto grid max-w-7xl gap-16 md:grid-cols-2">
-          <div className="order-2 md:order-1">
-            <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-8">
-              <div className="mb-10 flex items-center justify-between">
-                <h4 className="text-lg font-bold">{t.market.title}</h4>
-                <span className="rounded-full bg-ai px-3 py-1 text-xs font-bold text-warning">
-                  {t.market.badge}
-                </span>
-              </div>
-              <div className="flex h-48 items-end gap-3">
-                {t.market.chart.map((height, index) => (
-                  <div
-                    className="flex-1 rounded-t-lg bg-secondary-soft"
-                    key={index}
-                    style={{ height: `${height}%` }}
-                  />
-                ))}
-              </div>
-              <div className="mt-6 flex justify-between pt-6 text-xs font-bold uppercase text-muted-foreground">
-                {t.market.chartLabels.map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="order-1 md:order-2">
-            <span className="mb-4 block text-sm font-bold uppercase tracking-widest text-primary">
-              {t.market.label}
-            </span>
-            <h2 className="mb-6 text-4xl font-extrabold leading-tight">
-              {t.market.heading}
-            </h2>
-            <p className="mb-8 text-lg leading-relaxed text-muted-foreground">
-              {t.market.description}
-            </p>
-            <div className="space-y-4">
-              {t.market.insights.map((insight) => (
-                <div className="flex items-center gap-4" key={insight.text}>
-                  <div className={`h-2 w-2 rounded-full ${insight.color}`} />
-                  <p className="font-medium">{insight.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="bg-background px-8 py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-extrabold text-foreground">
-              {t.categories.title}
+          <div className="mb-16">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">
+              Khám phá theo ngành nghề
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
-            {t.categories.items.map((cat) => (
-              <CategoryCard icon={cat.icon} key={cat.label} label={cat.label} />
-            ))}
-          </div>
+
+          {categories.length > 0 ? (
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+              {categories.map((category, index) => (
+                <CategoryCard
+                  href={`/jobs?careerCategoryId=${category.id}`}
+                  icon={CATEGORY_ICONS[index % CATEGORY_ICONS.length]}
+                  key={category.id}
+                  label={category.name}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-border py-16 text-center">
+              <p className="text-sm text-muted-foreground">
+                Chưa có ngành nghề để hiển thị.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

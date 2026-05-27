@@ -1,4 +1,5 @@
-﻿export enum EUserRole {
+export enum EUserRole {
+  ADMIN = "admin",
   JOB_SEEKER = "job_seeker",
   RECRUITER = "recruiter",
 }
@@ -8,4 +9,3 @@ export enum EUserStatus {
   UNVERIFIED = "unverified",
   LOCKED = "locked",
 }
-

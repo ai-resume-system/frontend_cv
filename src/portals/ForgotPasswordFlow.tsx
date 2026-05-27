@@ -169,6 +169,7 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
     const response = await sendOtp({
       email,
       type: EOtpType.FORGOT_PASSWORD,
+      role,
     });
 
     return response.message;
@@ -265,6 +266,7 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
         email,
         otp: otpString,
         type: EOtpType.FORGOT_PASSWORD,
+        role,
       });
 
       const nextSignKey = response.data?.signKey;
@@ -316,6 +318,7 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
         email,
         signKey,
         newPassword: password,
+        role,
       });
       setStep("success");
     } catch (err) {
@@ -663,7 +666,7 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
                 href={`tel:${INFOMATION_WEB.PHONE}`}
               >
                 <span>Hỗ trợ</span>
-                <CircleQuestionMark className="h-4 w-4 translate-y-[1px]" />
+                <CircleQuestionMark className="h-4 w-4 translate-y-px" />
               </Link>
             </div>
           </header>

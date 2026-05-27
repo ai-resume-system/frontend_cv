@@ -11,7 +11,23 @@ import type { Job } from "@/shared/types/job";
 
 type UseJobsOptions = FetchJobsParams;
 
-export function useJobs({ page = 1, limit = 10, careerCategoryId, q }: UseJobsOptions = {}) {
+export function useJobs({
+  page = 1,
+  limit = 10,
+  careerCategoryId,
+  careerCategorySlug,
+  location,
+  salaryMin,
+  salaryMax,
+  experienceYears,
+  companyId,
+  status,
+  jobType,
+  skillIds,
+  sortBy,
+  sortOrder,
+  q,
+}: UseJobsOptions = {}) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [pagination, setPagination] = useState<IResponseApiPagination | undefined>(
     undefined,
@@ -26,7 +42,23 @@ export function useJobs({ page = 1, limit = 10, careerCategoryId, q }: UseJobsOp
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchJobs({ page, limit, careerCategoryId, q });
+        const data = await fetchJobs({
+          page,
+          limit,
+          careerCategoryId,
+          careerCategorySlug,
+          location,
+          salaryMin,
+          salaryMax,
+          experienceYears,
+          companyId,
+          status,
+          jobType,
+          skillIds,
+          sortBy,
+          sortOrder,
+          q,
+        });
         if (!cancelled) {
           setJobs(data.jobs);
           setPagination(data.pagination);
@@ -47,7 +79,23 @@ export function useJobs({ page = 1, limit = 10, careerCategoryId, q }: UseJobsOp
     return () => {
       cancelled = true;
     };
-  }, [careerCategoryId, limit, page, q]);
+  }, [
+    careerCategoryId,
+    careerCategorySlug,
+    companyId,
+    experienceYears,
+    jobType,
+    limit,
+    location,
+    page,
+    q,
+    salaryMax,
+    salaryMin,
+    skillIds,
+    sortBy,
+    sortOrder,
+    status,
+  ]);
 
   return { jobs, pagination, loading, error };
 }

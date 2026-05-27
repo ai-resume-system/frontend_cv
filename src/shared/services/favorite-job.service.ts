@@ -30,12 +30,17 @@ function mapJobApiItemToJob(job: JobApiItem): Job {
     id: job.id,
     title: job.title,
     shortDescription: toOptionalString(job.shortDescription),
+    description: toOptionalString(job.description),
     location: toOptionalString(job.location),
     salaryMin: toOptionalNumber(job.salaryMin),
     salaryMax: toOptionalNumber(job.salaryMax),
     experienceYears: toOptionalNumber(job.experienceYears),
     expiredAt: toOptionalDate(job.expiredAt),
+    jobType: job.jobType,
+    rejectReason: toOptionalString(job.rejectReason),
     status: job.status,
+    skills: job.skills ?? undefined,
+    isFavourited: job.isFavourited ?? undefined,
     createdAt: new Date(job.createdAt),
     updatedAt: new Date(job.updatedAt),
     company: job.company ?? undefined,
@@ -50,7 +55,7 @@ function extractJobApiItem(item: FavoriteJobApiItem): JobApiItem | null {
     return item.job ?? null;
   }
 
-  return item;
+  return item as JobApiItem;
 }
 
 export async function fetchFavoriteJobs(): Promise<Job[]> {

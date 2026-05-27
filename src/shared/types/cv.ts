@@ -1,15 +1,37 @@
-export type CvAiStatus = "pending" | "processing" | "completed" | "failed";
+import type {
+  ECVStatus,
+  EProcessingStatus,
+} from "@/shared/constants/enums/cv.enum";
 
-export interface CvItem {
+// ─────────────────────── Domain entity ───────────────────────
+
+export interface ICvEntity {
   id: string;
-  originalName: string;
+  userId: string;
+  title: string | null;
   fileUrl: string | null;
-  fileSize: number | null;
-  mimeType: string | null;
-  aiStatus: CvAiStatus;
-  matchScore: number | null;
-  isDefault: boolean;
+  fileExtension: string | null;
+  processingStatus: EProcessingStatus | null;
+  isDefault: boolean | null;
+  summary: string | null;
+  status: ECVStatus;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
 }
 
+// ─────────────────────── UI-friendly alias ───────────────────────
+
+export type CvItem = ICvEntity;
+
+// ─────────────────────── Download / Preview ───────────────────────
+
+export interface CvDownloadResponse {
+  downloadUrl: string;
+  expiresIn: number;
+}
+
+export interface CvPreviewResponse {
+  previewUrl: string;
+  expiresIn: number;
+}

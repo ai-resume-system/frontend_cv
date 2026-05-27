@@ -22,6 +22,8 @@ import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnE
 import { AvatarUploadModal } from "./AvatarUploadModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 import { useProfileForm } from "./useProfileForm";
+import { JOBSEEKER_ROUTES } from "@/shared/constants/constants/routes";
+import Link from "next/link";
 
 type SidebarTab = "personal" | "security" | "cv";
 
@@ -42,7 +44,7 @@ const SIDEBAR_ITEMS: Array<{
   },
   {
     key: "cv",
-    label: "Quản lý CV",
+    label: "Quản lý hồ sơ",
     icon: <FileText className="h-5 w-5" />,
   },
 ];
@@ -429,30 +431,32 @@ export function ProfilePage() {
               ref={cvSectionRef}
               className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-8 shadow-sm"
             >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <h2 className="font-display text-xl font-bold text-on-surface">
-                    Quản lý CV
-                  </h2>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <h2 className="font-display text-xl font-bold text-on-surface">
+                      Quản lý hồ sơ
+                    </h2>
+                  </div>
+                  <p className="text-sm text-on-surface-variant">
+                    Tải lên, xem và quản lý các hồ sơ của bạn.{" "}
+                    <Link
+                      className="text-primary underline hover:opacity-80"
+                      href={JOBSEEKER_ROUTES.CV}
+                    >
+                      Mở trang quản lý hồ sơ
+                    </Link>
+                  </p>
                 </div>
-                <a
-                  className="flex items-center gap-2 rounded-lg border border-muted-foreground/30 px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-                  href="/cv"
+                <Link
+                  className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-muted-foreground/30 px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+                  href={JOBSEEKER_ROUTES.CV}
                 >
                   <FileText className="h-4 w-4" />
-                  Quản lý danh sách
-                </a>
+                  Quản lý hồ sơ của bạn
+                </Link>
               </div>
-              <p className="text-sm text-on-surface-variant">
-                Tải lên, xem và quản lý các CV của bạn.{" "}
-                <a
-                  className="text-primary underline hover:opacity-80"
-                  href="/cv"
-                >
-                  Mở trang quản lý CV
-                </a>
-              </p>
             </section>
           </div>
         </div>

@@ -5,15 +5,19 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { fetchCurrentUser } from "@/shared/services/account.service";
 import { refreshAccessToken } from "@/shared/services/api-service";
+import { getExpectedRoleForPath } from "@/shared/services/auth-client";
 import {
   clearAuthStore,
   clearAuthStoreFromSync,
   getAccessToken,
   getCurrentUser,
+  hydrateAuthStoreFromStorage,
   redirectToLogin,
   setCurrentUser,
+  shouldRefreshAccessToken,
   subscribeToAuthSync,
 } from "@/shared/services/auth-store";
+import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
 
 export const AUTH_BOOTSTRAP_READY_EVENT = "auth-bootstrap-ready";
 
@@ -36,16 +40,31 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
     let isActive = true;
 
     async function bootstrapAuth() {
-      const accessToken = getAccessToken();
-      const currentUser = getCurrentUser();
+      const expectedRole = getExpectedRoleForPath();
+      hydrateAuthStoreFromStorage();
 
       try {
-        if (!accessToken) {
+        const initialToken = getAccessToken();
+
+        if (
+          !initialToken ||
+          shouldRefreshAccessToken(ACCESS_TOKEN_REFRESH_BUFFER_MS)
+        ) {
           await refreshAccessToken();
-        } else if (!currentUser) {
+        }
+
+        const accessToken = getAccessToken();
+        const currentUser = getCurrentUser();
+
+        if (accessToken && !currentUser) {
           const hydratedUser = await fetchCurrentUser();
 
           if (isActive) {
+            if (hydratedUser.role !== expectedRole) {
+              clearAuthStore();
+              redirectToLogin();
+              return;
+            }
             setCurrentUser(hydratedUser);
           }
         }
@@ -57,6 +76,13 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
         } else if (isActive) {
           setCurrentUser(null);
         }
+      }
+
+      const latestUser = getCurrentUser();
+      if (latestUser && latestUser.role !== expectedRole) {
+        clearAuthStore();
+        redirectToLogin();
+        return;
       }
 
       if (!isActive) {
@@ -75,7 +101,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
         return;
       }
 
-      void refreshAccessToken().catch(() => undefined);
+      hydrateAuthStoreFromStorage();
     });
 
     return () => {
@@ -129,7 +155,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
               />
             </div>
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-blue-50/10 to-transparent" />
           </div>
 
           <span className="text-sm font-medium tracking-wide text-slate-400">

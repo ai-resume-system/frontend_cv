@@ -22,9 +22,6 @@ interface AvatarUploadModalProps {
   currentAvatarUrl?: string;
 }
 
-/**
- * Xuất ảnh đã crop từ canvas thành File.
- */
 async function getCroppedFile(
   imageSrc: string,
   pixelCrop: Area,
@@ -75,7 +72,6 @@ export function AvatarUploadModal({
   onClose,
   onUploaded,
 }: AvatarUploadModalProps) {
-  // Step 1: chọn file, Step 2: crop
   const [step, setStep] = useState<"pick" | "crop">("pick");
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
@@ -83,7 +79,6 @@ export function AvatarUploadModal({
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Crop state
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -171,10 +166,9 @@ export function AvatarUploadModal({
     (_croppedArea: Area, croppedPixels: Area) => {
       setCroppedAreaPixels(croppedPixels);
 
-      // Tạo preview tròn real-time
       if (imageSrc) {
         const canvas = document.createElement("canvas");
-        const size = 128;
+        const size = 160;
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext("2d");
@@ -240,7 +234,7 @@ export function AvatarUploadModal({
     >
       <div className="absolute inset-0" onClick={handleClose} />
 
-      <div className="relative z-[91] w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]">
+      <div className="relative z-[91] w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 bg-primary px-6 py-4 sm:px-8">
           <h2 className="text-center text-lg font-bold uppercase tracking-wide text-on-primary">
@@ -286,7 +280,7 @@ export function AvatarUploadModal({
                   Kéo thả ảnh vào đây
                 </p>
                 <p className="mt-1 text-xs text-on-surface-variant">
-                  hoặc nhấn để chọn từ máy tính
+                  mặc định nhấn để chọn từ máy tính
                 </p>
               </div>
               <p className="text-xs text-outline">
@@ -294,94 +288,93 @@ export function AvatarUploadModal({
               </p>
             </div>
           ) : (
-            /* ===== STEP 2: Crop ===== */
-            <div className="space-y-6">
-              <div className="flex flex-col items-start gap-6 sm:flex-row">
-                {/* Crop area */}
-                <div className="flex-1">
-                  <p className="mb-2 text-center text-sm font-semibold text-on-surface-variant">
-                    Ảnh gốc
-                  </p>
-                  <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-surface-container">
-                    {imageSrc && (
-                      <Cropper
-                        image={imageSrc}
-                        crop={crop}
-                        zoom={zoom}
-                        aspect={1}
-                        cropShape="rect"
-                        showGrid
-                        onCropChange={setCrop}
-                        onZoomChange={setZoom}
-                        onCropComplete={onCropComplete}
-                      />
-                    )}
-                  </div>
-
-                  {/* Zoom slider */}
-                  <div className="mt-3 flex items-center gap-3">
-                    <ZoomOut className="h-4 w-4 text-on-surface-variant" />
-                    <input
-                      type="range"
-                      min={1}
-                      max={3}
-                      step={0.05}
-                      value={zoom}
-                      onChange={(e) => setZoom(Number(e.target.value))}
-                      className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary"
+            /* ===== STEP 2: Crop (Nằm trên cùng hàng ngang nhờ grid-cols-5) ===== */
+            <div className="grid gap-6 md:grid-cols-5">
+              {/* Vùng ảnh gốc bên trái - Chiếm 3 phần */}
+              <div className="flex flex-col md:col-span-3">
+                <p className="mb-2 text-center text-sm font-semibold text-on-surface-variant">
+                  Ảnh gốc
+                </p>
+                {/* Thay thế aspect-square thành aspect-[4/3] tạo khung hình chữ nhật */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-surface-container">
+                  {imageSrc && (
+                    <Cropper
+                      image={imageSrc}
+                      crop={crop}
+                      zoom={zoom}
+                      aspect={1}
+                      cropShape="rect"
+                      showGrid
+                      onCropChange={setCrop}
+                      onZoomChange={setZoom}
+                      onCropComplete={onCropComplete}
                     />
-                    <ZoomIn className="h-4 w-4 text-on-surface-variant" />
-                  </div>
+                  )}
                 </div>
 
-                {/* Preview circle */}
-                <div className="flex flex-col items-center gap-4 sm:w-44">
-                  <p className="text-sm font-semibold text-on-surface-variant">
-                    Ảnh hiển thị
+                {/* Slider Zoom */}
+                <div className="mt-4 flex items-center gap-3">
+                  <ZoomOut className="h-4 w-4 text-on-surface-variant" />
+                  <input
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.05}
+                    value={zoom}
+                    onChange={(e) => setZoom(Number(e.target.value))}
+                    className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary"
+                  />
+                  <ZoomIn className="h-4 w-4 text-on-surface-variant" />
+                </div>
+              </div>
+
+              {/* Vùng ảnh Preview hiển thị bên phải - Chiếm 2 phần */}
+              <div className="flex flex-col items-center md:col-span-2">
+                <p className="mb-2 text-sm font-semibold text-on-surface-variant">
+                  Ảnh hiển thị
+                </p>
+                <div className="h-36 w-36 overflow-hidden rounded-full border-4 border-primary/20 bg-surface-container">
+                  {croppedPreview ? (
+                    <img
+                      alt="Preview tròn"
+                      className="h-full w-full object-cover"
+                      src={croppedPreview}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+                      <ImagePlus className="h-10 w-10" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Thông tin File info */}
+                <div className="mt-4 w-full rounded-xl bg-surface-container-low px-3 py-2">
+                  <p className="truncate text-xs font-medium text-on-surface text-center">
+                    {fileName}
                   </p>
-                  <div className="h-36 w-36 overflow-hidden rounded-full border-4 border-primary/20 bg-surface-container">
-                    {croppedPreview ? (
-                      <img
-                        alt="Preview tròn"
-                        className="h-full w-full object-cover"
-                        src={croppedPreview}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
-                        <ImagePlus className="h-10 w-10" />
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-xs text-on-surface-variant text-center mt-0.5">
+                    {fileSize ? `${(fileSize / 1024).toFixed(0)} KB` : ""}
+                  </p>
+                </div>
 
-                  {/* File info */}
-                  <div className="w-full rounded-xl bg-surface-container-low px-3 py-2">
-                    <p className="truncate text-xs font-medium text-on-surface">
-                      {fileName}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
-                      {fileSize ? `${(fileSize / 1024).toFixed(0)} KB` : ""}
-                    </p>
-                  </div>
-
-                  {/* Đổi / Xóa */}
-                  <div className="flex w-full gap-2">
-                    <BaseButton
-                      variant="secondary"
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex-1 !px-2 !text-xs"
-                    >
-                      Đổi ảnh
-                    </BaseButton>
-                    <BaseButton
-                      variant="secondary"
-                      type="button"
-                      onClick={handleRemoveFile}
-                      className="flex-1 !border-error !px-2 !text-xs !text-error hover:!bg-error-container"
-                    >
-                      Xóa ảnh
-                    </BaseButton>
-                  </div>
+                {/* Các nút Đổi / Xóa gốc */}
+                <div className="mt-4 flex w-full gap-2">
+                  <BaseButton
+                    variant="secondary"
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 !px-2 !text-xs"
+                  >
+                    Đổi ảnh
+                  </BaseButton>
+                  <BaseButton
+                    variant="secondary"
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="flex-1 !border-error !px-2 !text-xs !text-error hover:!bg-error-container"
+                  >
+                    Xóa ảnh
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -396,6 +389,7 @@ export function AvatarUploadModal({
           />
         </div>
 
+        {/* Footer nút hành động chính của bạn */}
         <div className="flex items-center justify-center gap-3 border-t border-border px-6 py-5 sm:px-8">
           <BaseButton
             type="button"

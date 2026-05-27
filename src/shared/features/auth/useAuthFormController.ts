@@ -314,7 +314,11 @@ export function useAuthFormController({
         rememberMe: form.rememberMe,
       });
 
-      setAccessToken(response.accessToken);
+      setAccessToken(
+        response.accessToken,
+        response.expiresAt,
+        response.expiresIn,
+      );
       setCurrentUser(null);
 
       try {
@@ -418,6 +422,7 @@ export function useAuthFormController({
         email: form.email,
         otp: otpValue,
         type: EOtpType.REGISTER,
+        role,
       });
 
       await showAppAlert({
@@ -429,7 +434,7 @@ export function useAuthFormController({
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem(
           SESSION_STORAGE_KEYS.AUTH_SELECTED_ROLE,
-          isRecruiter ? "recruiter" : "jobseeker",
+          isRecruiter ? "recruiter" : "job_seeker",
         );
         window.sessionStorage.removeItem(SESSION_STORAGE_KEYS.AUTH_ROLE_PROMPT);
       }
@@ -507,7 +512,7 @@ export function useAuthFormController({
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem(
         SESSION_STORAGE_KEYS.AUTH_SELECTED_ROLE,
-        "jobseeker",
+        "job_seeker",
       );
       window.sessionStorage.removeItem(SESSION_STORAGE_KEYS.AUTH_ROLE_PROMPT);
       window.sessionStorage.setItem(SESSION_STORAGE_KEYS.AUTH_FLOW_MODE, mode);

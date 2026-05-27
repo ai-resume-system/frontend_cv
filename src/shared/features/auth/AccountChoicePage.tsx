@@ -6,9 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { BellRing } from "lucide-react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
+import { BaseButton } from "@/shared/components/ui/BaseButton";
 
 type AccountMode = "login" | "register";
-type AccountRole = "jobseeker" | "recruiter";
+type AccountRole = "job_seeker" | "recruiter";
 
 interface AccountChoicePageProps {
   mode?: AccountMode;
@@ -66,7 +67,7 @@ export function AccountChoicePage({
       buttonLabel: "Tôi là người tìm việc",
       image: "/Job_Seeker.png",
       imageAlt: "Người tìm việc",
-      role: "jobseeker",
+      role: "job_seeker",
     },
   ];
 
@@ -94,7 +95,7 @@ export function AccountChoicePage({
         <div className="mx-auto mt-8 grid max-w-[680px] gap-8 sm:grid-cols-2 sm:gap-12">
           {roleOptions.map((option) => {
             const href = getTargetHref(resolvedMode, option.role);
-            const isJobSeeker = option.role === "jobseeker";
+            const isJobSeeker = option.role === "job_seeker";
 
             return (
               <div
@@ -104,7 +105,7 @@ export function AccountChoicePage({
                 {(isJobSeeker && variant === "modal" && onSelectJobSeeker) ||
                 (!isJobSeeker && variant === "modal" && onSelectRecruiter) ? (
                   <button
-                    className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
+                    className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 cursor-pointer"
                     onClick={
                       isJobSeeker ? onSelectJobSeeker : onSelectRecruiter
                     }
@@ -123,15 +124,16 @@ export function AccountChoicePage({
 
                 {(isJobSeeker && variant === "modal" && onSelectJobSeeker) ||
                 (!isJobSeeker && variant === "modal" && onSelectRecruiter) ? (
-                  <button
-                    className="mt-8 rounded-full bg-primary px-6 py-3 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  <BaseButton
+                    variant="primary"
+                    className="mt-8 rounded-full px-6 py-3 text-base font-extrabold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={
                       isJobSeeker ? onSelectJobSeeker : onSelectRecruiter
                     }
                     type="button"
                   >
                     {option.buttonLabel}
-                  </button>
+                  </BaseButton>
                 ) : (
                   <Link
                     className="mt-8 rounded-full bg-primary px-6 py-3 text-base font-extrabold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"

@@ -1,4 +1,7 @@
-import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
+import {
+  LOCAL_STORAGE_KEYS,
+  SESSION_STORAGE_KEYS,
+} from "@/shared/constants/constants/local-storage";
 import type { AuthUser } from "@/shared/types/auth";
 
 export const AUTH_STORE_CHANGED_EVENT = "auth-store-changed";
@@ -7,11 +10,108 @@ export const AUTH_SYNC_CHANNEL_NAME = "auth-sync";
 export type AuthSyncMessage = { type: "login" } | { type: "logout" };
 
 let accessToken: string | null = null;
+let accessTokenExpiresAt: string | null = null;
+let accessTokenExpiresIn: number | null = null;
 let currentUser: AuthUser | null = null;
 let authSyncChannel: BroadcastChannel | null = null;
 
+function readAccessTokenExpiresIn(value: string | null): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function isBrowser(): boolean {
   return typeof window !== "undefined";
+}
+
+function persistAccessTokenToStorage(
+  token: string | null,
+  expiresAt?: string | null,
+  expiresIn?: number | null,
+): void {
+  if (!isBrowser()) {
+    return;
+  }
+
+  if (!token) {
+    clearAccessTokenStorage();
+    return;
+  }
+
+  window.localStorage.setItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN, token);
+
+  if (expiresAt) {
+    window.localStorage.setItem(
+      LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT,
+      expiresAt,
+    );
+  } else {
+    window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT);
+  }
+
+  if (typeof expiresIn === "number") {
+    window.localStorage.setItem(
+      LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_IN,
+      String(expiresIn),
+    );
+  } else {
+    window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_IN);
+  }
+}
+
+export function clearAccessTokenStorage(): void {
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT);
+  window.localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_IN);
+}
+
+export function hydrateAuthStoreFromStorage(): void {
+  if (!isBrowser()) {
+    return;
+  }
+
+  const storedToken = window.localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+  const storedExpiresAt = window.localStorage.getItem(
+    LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT,
+  );
+  const storedExpiresIn = readAccessTokenExpiresIn(
+    window.localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_IN),
+  );
+
+  if (!storedToken) {
+    if (
+      accessToken !== null ||
+      accessTokenExpiresAt !== null ||
+      accessTokenExpiresIn !== null
+    ) {
+      accessToken = null;
+      accessTokenExpiresAt = null;
+      accessTokenExpiresIn = null;
+      emitAuthStoreChanged();
+    }
+    return;
+  }
+
+  if (
+    accessToken === storedToken &&
+    accessTokenExpiresAt === storedExpiresAt &&
+    accessTokenExpiresIn === storedExpiresIn
+  ) {
+    return;
+  }
+
+  accessToken = storedToken;
+  accessTokenExpiresAt = storedExpiresAt;
+  accessTokenExpiresIn = storedExpiresIn;
+  emitAuthStoreChanged();
 }
 
 function emitAuthStoreChanged(): void {
@@ -42,15 +142,39 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
-export function setAccessToken(token: string | null): void {
-  if (accessToken === token) {
+export function getAccessTokenExpiresAt(): string | null {
+  return accessTokenExpiresAt;
+}
+
+export function shouldRefreshAccessToken(bufferMs = 60_000): boolean {
+  if (!accessToken || !accessTokenExpiresAt) {
+    return true;
+  }
+
+  return new Date(accessTokenExpiresAt).getTime() - Date.now() <= bufferMs;
+}
+
+export function setAccessToken(
+  token: string | null,
+  expiresAt?: string | null,
+  expiresIn?: number | null,
+  shouldBroadcastLogin = true,
+): void {
+  if (
+    accessToken === token &&
+    accessTokenExpiresAt === (expiresAt ?? null) &&
+    accessTokenExpiresIn === (expiresIn ?? null)
+  ) {
     return;
   }
 
   accessToken = token;
+  accessTokenExpiresAt = expiresAt ?? null;
+  accessTokenExpiresIn = expiresIn ?? null;
+  persistAccessTokenToStorage(token, expiresAt, expiresIn);
   emitAuthStoreChanged();
 
-  if (token) {
+  if (token && shouldBroadcastLogin) {
     broadcastAuthSync({ type: "login" });
   }
 }
@@ -69,10 +193,14 @@ export function setCurrentUser(user: AuthUser | null): void {
 }
 
 export function clearAuthStore(): void {
-  const hadAuthenticatedState = accessToken !== null || currentUser !== null;
+  const hadAuthenticatedState =
+    accessToken !== null || currentUser !== null || accessTokenExpiresAt !== null;
 
   accessToken = null;
+  accessTokenExpiresAt = null;
+  accessTokenExpiresIn = null;
   currentUser = null;
+  clearAccessTokenStorage();
 
   if (!hadAuthenticatedState) {
     return;
@@ -83,10 +211,14 @@ export function clearAuthStore(): void {
 }
 
 export function clearAuthStoreFromSync(): void {
-  const hadAuthenticatedState = accessToken !== null || currentUser !== null;
+  const hadAuthenticatedState =
+    accessToken !== null || currentUser !== null || accessTokenExpiresAt !== null;
 
   accessToken = null;
+  accessTokenExpiresAt = null;
+  accessTokenExpiresIn = null;
   currentUser = null;
+  clearAccessTokenStorage();
 
   if (!hadAuthenticatedState) {
     return;

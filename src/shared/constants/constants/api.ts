@@ -23,6 +23,9 @@ export const API_ROUTES = {
   CAREER_CATEGORY: {
     BASE: `${API_PREFIX}/career-categories`,
   },
+  COMPANY: {
+    BASE: `${API_PREFIX}/companies`,
+  },
   CV: {
     BASE: `${API_PREFIX}/cvs`,
     DOWNLOAD: (id: string) => `${API_PREFIX}/cvs/${id}/download`,

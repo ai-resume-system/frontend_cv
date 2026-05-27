@@ -16,7 +16,7 @@ import { Footer } from "@/shared/components/layouts/Footer";
 import { Header } from "@/shared/components/layouts/Header";
 import { cn } from "@/shared/lib/utils/cn";
 
-const AI_STATUS_CONFIG = {
+const PROCESSING_STATUS_CONFIG = {
   pending: {
     label: "Chờ xử lý",
     className: "bg-surface-container-highest text-on-surface-variant",
@@ -49,8 +49,11 @@ interface CvItemRowProps {
 
 function CvItemRow({ cv, onDelete }: CvItemRowProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const processingStatus = cv.processingStatus ?? "pending";
   const statusConfig =
-    AI_STATUS_CONFIG[cv.aiStatus] ?? AI_STATUS_CONFIG.pending;
+    PROCESSING_STATUS_CONFIG[processingStatus] ??
+    PROCESSING_STATUS_CONFIG.pending;
+  const isCompleted = processingStatus === "completed";
 
   const uploadDate = new Date(cv.createdAt).toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -70,7 +73,7 @@ function CvItemRow({ cv, onDelete }: CvItemRowProps) {
         <div
           className={cn(
             "flex h-12 w-12 shrink-0 items-center justify-center rounded-lg",
-            cv.aiStatus === "completed"
+            isCompleted
               ? "bg-secondary-fixed"
               : "bg-surface-container-highest",
           )}
@@ -78,7 +81,7 @@ function CvItemRow({ cv, onDelete }: CvItemRowProps) {
           <FileText
             className={cn(
               "h-6 w-6",
-              cv.aiStatus === "completed"
+              isCompleted
                 ? "text-primary"
                 : "text-on-surface-variant",
             )}
@@ -86,7 +89,7 @@ function CvItemRow({ cv, onDelete }: CvItemRowProps) {
         </div>
         <div>
           <h4 className="font-bold leading-tight text-on-surface">
-            {cv.originalName}
+            {cv.title ?? "CV không tên"}
           </h4>
           <div className="mt-1 flex items-center gap-3">
             <span className="text-xs text-on-surface-variant">
@@ -104,61 +107,41 @@ function CvItemRow({ cv, onDelete }: CvItemRowProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-6 border-t pt-4 md:justify-end md:border-0 md:pt-0">
-        {cv.aiStatus === "completed" && cv.matchScore !== null ? (
-          <div className="flex items-center gap-1">
-            <span className="text-xs font-bold text-primary">
-              {cv.matchScore}%
-            </span>
-            <span className="text-[10px] font-medium text-on-surface-variant">
-              Match
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 opacity-40">
-            <span className="text-xs font-bold">--</span>
-            <span className="text-[10px] font-medium text-on-surface-variant">
-              Match
-            </span>
-          </div>
-        )}
-
-        <div className="flex items-center gap-1">
-          {cv.fileUrl && (
-            <a
-              className="rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high"
-              href={cv.fileUrl}
-              rel="noopener noreferrer"
-              target="_blank"
-              title="Xem CV"
-            >
-              <Eye className="h-5 w-5" />
-            </a>
-          )}
-          {cv.fileUrl && (
-            <a
-              className="rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high"
-              download={cv.originalName}
-              href={cv.fileUrl}
-              title="Tải xuống"
-            >
-              <Download className="h-5 w-5" />
-            </a>
-          )}
-          <button
-            className="rounded-lg p-2 text-error transition-colors hover:bg-error-container disabled:opacity-50"
-            disabled={isDeleting}
-            onClick={handleDelete}
-            title="Xóa"
-            type="button"
+      <div className="flex items-center gap-1">
+        {cv.fileUrl && (
+          <a
+            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high"
+            href={cv.fileUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Xem CV"
           >
-            {isDeleting ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Trash2 className="h-5 w-5" />
-            )}
-          </button>
-        </div>
+            <Eye className="h-5 w-5" />
+          </a>
+        )}
+        {cv.fileUrl && (
+          <a
+            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high"
+            download
+            href={cv.fileUrl}
+            title="Tải xuống"
+          >
+            <Download className="h-5 w-5" />
+          </a>
+        )}
+        <button
+          className="rounded-lg p-2 text-error transition-colors hover:bg-error-container disabled:opacity-50"
+          disabled={isDeleting}
+          onClick={handleDelete}
+          title="Xóa"
+          type="button"
+        >
+          {isDeleting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Trash2 className="h-5 w-5" />
+          )}
+        </button>
       </div>
     </div>
   );
@@ -179,19 +162,8 @@ export function CvPage() {
   } = useCvList();
 
   const completedCount = cvList.filter(
-    (cv) => cv.aiStatus === "completed",
+    (cv) => cv.processingStatus === "completed",
   ).length;
-  const avgMatch =
-    completedCount > 0
-      ? Math.round(
-          cvList
-            .filter(
-              (cv) => cv.aiStatus === "completed" && cv.matchScore !== null,
-            )
-            .reduce((sum, cv) => sum + (cv.matchScore ?? 0), 0) /
-            completedCount,
-        )
-      : null;
 
   function validateAndUpload(file: File) {
     setFileError(null);
@@ -350,24 +322,19 @@ export function CvPage() {
                   <div className="h-4 animate-pulse rounded-full bg-surface-container" />
                   <div className="h-2 animate-pulse rounded-full bg-surface-container" />
                 </div>
-              ) : avgMatch !== null ? (
+              ) : completedCount > 0 ? (
                 <div className="space-y-4">
                   <div className="flex items-end justify-between">
                     <span className="text-sm font-medium text-on-surface">
-                      Độ hoàn thiện trung bình
+                      CV đã phân tích
                     </span>
                     <span className="text-2xl font-black text-primary">
-                      {avgMatch}%
+                      {completedCount}
                     </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-container-highest">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-700"
-                      style={{ width: `${avgMatch}%` }}
-                    />
-                  </div>
                   <p className="text-xs italic text-on-surface-variant">
-                    Dựa trên {completedCount} CV đã phân tích bởi AI.
+                    {completedCount} CV đã được xử lý bởi AI. Nhấp vào từng CV
+                    để xem phân tích chi tiết.
                   </p>
                 </div>
               ) : (

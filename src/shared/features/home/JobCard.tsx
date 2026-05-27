@@ -1,10 +1,9 @@
 "use client";
 
+import { Heart, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, MapPin } from "lucide-react";
-import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/Badge";
 import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
@@ -36,9 +35,9 @@ interface FavoriteButtonProps {
 function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavoriteJobs();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
   const saved = isFavorite(jobId);
+  const isSubmitting = isFavoritePending(jobId);
 
   return (
     <button
@@ -64,7 +63,6 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
         }
 
         try {
-          setIsSubmitting(true);
           const wasAdded = await toggleFavorite(jobId, jobData);
 
           if (wasAdded && typeof window !== "undefined") {
@@ -80,8 +78,6 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
               ? error.message
               : "Không thể cập nhật danh sách yêu thích.",
           );
-        } finally {
-          setIsSubmitting(false);
         }
       }}
       type="button"
@@ -127,11 +123,11 @@ function JobCardContent({
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         {salary ? (
-          <Badge className="text-sm bg-secondary-soft text-primary">
+          <Badge className="bg-secondary-soft text-sm text-primary">
             {salary}
           </Badge>
         ) : null}
-        <Badge className="text-sm bg-gray-300/70 text-muted-foreground gap-1">
+        <Badge className="gap-1 bg-gray-300/70 text-sm text-muted-foreground">
           <MapPin aria-hidden="true" className="h-4 w-4" />
           {location}
         </Badge>

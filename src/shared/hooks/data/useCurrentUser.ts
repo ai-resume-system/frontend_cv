@@ -38,11 +38,6 @@ export function useCurrentUser() {
   }, []);
 
   useEffect(() => {
-    const token = getCachedToken();
-    const cachedUser = getCachedUser();
-
-    let cancelled = false;
-
     function syncUserFromCache() {
       setUser(getCachedUser());
     }
@@ -50,37 +45,7 @@ export function useCurrentUser() {
     syncUserFromCache();
     window.addEventListener(AUTH_USER_UPDATED_EVENT, syncUserFromCache);
 
-    if (!token || cachedUser) {
-      return () => {
-        cancelled = true;
-        window.removeEventListener(AUTH_USER_UPDATED_EVENT, syncUserFromCache);
-      };
-    }
-
-    async function load() {
-      setLoading(true);
-      try {
-        const userData = await fetchCurrentUser();
-        if (!cancelled) {
-          setUser(userData);
-          setCachedUser(userData);
-        }
-      } catch {
-        if (!cancelled) {
-          const cached = getCachedUser();
-          setUser(cached);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    load();
-
     return () => {
-      cancelled = true;
       window.removeEventListener(AUTH_USER_UPDATED_EVENT, syncUserFromCache);
     };
   }, []);

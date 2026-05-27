@@ -83,13 +83,9 @@ export function ChangePasswordModal({
             Thay đổi mật khẩu đăng nhập
           </h2>
 
-          <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-on-surface transition-colors hover:bg-surface-container"
-            onClick={handleClose}
-            type="button"
-          >
+          <BaseButton variant="ghost" onClick={handleClose} type="button">
             <X className="h-5 w-5" />
-          </button>
+          </BaseButton>
         </div>
 
         {/* FORM NỘI DUNG */}

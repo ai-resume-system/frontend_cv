@@ -78,25 +78,27 @@ export function FloatingFavoriteButton() {
   }
 
   return (
-    <div className="fixed bottom-5 right-4 z-[55] sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-5 right-4 z-55 sm:bottom-6 sm:right-6 flex items-center">
       <div
         className={cn(
-          "pointer-events-none absolute bottom-[1rem] right-15 w-[330px] translate-y-2 opacity-0 transition-all duration-300 sm:w-[320px]",
-          showToast && "translate-y-0 opacity-100",
+          "hidden md:block absolute right-16 w-[330px] transition-all duration-300 pointer-events-none opacity-0 translate-x-2",
+          showToast && "opacity-100 translate-x-0 pointer-events-auto",
         )}
       >
-        <div className="rounded-2xl bg-slate-700/90 px-4 py-3 text-white shadow-[0_18px_40px_rgba(15,23,42,0.24)]"> /// day
-          <p className="text-base font-semibold">Lưu tin thành công!</p>
-          <p className="mt-1 text-sm leading-6 text-slate-100">
-            Xem{" "}
+        <div className="relative rounded-xl bg-slate-800/95 px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(15,23,42,0.3)]">
+          <p className="text-sm font-semibold">Lưu tin thành công!</p>
+          <p className="mt-0.5 text-xs text-slate-200">
+            Để xem{" "}
             <Link
-              className="pointer-events-auto font-semibold text-secondary-container underline underline-offset-2"
+              className="font-semibold text-secondary-container underline underline-offset-2 hover:text-white transition-colors"
               href={ROUTES.JOB_SEEKER_FAVORITES}
             >
               Danh sách việc làm đã lưu
             </Link>
-            , click vào đây.
+            , click vào đây!
           </p>
+
+          <div className="absolute right-[10px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-slate-800/95" />
         </div>
       </div>
 

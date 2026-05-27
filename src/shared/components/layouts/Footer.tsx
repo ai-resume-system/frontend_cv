@@ -38,8 +38,9 @@ const communityLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-muted border border-t-gray-300">
-      <div className="mx-auto grid max-w-7xl gap-10 py-12 sm:px-8 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.85fr] lg:px-12">
+    <footer className="bg-muted border-t border-t-gray-300">
+      {/* FIX: Thêm px-4 mặc định để màn hình mobile không bị dính sát viền trái/phải */}
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-8 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.85fr] lg:px-12">
         <section>
           <div className="mb-4 flex items-center gap-2 font-extrabold text-primary">
             <Image alt="Logo" height={50} src="/logo.png" width={50} />
@@ -65,7 +66,8 @@ export function Footer() {
                     href={item.href}
                     key={item.label}
                   >
-                    <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
+                    {/* Ép size cứng cho fontawesome để tránh tình trạng vỡ layout khi load trang */}
+                    <FontAwesomeIcon icon={item.icon} className="h-4 w-4" />
                   </Link>
                 );
               })}
@@ -73,6 +75,7 @@ export function Footer() {
           </div>
         </section>
 
+        {/* Các cột navigation tự động rớt dòng xếp hàng dọc rất đẹp trên mobile */}
         <FooterNav
           links={[
             { href: "#", label: "Giới thiệu" },
@@ -96,28 +99,29 @@ export function Footer() {
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               href={`tel:${INFOMATION_WEB.PHONE}`}
             >
-              <Phone aria-hidden="true" className="h-4 w-4" />
-              Hotline: {INFOMATION_WEB.PHONE}
+              <Phone aria-hidden="true" className="h-4 w-4 shrink-0" />
+              <span>Hotline: {INFOMATION_WEB.PHONE}</span>
             </Link>
             <Link
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               href={`mailto:${INFOMATION_WEB.EMAIL}`}
             >
-              <Mail aria-hidden="true" className="h-4 w-4" />
-              Email: {INFOMATION_WEB.EMAIL}
+              <Mail aria-hidden="true" className="h-4 w-4 shrink-0" />
+              <span className="break-all">Email: {INFOMATION_WEB.EMAIL}</span>
             </Link>
             <Link
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
               href="#"
             >
-              <MessageCircle aria-hidden="true" className="h-4 w-4" />
-              Zalo: {INFOMATION_WEB.PHONE}
+              <MessageCircle aria-hidden="true" className="h-4 w-4 shrink-0" />
+              <span>Zalo: {INFOMATION_WEB.PHONE}</span>
             </Link>
           </div>
         </section>
       </div>
 
-      <div className="w-full border-t-2 border-border py-4 text-center text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
+      {/* Dòng bản quyền */}
+      <div className="w-full border-t border-border px-4 py-4 text-center text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
         &copy; {INFOMATION_WEB.COPYRIGHT_YEAR}{" "}
         <span className="uppercase">{INFOMATION_WEB.COMPANY_NAME}</span>. Kiến
         tạo sự nghiệp bền vững.

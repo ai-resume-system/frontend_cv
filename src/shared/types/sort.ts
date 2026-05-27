@@ -1,4 +1,4 @@
 export interface ISort {
-    sortBy: string;
-    sortOrder: "asc" | "desc";
+  sortBy: string;
+  sortOrder: "ASC" | "DESC";
 }

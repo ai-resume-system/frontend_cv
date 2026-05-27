@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface CategoryCardProps {
-  icon: string;
+  icon?: string;
   label: string;
   href?: string;
 }

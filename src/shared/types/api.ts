@@ -17,3 +17,13 @@ export interface IResponseApiList<T> {
   data: T[];
   pagination?: IResponseApiPagination;
 }
+
+export interface IResponseApiError {
+  status: string;
+  message: string;
+  code?: string | number;
+  error?: {
+    code?: string;
+    fields?: Record<string, string[]>;
+  };
+}

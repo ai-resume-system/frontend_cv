@@ -1,12 +1,16 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
+import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
 import { env } from "@/shared/lib/config/env";
 import {
   clearAuthStore,
   getAccessToken,
+  getAccessTokenExpiresAt,
   redirectToLogin,
   setAccessToken,
   setCurrentUser,
+  shouldRefreshAccessToken,
 } from "@/shared/services/auth-store";
+import { resolveAuthClient } from "@/shared/services/auth-client";
 import type {
   AuthUser,
   ApiFieldErrorResponse,
@@ -23,6 +27,12 @@ interface ApiRequestConfig extends Omit<RequestInit, "body" | "method"> {
 
 interface JsonRequestConfig extends Omit<ApiRequestConfig, "body"> {
   body?: unknown;
+}
+
+function buildAuthHeaders(headers?: HeadersInit): Headers {
+  const nextHeaders = new Headers(headers);
+  nextHeaders.set("x-auth-client", resolveAuthClient());
+  return nextHeaders;
 }
 
 const REFRESH_TOKEN_EXPIRED_CODE = 1007;
@@ -91,6 +101,7 @@ async function fetchCurrentUserAfterRefresh(
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      "x-auth-client": resolveAuthClient(),
     },
     cache: "no-store",
     credentials: "include",
@@ -111,6 +122,7 @@ async function doRefresh(): Promise<boolean> {
     method: "POST",
     cache: "no-store",
     credentials: "include",
+    headers: buildAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -124,7 +136,12 @@ async function doRefresh(): Promise<boolean> {
   const payloadResponse =
     await readJson<IResponseApiItem<RefreshTokenResponseData>>(response);
   const nextAccessToken = payloadResponse.data.accessToken;
-  setAccessToken(nextAccessToken);
+  setAccessToken(
+    nextAccessToken,
+    payloadResponse.data.expiresAt,
+    payloadResponse.data.expiresIn,
+    false,
+  );
 
   try {
     const currentUser = await fetchCurrentUserAfterRefresh(nextAccessToken);
@@ -143,7 +160,16 @@ async function doRefresh(): Promise<boolean> {
   }
 }
 
-async function refreshAccessToken(): Promise<boolean> {
+async function refreshAccessToken(force = false): Promise<boolean> {
+  if (
+    !force &&
+    getAccessToken() &&
+    getAccessTokenExpiresAt() &&
+    !shouldRefreshAccessToken(ACCESS_TOKEN_REFRESH_BUFFER_MS)
+  ) {
+    return true;
+  }
+
   if (ongoingRefresh) {
     return ongoingRefresh;
   }
@@ -210,12 +236,15 @@ class ApiService {
     retried = false,
   ): Promise<TResponse> {
     const { auth, body, headers, ...requestConfig } = config;
-    const requestHeaders = new Headers(headers);
+    const requestHeaders = buildAuthHeaders(headers);
 
     if (auth) {
-      const accessToken = getAccessToken();
+      const currentAccessToken = getAccessToken();
 
-      if (!accessToken) {
+      if (
+        !currentAccessToken ||
+        shouldRefreshAccessToken(ACCESS_TOKEN_REFRESH_BUFFER_MS)
+      ) {
         if (!retried) {
           const refreshed = await refreshAccessToken();
 
@@ -224,10 +253,18 @@ class ApiService {
           }
         }
 
+        if (!getAccessToken()) {
+          throw new Error("Not authenticated");
+        }
+      }
+
+      const latestAccessToken = getAccessToken();
+
+      if (!latestAccessToken) {
         throw new Error("Not authenticated");
       }
 
-      requestHeaders.set("Authorization", `Bearer ${accessToken}`);
+      requestHeaders.set("Authorization", `Bearer ${latestAccessToken}`);
     }
 
     const requestBody = isJsonBody(body) ? JSON.stringify(body) : body;

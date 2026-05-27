@@ -4,6 +4,8 @@ import type {
   EUserStatus,
 } from "@/shared/constants/enums/user.enum";
 
+// ─────────────────────── Register ───────────────────────
+
 export interface IBaseRegisterPayload {
   email: string;
   password: string;
@@ -20,11 +22,26 @@ export interface IRegisterRecruiterPayload extends IBaseRegisterPayload {
   location?: string;
 }
 
+// ─────────────────────── OTP ───────────────────────
+
+export interface ISendOtpPayload {
+  email: string;
+  type: EOtpType;
+  role?: EUserRole;
+}
+
 export interface IVerifyOtpPayload {
   email: string;
   otp: string;
   type: EOtpType;
+  role?: EUserRole;
 }
+
+export interface VerifyOtpForgotPasswordResponseData {
+  signKey: string;
+}
+
+// ─────────────────────── Login ───────────────────────
 
 export interface ILoginPayload {
   email: string;
@@ -34,29 +51,39 @@ export interface ILoginPayload {
 
 export interface IResponseLogin {
   accessToken: string;
+  expiresIn: number;
+  expiresAt: string;
 }
 
 export type RefreshTokenResponseData = IResponseLogin;
+
+// ─────────────────────── Forgot password ───────────────────────
 
 export interface ForgotPasswordPayload {
   email: string;
   signKey: string;
   newPassword: string;
+  role: EUserRole;
 }
 
-export interface ISendOtpPayload {
-  email: string;
-  type: EOtpType;
+// ─────────────────────── Auth user (GET /account/me) ───────────────────────
+
+export interface AuthUserProfile {
+  fullName?: string;
+  avatarUrl: string | null;
+  bio?: string;
 }
 
-export interface VerifyOtpForgotPasswordResponseData {
-  signKey: string;
-}
-
-export interface ApiErrorResponse {
-  status?: string;
-  message?: string;
-  code?: number | string;
+export interface AuthCompanyProfile {
+  id?: string;
+  careerCategoriesId?: string | null;
+  companyName?: string | null;
+  taxCode?: string | null;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  location?: string | null;
+  description?: string | null;
+  websiteUrl?: string | null;
 }
 
 export interface AuthUser {
@@ -72,38 +99,54 @@ export interface AuthUser {
   deletedAt: string | null;
 }
 
-export interface AuthUserProfile {
-  fullName: string;
-  avatarUrl: string | null;
-  bio: string;
-}
-
-export interface AuthCompanyProfile {
-  careerCategoriesId: string;
-  companyName: string;
-  taxCode: string;
-  logoUrl: string;
-  bannerUrl: string;
-  location: string;
-  description: string;
-  websiteUrl: string;
-}
+// ─────────────────────── Account management ───────────────────────
 
 export interface UpdateMyProfilePayload {
-  bio?: string;
   fullName: string;
   phone: string;
+  bio?: string;
 }
 
 export interface UpdateMyProfileResponse {
   fullName?: string;
+  avatarUrl?: string | null;
   bio?: string;
   phone?: string;
+}
+
+export interface UpdateMyCompanyPayload {
+  careerCategoriesId?: string;
+  companyName?: string;
+  taxCode?: string;
+  location?: string;
+  description?: string;
+  websiteUrl?: string;
+  phone?: string;
+}
+
+export interface UpdateMyCompanyResponse {
+  id?: string;
+  careerCategoriesId?: string | null;
+  companyName?: string | null;
+  taxCode?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  location?: string | null;
+  description?: string | null;
+  websiteUrl?: string | null;
 }
 
 export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;
+}
+
+// ─────────────────────── Error types ───────────────────────
+
+export interface ApiErrorResponse {
+  status?: string;
+  message?: string;
+  code?: number | string;
 }
 
 export interface ApiFieldErrorResponse extends ApiErrorResponse {
