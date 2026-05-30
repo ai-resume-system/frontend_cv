@@ -24,6 +24,7 @@ import {
   type AuthMode,
   useAuthFormController,
 } from "@/shared/features/auth/useAuthFormController";
+import { cn } from "@/shared/lib/utils/cn";
 import { RecruiterShowcase } from "./function";
 
 interface RecruiterAuthFormProps {
@@ -38,6 +39,7 @@ function formatCountdown(seconds: number): string {
 }
 
 export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
+  const isLogin = mode === "login";
   const controller = useAuthFormController({
     mode,
     role: EUserRole.RECRUITER,
@@ -70,9 +72,26 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
   } = controller;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white lg:flex-row overflow-y-auto custom-scroll">
-      <div className="flex w-full flex-1 lg:w-1/2">
-        <div className="flex min-h-screen w-full flex-col bg-white px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16">
+    <div
+      className={cn(
+        "custom-scroll flex min-h-screen flex-col lg:flex-row",
+        isLogin
+          ? "overflow-hidden lg:h-screen"
+          : "overflow-y-auto lg:h-screen lg:overflow-hidden",
+      )}
+    >
+      <div
+        className={cn(
+          "flex w-full flex-1 lg:w-1/2",
+          !isLogin && "lg:min-h-0 lg:overflow-y-auto",
+        )}
+      >
+        <div
+          className={cn(
+            "flex w-full flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16",
+            isLogin ? "justify-center" : "lg:min-h-full",
+          )}
+        >
           <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:min-h-[72px]">
             <Link
               className="flex min-w-0 items-center gap-2 sm:gap-3"
@@ -118,7 +137,14 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
             </div>
           </header>
 
-          <main className="flex flex-1 items-center justify-center py-4 md:py-6 lg:py-8 xl:py-12">
+          <main
+            className={cn(
+              "flex flex-1 justify-center",
+              isLogin
+                ? "items-center py-4 md:py-6"
+                : "items-start py-4 md:py-6 lg:py-8 xl:py-12",
+            )}
+          >
             <div className="w-full max-w-lg xl:max-w-xl">
               {isRegister ? (
                 <div className="space-y-6 sm:space-y-8 lg:space-y-10">
@@ -334,7 +360,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                             onClick={handleResendOtp}
                           >
                             {otpExpiryCountdown > 0
-                              ? `Gửi lại mã sau ${formatCountdown(otpExpiryCountdown)}}s`
+                              ? `Gửi lại mã sau ${formatCountdown(otpExpiryCountdown)} giây`
                               : "Gửi lại mã"}
                           </button>
                         </div>
@@ -358,8 +384,8 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                       Chào mừng bạn quay trở lại
                     </h1>
                     <p className="mt-3 max-w-xl text-sm leading-7 text-on-surface-variant sm:mt-4 sm:text-base sm:leading-8 lg:text-lg">
-                      Cùng tạo dựng lợi thế cho doanh nghiệp bằng trải nghiệm
-                      công nghệ tuyển dụng thông minh từ FUSE
+                      Đăng nhập để kết nối ngay với ứng viên tiềm năng – thông
+                      minh và nhanh chóng cùng FUSE.
                     </p>
                   </div>
 
@@ -460,7 +486,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
         </div>
       </div>
 
-      <div className="sticky top-0 hidden h-screen lg:flex lg:w-1/2">
+      <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
         <RecruiterShowcase />
       </div>
     </div>

@@ -11,10 +11,8 @@ import {
 import { useCallback, useRef, useState } from "react";
 
 import { useCvList } from "@/portals/jobseeker/hooks/data/useCvList";
-import type { CvItem } from "@/shared/types/cv";
-import { Footer } from "@/shared/components/layouts/Footer";
-import { Header } from "@/shared/components/layouts/Header";
 import { cn } from "@/shared/lib/utils/cn";
+import type { CvItem } from "@/shared/types/cv";
 
 const PROCESSING_STATUS_CONFIG = {
   pending: {
@@ -216,9 +214,6 @@ export function CvPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Header />
-
       <div className="mx-auto max-w-5xl px-6 py-12">
         {/* Title */}
         <section className="mb-12">
@@ -401,8 +396,5 @@ export function CvPage() {
           </div>
         </div>
       </div>
-
-      <Footer />
-    </main>
   );
 }

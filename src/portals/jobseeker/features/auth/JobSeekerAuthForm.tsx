@@ -23,6 +23,7 @@ import {
   type AuthMode,
   useAuthFormController,
 } from "@/shared/features/auth/useAuthFormController";
+import { cn } from "@/shared/lib/utils/cn";
 import { JobSeekerShowcase } from "./function";
 
 interface JobSeekerAuthFormProps {
@@ -37,6 +38,7 @@ function formatCountdown(seconds: number): string {
 }
 
 export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
+  const isLogin = mode === "login";
   const controller = useAuthFormController({
     mode,
     role: EUserRole.JOB_SEEKER,
@@ -73,13 +75,28 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
 
   return (
     <>
-      <div className="flex h-screen flex-col bg-white lg:flex-row overflow-y-auto custom-scroll">
-        <div className="sticky top-0 hidden h-screen lg:flex lg:w-1/2">
+      <div
+        className={cn(
+          "custom-scroll flex min-h-screen flex-col lg:flex-row",
+          isLogin ? "overflow-hidden lg:h-screen" : "overflow-y-auto lg:h-screen lg:overflow-hidden",
+        )}
+      >
+        <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
           <JobSeekerShowcase />
         </div>
 
-        <div className="flex w-full flex-1 lg:w-1/2">
-          <div className="flex min-h-screen w-full flex-col px-4 sm:px-6 lg:px-10 xl:px-12 2xl:px-16 py-4 sm:py-5 lg:py-6 xl:py-8">
+        <div
+          className={cn(
+            "flex w-full flex-1 lg:w-1/2",
+            !isLogin && "lg:min-h-0 lg:overflow-y-auto",
+          )}
+        >
+          <div
+            className={cn(
+              "flex w-full flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16",
+              isLogin ? "justify-center" : "lg:min-h-full",
+            )}
+          >
             <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:min-h-[72px]">
               <Link
                 className="flex min-w-0 items-center gap-2 sm:gap-3"
@@ -125,7 +142,12 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
               </div>
             </header>
 
-            <main className="flex flex-1 items-center justify-center">
+            <main
+              className={cn(
+                "flex flex-1 justify-center",
+                isLogin ? "items-center" : "items-start pt-6 lg:pt-8",
+              )}
+            >
               <div className="w-full max-w-lg xl:max-w-xl">
                 {isRegister ? (
                   <>

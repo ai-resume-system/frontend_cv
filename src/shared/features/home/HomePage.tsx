@@ -2,18 +2,15 @@ import { Phone } from "lucide-react";
 import Link from "next/link";
 
 import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
-import { Footer } from "@/shared/components/layouts/Footer";
-import { Header } from "@/shared/components/layouts/Header";
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { fetchCareerCategoriesWithPagination } from "@/shared/services/category.service";
 import { fetchCompanies } from "@/shared/services/company.service";
 import { fetchJobs } from "@/shared/services/job.service";
 
-import { FloatingFavoriteButton } from "./FloatingFavoriteButton";
 import { HotJobsSection } from "./HotJobsSection";
 
-const CATEGORY_ICONS = ["💻", "💼", "🩺", "📣", "📚", "🚚"] as const;
+const CATEGORY_ICONS = ["IT", "KD", "MKT", "HR", "OPS", "FIN"] as const;
 
 interface HomeStat {
   label: string;
@@ -22,22 +19,22 @@ interface HomeStat {
 
 function formatCompactNumber(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
-    notation: "compact",
     maximumFractionDigits: 1,
+    notation: "compact",
   }).format(value);
 }
 
 function buildHomeStats(params: {
-  totalJobs: number;
-  totalCompanies: number;
   totalCategories: number;
+  totalCompanies: number;
+  totalJobs: number;
   totalLocations: number;
 }): HomeStat[] {
-  const { totalJobs, totalCompanies, totalCategories, totalLocations } = params;
+  const { totalCategories, totalCompanies, totalJobs, totalLocations } = params;
 
   return [
     {
-      label: "Việc làm đang mới",
+      label: "Việc làm đang mở",
       value: formatCompactNumber(totalJobs),
     },
     {
@@ -56,6 +53,7 @@ function buildHomeStats(params: {
 }
 
 export default async function HomePage() {
+  // Bugs
   const [
     jobsResult,
     companiesResult,
@@ -63,22 +61,22 @@ export default async function HomePage() {
     jobsForLocationsResult,
   ] = await Promise.all([
     fetchJobs({
+      limit: 100,
       page: 1,
-      limit: 1,
       sortBy: "createdAt",
       sortOrder: "DESC",
     }),
     fetchCompanies({
+      limit: 100,
       page: 1,
-      limit: 1,
     }),
     fetchCareerCategoriesWithPagination({
+      limit: 100,
       page: 1,
-      limit: 6,
     }),
     fetchJobs({
-      page: 1,
       limit: 100,
+      page: 1,
       sortBy: "createdAt",
       sortOrder: "DESC",
     }),
@@ -90,27 +88,22 @@ export default async function HomePage() {
   const totalCategories =
     categoriesResult.pagination?.totalItems ??
     categoriesResult.categories.length;
-
   const totalLocations = new Set(
     jobsForLocationsResult.jobs
       .map((job) => job.location ?? job.company?.location ?? "")
       .map((location) => location.trim())
       .filter(Boolean),
   ).size;
-
   const stats = buildHomeStats({
-    totalJobs,
-    totalCompanies,
     totalCategories,
+    totalCompanies,
+    totalJobs,
     totalLocations,
   });
-
   const categories = categoriesResult.categories.slice(0, 6);
 
   return (
-    <main className="custom-scrollbar min-h-screen bg-background text-foreground">
-      <Header />
-      <FloatingFavoriteButton />
+    <>
       <HomeSlideshow />
 
       <section className="bg-surface px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -184,8 +177,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </main>
+    </>
   );
 }

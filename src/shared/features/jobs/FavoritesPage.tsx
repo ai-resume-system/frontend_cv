@@ -253,8 +253,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { Footer } from "@/shared/components/layouts/Footer";
-import { Header } from "@/shared/components/layouts/Header";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { Badge } from "@/shared/components/ui/Badge";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
@@ -315,7 +313,7 @@ function formatExperience(job: Job): string | null {
 }
 
 function buildJobHref(jobId: string): string {
-  return `${ROUTES.JOBS}?jobId=${jobId}`;
+  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
 }
 
 interface FavoriteJobRowProps {
@@ -456,11 +454,8 @@ export function FavoritesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/50 text-slate-900 flex flex-col">
-      <Header />
-
-      <section className="flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="mx-auto max-w-7xl">
+    <section className="bg-slate-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto max-w-7xl">
           {/* Header trang tối giản, tinh tế */}
           <div className="mb-8 flex flex-col gap-2 border-b border-slate-100 pb-6 sm:flex-row sm:items-end sm:justify-between">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -505,10 +500,7 @@ export function FavoritesPage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
-
-      <Footer />
-    </main>
+      </div>
+    </section>
   );
 }

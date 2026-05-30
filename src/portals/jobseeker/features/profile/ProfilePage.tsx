@@ -8,13 +8,10 @@ import {
   Save,
   ShieldCheck,
   User,
-  User2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Footer } from "@/shared/components/layouts/Footer";
-import { Header } from "@/shared/components/layouts/Header";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
@@ -191,56 +188,46 @@ export function ProfilePage() {
 
   if (isLoading && !user) {
     return (
-      <main className="min-h-screen bg-background text-foreground">
-        <Header />
-        <div className="mx-auto max-w-7xl px-8 py-12">
-          <div className="space-y-4">
-            <div className="h-4 w-40 animate-pulse rounded-full bg-surface-container" />
-            <div className="h-10 w-80 animate-pulse rounded-xl bg-surface-container" />
+      <div className="mx-auto max-w-7xl px-8 py-12">
+        <div className="space-y-4">
+          <div className="h-4 w-40 animate-pulse rounded-full bg-surface-container" />
+          <div className="h-10 w-80 animate-pulse rounded-xl bg-surface-container" />
+        </div>
+        <div className="mt-10 flex gap-10">
+          <div className="hidden w-64 space-y-2 lg:block">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-12 animate-pulse rounded-lg bg-surface-container"
+              />
+            ))}
           </div>
-          <div className="mt-10 flex gap-10">
-            <div className="hidden w-64 space-y-2 lg:block">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="h-12 animate-pulse rounded-lg bg-surface-container"
-                />
-              ))}
-            </div>
-            <div className="flex-1 space-y-6">
-              <div className="h-64 animate-pulse rounded-xl bg-surface-container" />
-              <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
-            </div>
+          <div className="flex-1 space-y-6">
+            <div className="h-64 animate-pulse rounded-xl bg-surface-container" />
+            <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
           </div>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-background text-foreground">
-        <Header />
-        <div className="mx-auto max-w-7xl px-8 py-12">
-          <div className="rounded-xl bg-surface-container-lowest p-8 shadow-sm">
-            <h2 className="font-headline text-2xl font-semibold text-on-surface">
-              Bạn chưa đăng nhập
-            </h2>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-on-surface-variant">
-              Vui lòng đăng nhập để xem và cập nhật thông tin cá nhân.
-            </p>
-          </div>
+      <div className="mx-auto max-w-7xl px-8 py-12">
+        <div className="rounded-xl bg-surface-container-lowest p-8 shadow-sm">
+          <h2 className="font-headline text-2xl font-semibold text-on-surface">
+            Bạn chưa đăng nhập
+          </h2>
+          <p className="mt-3 max-w-xl text-sm leading-7 text-on-surface-variant">
+            Vui lòng đăng nhập để xem và cập nhật thông tin cá nhân.
+          </p>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Header />
-
+    <>
       <div className="mx-auto max-w-7xl px-8 py-12">
         <div className="flex flex-col gap-10 lg:flex-row">
           <aside className="w-full lg:sticky lg:top-24 lg:w-64 lg:self-start">
@@ -374,6 +361,11 @@ export function ProfilePage() {
                       />
                     </div>
 
+                    <p className="flex xl:hidden xl:flex-col text-sm text-on-surface-variant gap-2">
+                      <span className="text-red-500">(*)</span> Các thông tin
+                      bắt buộc
+                    </p>
+
                     <div className="col-span-1 flex justify-end gap-4 md:col-span-2">
                       <BaseButton
                         onClick={resetForm}
@@ -431,7 +423,7 @@ export function ProfilePage() {
               ref={cvSectionRef}
               className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-8 shadow-sm"
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 duration-200 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-primary" />
@@ -461,8 +453,6 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
-
-      <Footer />
       <AvatarUploadModal
         currentAvatarUrl={avatarUrl}
         isOpen={isAvatarUploadOpen}
@@ -473,6 +463,6 @@ export function ProfilePage() {
         isOpen={isModalVisible}
         onClose={closeChangePasswordModal}
       />
-    </main>
+    </>
   );
 }

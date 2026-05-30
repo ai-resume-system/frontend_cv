@@ -2,8 +2,6 @@
 
 import { FileX2 } from "lucide-react";
 
-import { Footer } from "@/shared/components/layouts/Footer";
-import { Header } from "@/shared/components/layouts/Header";
 import { JobCardLink } from "@/shared/features/home/JobCard";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import type { Job } from "@/shared/types/job";
@@ -52,10 +50,7 @@ export function JobsPage() {
   const { jobs, loading, error } = useJobs({ page: 1, limit: 12 });
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Header />
-
-      <section className="bg-background px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <section className="bg-background px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 max-w-3xl">
             <h1 className="font-display text-4xl font-bold">
@@ -107,8 +102,5 @@ export function JobsPage() {
           )}
         </div>
       </section>
-
-      <Footer />
-    </main>
   );
 }

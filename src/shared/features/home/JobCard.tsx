@@ -147,7 +147,9 @@ export function JobCard(props: JobCardProps) {
 }
 
 export function JobCardLink(props: JobCardProps) {
-  const href = props.href ?? ROUTES.JOBS;
+  const href =
+    props.href ??
+    (props.jobId ? ROUTES.JOB_SEEKER_JOB_DETAIL(props.jobId) : ROUTES.JOBS);
 
   return (
     <article className="group relative min-h-full rounded-3xl border border-gray-200 border-t-[6px] border-t-transparent bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-t-primary hover:shadow-xl">

@@ -1,5 +1,11 @@
-export const metadata = { title: "FUSE - Dashboard" };
+import type { Metadata } from "next";
 
-export default function Dashboard() {
-  return <h1>Nhà tìm việc</h1>;
+import { RecruiterDashboardPage } from "@/portals/recruiter/features/dashboard/RecruiterDashboardPage";
+
+export const metadata: Metadata = {
+  title: "Dashboard recruiter",
+};
+
+export default function DashboardPage() {
+  return <RecruiterDashboardPage />;
 }

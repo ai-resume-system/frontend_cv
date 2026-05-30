@@ -7,9 +7,9 @@ export const API_ROUTES = {
     SEND_OTP: `${API_PREFIX}/auth/send-otp`,
     VERIFY_OTP: `${API_PREFIX}/auth/verify-otp`,
     LOGIN: `${API_PREFIX}/auth/login`,
-    LOGOUT: `${API_PREFIX}/auth/logout`,
     REFRESH_TOKEN: `${API_PREFIX}/auth/refresh-token`,
     FORGOT_PASSWORD: `${API_PREFIX}/auth/forgot-password`,
+    LOGOUT: `${API_PREFIX}/auth/logout`,
   },
   ACCOUNT: {
     ME: `${API_PREFIX}/account/me`,
@@ -32,13 +32,14 @@ export const API_ROUTES = {
     PREVIEW: (id: string) => `${API_PREFIX}/cvs/${id}/preview`,
     DEFAULT: (id: string) => `${API_PREFIX}/cvs/${id}/default`,
   },
-  JOB: {
+  JOB_PUBLIC: {
     BASE: `${API_PREFIX}/jobs`,
-    MY: `${API_PREFIX}/jobs/my`,
-    ADMIN: `${API_PREFIX}/jobs/admin`,
-    APPROVE: (id: string) => `${API_PREFIX}/jobs/${id}/approve`,
-    REJECT: (id: string) => `${API_PREFIX}/jobs/${id}/reject`,
-    CLOSE: (id: string) => `${API_PREFIX}/jobs/${id}/close`,
+    DETAIL: (slug: string) => `${API_PREFIX}/jobs/${slug}`,
+  },
+  JOB_RECRUITER: {
+    BASE: `${API_PREFIX}/recruiter/jobs`,
+    DETAIL: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}`,
+    CLOSE: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}/close`,
   },
   APPLICATION: {
     BASE: `${API_PREFIX}/applications`,

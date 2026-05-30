@@ -619,19 +619,19 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
   }
 
   return (
-    <div className="custom-scroll flex h-screen flex-col overflow-y-auto bg-white lg:flex-row">
+    <div className="custom-scroll flex min-h-screen flex-col overflow-y-auto lg:flex-row">
       {isJobSeeker ? (
-        <div className="sticky top-0 hidden h-screen lg:flex lg:w-1/2">
+        <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
           <JobSeekerShowcase />
         </div>
       ) : (
-        <div className="sticky top-0 hidden h-screen lg:flex lg:w-1/2">
+        <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
           <RecruiterShowcase />
         </div>
       )}
 
       <div className="flex w-full flex-1 lg:w-1/2">
-        <div className="flex min-h-screen w-full flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16">
+        <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16">
           <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:min-h-[72px]">
             <Link
               className="flex min-w-0 items-center gap-2 sm:gap-3"

@@ -1,6 +1,9 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
 import { apiService } from "@/shared/services/api-service";
-import type { IResponseApiPagination } from "@/shared/types/api";
+import type {
+  IResponseApiItem,
+  IResponseApiPagination,
+} from "@/shared/types/api";
 import type { Job, JobApiItem, JobListResponse } from "@/shared/types/job";
 
 export interface FetchJobsParams {
@@ -154,4 +157,15 @@ export async function fetchJobs(
     jobs: response.data.map(mapJobApiItemToJob),
     pagination: response.pagination,
   };
+}
+
+export async function fetchJobById(id: string): Promise<Job> {
+  const response = await apiService.get<IResponseApiItem<JobApiItem>>(
+    API_ROUTES.JOB_PUBLIC.DETAIL(id),
+    {
+      cache: "no-store",
+    },
+  );
+
+  return mapJobApiItemToJob(response.data);
 }

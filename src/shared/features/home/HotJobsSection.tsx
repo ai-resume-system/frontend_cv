@@ -83,7 +83,7 @@ function formatSalary(job: Job): string | undefined {
 }
 
 function buildJobHref(jobId: string): string {
-  return `${ROUTES.JOBS}?jobId=${jobId}`;
+  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
 }
 
 function getSalaryFilterValue(job: Job): string | null {
