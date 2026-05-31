@@ -19,10 +19,7 @@ import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { AccountChoicePage } from "@/shared/features/auth/AccountChoicePage";
-import {
-  type AuthMode,
-  useAuthFormController,
-} from "@/shared/features/auth/useAuthFormController";
+import { type AuthMode, useAuth } from "@/shared/hooks/data/useAuth";
 import { cn } from "@/shared/lib/utils/cn";
 import { JobSeekerShowcase } from "./function";
 
@@ -39,7 +36,7 @@ function formatCountdown(seconds: number): string {
 
 export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
   const isLogin = mode === "login";
-  const controller = useAuthFormController({
+  const controller = useAuth({
     mode,
     role: EUserRole.JOB_SEEKER,
   });
@@ -78,7 +75,9 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
       <div
         className={cn(
           "custom-scroll flex min-h-screen flex-col lg:flex-row",
-          isLogin ? "overflow-hidden lg:h-screen" : "overflow-y-auto lg:h-screen lg:overflow-hidden",
+          isLogin
+            ? "overflow-hidden lg:h-screen"
+            : "overflow-y-auto lg:h-screen lg:overflow-hidden",
         )}
       >
         <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">

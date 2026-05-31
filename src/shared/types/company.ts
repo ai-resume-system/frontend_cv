@@ -1,32 +1,24 @@
-// ─────────────────────── Domain entity ───────────────────────
-
 import type { IResponseApiList } from "@/shared/types/api";
+import type { CareerCategory } from "@/shared/types/career-category";
 
-export interface ICompanyEntity {
+export interface CompanyDto {
   id: string;
-  userId: string;
-  careerCategoriesId: string | null;
-  companyName: string | null;
+  slug: string | null;
+  name: string | null;
   logoUrl: string | null;
   bannerUrl: string | null;
-  location: string | null;
+  address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   description: string | null;
-  taxCode: string | null;
   websiteUrl: string | null;
+  taxCode: string | null;
+  careerCategory?: CareerCategory | null;
+  employeeMin?: number | null;
+  employeeMax?: number | null;
+  openJobCount?: number | null;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
 }
 
-// ─────────────────────── Create / Update payload ───────────────────────
-
-export interface UpdateCompanyPayload {
-  careerCategoriesId?: string;
-  companyName?: string;
-  taxCode?: string;
-  location?: string;
-  description?: string;
-  websiteUrl?: string;
-}
-
-export type CompanyListResponse = IResponseApiList<ICompanyEntity>;
+export type CompanyListResponse = IResponseApiList<CompanyDto>;

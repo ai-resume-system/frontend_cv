@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,12 +17,13 @@ import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import { cn } from "@/shared/lib/utils/cn";
-import type { CareerCategory } from "@/shared/types/category";
+import type { FetchJobsParams } from "@/shared/services/job.service";
+import type { CareerCategory } from "@/shared/types/career-category";
 import type { Job } from "@/shared/types/job";
 
 import { JobCardLink } from "./JobCard";
 
-type FilterKey = "salary" | "location" | "experience" | "category";
+type FilterKey = "salary" | "address" | "experience" | "category";
 
 interface FilterOption {
   label: string;
@@ -31,19 +32,17 @@ interface FilterOption {
 
 const FILTER_LABELS: Record<FilterKey, string> = {
   salary: "Mức lương",
-  location: "Địa điểm",
+  address: "Địa điểm",
   experience: "Kinh nghiệm",
   category: "Ngành nghề",
 };
 
-function getCompanyName(job: Job): string {
-  return (
-    job.companyName ?? job.company?.companyName ?? "Doanh nghiệp đang cập nhật"
-  );
+function getCompanyLabel(job: Job): string {
+  return job.company?.name ?? "Doanh nghiệp đang cập nhật";
 }
 
-function getLocation(job: Job): string {
-  return job.location ?? job.company?.location ?? "Địa điểm đang cập nhật";
+function getAddress(job: Job): string {
+  return job.address ?? job.company?.address ?? "Địa điểm đang cập nhật";
 }
 
 function toSalaryMillion(value?: number): number | undefined {
@@ -86,58 +85,6 @@ function buildJobHref(jobId: string): string {
   return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
 }
 
-function getSalaryFilterValue(job: Job): string | null {
-  const salaryMin = toSalaryMillion(job.salaryMin);
-  const salaryMax = toSalaryMillion(job.salaryMax);
-  const salaryValue = salaryMax ?? salaryMin;
-
-  if (typeof salaryValue !== "number") {
-    return null;
-  }
-
-  if (salaryValue < 10) {
-    return "under-10";
-  }
-
-  if (salaryValue < 15) {
-    return "10-15";
-  }
-
-  if (salaryValue < 20) {
-    return "15-20";
-  }
-
-  if (salaryValue < 25) {
-    return "20-25";
-  }
-
-  if (salaryValue < 30) {
-    return "25-30";
-  }
-
-  return "over-30";
-}
-
-function getExperienceFilterValue(job: Job): string | null {
-  if (typeof job.experienceYears !== "number") {
-    return null;
-  }
-
-  if (job.experienceYears <= 0) {
-    return "fresher";
-  }
-
-  if (job.experienceYears <= 2) {
-    return "1-2";
-  }
-
-  if (job.experienceYears <= 4) {
-    return "3-4";
-  }
-
-  return "5-plus";
-}
-
 function buildFilterOptions(
   filterKey: FilterKey,
   categories: CareerCategory[],
@@ -157,10 +104,10 @@ function buildFilterOptions(
   if (filterKey === "experience") {
     return [
       { label: "Tất cả", value: "all" },
-      { label: "Chưa yêu cầu", value: "fresher" },
+      { label: "Chưa có kinh nghiệm", value: "fresher" },
       { label: "1-2 năm", value: "1-2" },
       { label: "3-4 năm", value: "3-4" },
-      { label: "Từ 5 năm", value: "5-plus" },
+      { label: "Trên 5 năm", value: "5-plus" },
     ];
   }
 
@@ -169,12 +116,50 @@ function buildFilterOptions(
       { label: "Tất cả", value: "all" },
       ...categories.map((category) => ({
         label: category.name,
-        value: category.id,
+        value: category.slug,
       })),
     ];
   }
 
   return [];
+}
+
+function getSalaryQuery(
+  value: string,
+): Pick<FetchJobsParams, "salaryMin" | "salaryMax"> {
+  switch (value) {
+    case "under-10":
+      return { salaryMax: 10000000 };
+    case "10-15":
+      return { salaryMin: 10000000, salaryMax: 15000000 };
+    case "15-20":
+      return { salaryMin: 15000000, salaryMax: 20000000 };
+    case "20-25":
+      return { salaryMin: 20000000, salaryMax: 25000000 };
+    case "25-30":
+      return { salaryMin: 25000000, salaryMax: 30000000 };
+    case "over-30":
+      return { salaryMin: 30000000 };
+    default:
+      return {};
+  }
+}
+
+function getExperienceQuery(
+  value: string,
+): Pick<FetchJobsParams, "experienceYearsMin" | "experienceYearsMax"> {
+  switch (value) {
+    case "fresher":
+      return { experienceYearsMin: 0, experienceYearsMax: 0 };
+    case "1-2":
+      return { experienceYearsMin: 1, experienceYearsMax: 2 };
+    case "3-4":
+      return { experienceYearsMin: 3, experienceYearsMax: 4 };
+    case "5-plus":
+      return { experienceYearsMin: 5 };
+    default:
+      return {};
+  }
 }
 
 function HotJobSkeleton() {
@@ -195,12 +180,6 @@ function HotJobSkeleton() {
 }
 
 export function HotJobsSection() {
-  const { jobs, loading } = useJobs({
-    page: 1,
-    limit: 50,
-    sortBy: "createdAt",
-    sortOrder: "DESC",
-  });
   const {
     categories,
     loading: categoriesLoading,
@@ -213,45 +192,65 @@ export function HotJobsSection() {
   const [activeFilterKey, setActiveFilterKey] = useState<FilterKey>("salary");
   const [selectedFilterValue, setSelectedFilterValue] = useState("all");
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
-  const [locationInput, setLocationInput] = useState("");
+  const [addressInput, setAddressInput] = useState("");
+  const [debouncedAddressInput, setDebouncedAddressInput] = useState("");
   const chipScrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedAddressInput(addressInput.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [addressInput]);
 
   const filterOptions = useMemo(
     () => buildFilterOptions(activeFilterKey, categories),
     [activeFilterKey, categories],
   );
 
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      if (activeFilterKey === "location") {
-        if (locationInput.trim() === "") {
-          return true;
-        }
+  const queryOptions = useMemo<FetchJobsParams>(() => {
+    const baseQuery: FetchJobsParams = {
+      page: 1,
+      limit: 50,
+      sortBy: "createdAt",
+      sortOrder: "DESC",
+    };
 
-        const jobLocation = (
-          job.location ??
-          job.company?.location ??
-          ""
-        ).toLowerCase();
+    if (activeFilterKey === "address") {
+      return debouncedAddressInput
+        ? {
+            ...baseQuery,
+            address: debouncedAddressInput,
+          }
+        : baseQuery;
+    }
 
-        return jobLocation.includes(locationInput.trim().toLowerCase());
-      }
+    if (selectedFilterValue === "all") {
+      return baseQuery;
+    }
 
-      if (selectedFilterValue === "all") {
-        return true;
-      }
+    if (activeFilterKey === "salary") {
+      return {
+        ...baseQuery,
+        ...getSalaryQuery(selectedFilterValue),
+      };
+    }
 
-      if (activeFilterKey === "salary") {
-        return getSalaryFilterValue(job) === selectedFilterValue;
-      }
+    if (activeFilterKey === "experience") {
+      return {
+        ...baseQuery,
+        ...getExperienceQuery(selectedFilterValue),
+      };
+    }
 
-      if (activeFilterKey === "experience") {
-        return getExperienceFilterValue(job) === selectedFilterValue;
-      }
+    return {
+      ...baseQuery,
+      careerCategorySlug: selectedFilterValue,
+    };
+  }, [activeFilterKey, debouncedAddressInput, selectedFilterValue]);
 
-      return job.careerCategory?.id === selectedFilterValue;
-    });
-  }, [activeFilterKey, jobs, locationInput, selectedFilterValue]);
+  const { jobs, loading } = useJobs(queryOptions);
 
   function scrollFilters(direction: "left" | "right") {
     chipScrollRef.current?.scrollBy({
@@ -263,7 +262,8 @@ export function HotJobsSection() {
   function handleFilterKeyChange(filterKey: FilterKey) {
     setActiveFilterKey(filterKey);
     setSelectedFilterValue("all");
-    setLocationInput("");
+    setAddressInput("");
+    setDebouncedAddressInput("");
     setIsFilterMenuOpen(false);
   }
 
@@ -293,7 +293,7 @@ export function HotJobsSection() {
             <button
               aria-expanded={isFilterMenuOpen}
               aria-haspopup="menu"
-              className="flex h-11 w-full min-w-[200px] items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-[240px] cursor-pointer"
+              className="cursor-pointer flex h-11 w-full min-w-[200px] items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-[240px]"
               onClick={() => setIsFilterMenuOpen((prev) => !prev)}
               type="button"
             >
@@ -343,27 +343,27 @@ export function HotJobsSection() {
           </div>
 
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            {activeFilterKey === "location" ? (
+            {activeFilterKey === "address" ? (
               <div className="w-full max-w-md animate-fadeIn">
                 <BaseField
                   inputClassName="!h-11 rounded-xl border-primary/30 bg-white text-sm placeholder:text-slate-400 focus:border-primary"
                   leadingIcon={
                     <MapPinIcon className="h-4 w-4 text-muted-foreground" />
                   }
-                  onChange={(event) => setLocationInput(event.target.value)}
+                  onChange={(event) => setAddressInput(event.target.value)}
                   placeholder="Nhập địa điểm tìm kiếm (e.g. Hà Nội, Hồ Chí Minh)..."
                   trailingIcon={
-                    locationInput ? (
+                    addressInput ? (
                       <button
                         className="rounded-full p-1 transition-colors hover:bg-muted"
-                        onClick={() => setLocationInput("")}
+                        onClick={() => setAddressInput("")}
                         type="button"
                       >
                         <XIcon className="h-3.5 w-3.5 text-muted-foreground" />
                       </button>
                     ) : undefined
                   }
-                  value={locationInput}
+                  value={addressInput}
                 />
               </div>
             ) : (
@@ -421,7 +421,7 @@ export function HotJobsSection() {
           </div>
         </div>
 
-        {loading ? (
+        {loading && jobs.length === 0 ? (
           <div className="grid gap-6 md:grid-cols-3">
             <HotJobSkeleton />
             <HotJobSkeleton />
@@ -429,15 +429,15 @@ export function HotJobsSection() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
+            {jobs.length > 0 ? (
+              jobs.map((job) => (
                 <JobCardLink
-                  company={getCompanyName(job)}
+                  company={getCompanyLabel(job)}
                   href={buildJobHref(job.id)}
                   jobData={job}
                   jobId={job.id}
                   key={job.id}
-                  location={getLocation(job)}
+                  address={getAddress(job)}
                   salary={formatSalary(job)}
                   title={job.title}
                 />
@@ -457,8 +457,8 @@ export function HotJobsSection() {
                   Không có việc làm phù hợp
                 </h4>
                 <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                  {activeFilterKey === "location" && locationInput
-                    ? `Không tìm thấy kết quả nào tại địa điểm "${locationInput}".`
+                  {activeFilterKey === "address" && debouncedAddressInput
+                    ? `Không tìm thấy kết quả nào tại địa điểm "${debouncedAddressInput}".`
                     : activeFilterKey === "category" && categoriesError
                       ? "Chưa tải được danh sách ngành nghề để lọc."
                       : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."}

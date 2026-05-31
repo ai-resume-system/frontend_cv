@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { JobDetailPage } from "@/portals/jobseeker/features/jobs/JobDetailPage";
-import { fetchJobById, fetchJobs } from "@/shared/services/job.service";
+import { fetchJobBySlug, fetchJobs } from "@/shared/services/job.service";
 
 interface JobDetailRouteProps {
   params: Promise<{
@@ -13,10 +13,10 @@ interface JobDetailRouteProps {
 export async function generateMetadata({
   params,
 }: JobDetailRouteProps): Promise<Metadata> {
-  const { id } = await params;
+  const { id: slug } = await params;
 
   try {
-    const job = await fetchJobById(id);
+    const job = await fetchJobBySlug(slug);
 
     return {
       title: job.title,
@@ -29,10 +29,10 @@ export async function generateMetadata({
 }
 
 export default async function JobDetailRoute({ params }: JobDetailRouteProps) {
-  const { id } = await params;
+  const { id: slug } = await params;
 
   try {
-    const job = await fetchJobById(id);
+    const job = await fetchJobBySlug(slug);
     const relatedJobsResult = await fetchJobs({
       careerCategoryId: job.careerCategory?.id,
       limit: 3,

@@ -6,7 +6,7 @@ import {
   deleteCv,
   fetchMyCvList,
   uploadCv,
-} from "@/portals/jobseeker/services/cv.service";
+} from "@/shared/services/cv.service";
 import type { CvItem } from "@/shared/types/cv";
 
 interface UseCvListReturn {
@@ -38,9 +38,9 @@ export function useCvList(): UseCvListReturn {
   const refresh = useCallback(async () => {
     try {
       setIsLoading(true);
-      const list = await fetchMyCvList();
+      const { cvs } = await fetchMyCvList();
       if (isMounted.current) {
-        setCvList(list);
+        setCvList(cvs);
       }
     } catch {
       // Silently handle — empty list stays

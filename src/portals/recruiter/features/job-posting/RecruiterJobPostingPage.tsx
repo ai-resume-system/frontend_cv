@@ -1,10 +1,17 @@
 "use client";
 
 import type { ChangeEvent, KeyboardEvent } from "react";
-import { CalendarDays, Info, Plus, Sparkles, TriangleAlert } from "lucide-react";
+import {
+  CalendarDays,
+  Info,
+  Plus,
+  Sparkles,
+  TriangleAlert,
+} from "lucide-react";
 
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
 import { useRecruiterJobPostingForm } from "@/portals/recruiter/features/job-posting/useRecruiterJobPostingForm";
+import { EJobType } from "@/shared/constants/enums/job.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 
@@ -134,10 +141,7 @@ export function RecruiterJobPostingPage() {
                 label="Hình thức làm việc"
                 value={form.jobType}
                 onChange={(event) =>
-                  updateField(
-                    "jobType",
-                    event.target.value as (typeof JOB_TYPE_OPTIONS)[number]["value"],
-                  )
+                  updateField("jobType", event.target.value as EJobType)
                 }
                 options={JOB_TYPE_OPTIONS.map((option) => ({
                   label: option.label,
@@ -146,11 +150,11 @@ export function RecruiterJobPostingPage() {
               />
 
               <BaseField
-                id="location"
+                id="address"
                 label="Địa điểm làm việc"
                 placeholder="Hà Nội, TP.HCM hoặc Remote"
-                value={form.location}
-                onChange={(event) => updateField("location", event.target.value)}
+                value={form.address}
+                onChange={(event) => updateField("address", event.target.value)}
               />
 
               <BaseField
@@ -200,9 +204,9 @@ export function RecruiterJobPostingPage() {
             </div>
 
             <div className="mt-6 rounded-3xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
-              Phần biên tập AI trong file HTML gốc hiện chưa có endpoint backend để
-              viết lại nội dung. Form này đang gửi đúng các field backend đã hỗ trợ:
-              `title`, `shortDescription`, `description`, `location`,
+              Phần biên tập AI trong file HTML gốc hiện chưa có endpoint backend
+              để viết lại nội dung. Form này đang gửi đúng các field backend đã
+              hỗ trợ: `title`, `shortDescription`, `description`, `address`,
               `salaryMin`, `salaryMax`, `experienceYears`, `careerCategoryId`,
               `expiredAt`, `jobType`.
             </div>
@@ -216,7 +220,9 @@ export function RecruiterJobPostingPage() {
                 required
                 value={form.description}
                 error={fieldErrors.description}
-                onChange={(event) => updateField("description", event.target.value)}
+                onChange={(event) =>
+                  updateField("description", event.target.value)
+                }
                 inputClassName="min-h-56 resize-y"
               />
             </div>
@@ -243,10 +249,10 @@ export function RecruiterJobPostingPage() {
             </div>
 
             <div className="mt-6 rounded-3xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
-              Backend hiện chưa có endpoint lấy danh sách kỹ năng và cũng chưa có
-              API map `skillId` từ tên kỹ năng nhập tay. Vì vậy khối này được giữ
-              ngay trong view để recruiter chuẩn bị nội dung, nhưng dữ liệu kỹ năng
-              hiện chưa được gửi lên backend khi submit.
+              Backend hiện chưa có endpoint lấy danh sách kỹ năng và cũng chưa
+              có API map `skillId` từ tên kỹ năng nhập tay. Vì vậy khối này được
+              giữ ngay trong view để recruiter chuẩn bị nội dung, nhưng dữ liệu
+              kỹ năng hiện chưa được gửi lên backend khi submit.
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -306,7 +312,10 @@ export function RecruiterJobPostingPage() {
                           max="100"
                           value={skill.weight}
                           onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                            updateSkillWeight(skill.id, Number(event.target.value))
+                            updateSkillWeight(
+                              skill.id,
+                              Number(event.target.value),
+                            )
                           }
                           className="h-2 w-full cursor-pointer appearance-none rounded-full bg-primary-soft accent-primary"
                         />
@@ -349,22 +358,26 @@ export function RecruiterJobPostingPage() {
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <BaseField
                 id="salaryMin"
-                label="Lương tối thiểu"
+                label="Mức lương tối thiểu"
                 type="number"
                 placeholder="15000000"
                 value={form.salaryMin}
                 error={fieldErrors.salaryMin}
-                onChange={(event) => updateField("salaryMin", event.target.value)}
+                onChange={(event) =>
+                  updateField("salaryMin", event.target.value)
+                }
               />
 
               <BaseField
                 id="salaryMax"
-                label="Lương tối đa"
+                label="Mức lương tối đa"
                 type="number"
                 placeholder="30000000"
                 value={form.salaryMax}
                 error={fieldErrors.salaryMax}
-                onChange={(event) => updateField("salaryMax", event.target.value)}
+                onChange={(event) =>
+                  updateField("salaryMax", event.target.value)
+                }
               />
 
               <BaseField
@@ -374,7 +387,9 @@ export function RecruiterJobPostingPage() {
                 required
                 value={form.expiredAt}
                 error={fieldErrors.expiredAt}
-                onChange={(event) => updateField("expiredAt", event.target.value)}
+                onChange={(event) =>
+                  updateField("expiredAt", event.target.value)
+                }
               />
             </div>
           </section>
@@ -387,7 +402,9 @@ export function RecruiterJobPostingPage() {
                 <Sparkles className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-lg font-bold text-on-surface">Ghi chú API</h2>
+                <h2 className="text-lg font-bold text-on-surface">
+                  Ghi chú API
+                </h2>
                 <p className="text-sm text-on-surface-variant">
                   Trạng thái hiện tại của backend.
                 </p>
@@ -400,12 +417,12 @@ export function RecruiterJobPostingPage() {
               </li>
               <li>`jobs` POST: đang dùng để tạo tin mới.</li>
               <li>
-                Skill AI matrix: chưa có API lookup `skillId`, nên chỉ lưu nội bộ
-                trong view.
+                Skill AI matrix: chưa có API lookup `skillId`, nên chỉ lưu nội
+                bộ trong view.
               </li>
               <li>
-                AI rewrite, AI reach estimate, preview matching: chưa có endpoint
-                backend riêng.
+                AI rewrite, AI reach estimate, preview matching: chưa có
+                endpoint backend riêng.
               </li>
             </ul>
           </section>
@@ -418,8 +435,9 @@ export function RecruiterJobPostingPage() {
                   Ghi chú vận hành
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-                  Nếu backend thay đổi contract của `POST /jobs`, chỉ cần cập nhật
-                  payload mapping trong service recruiter thay vì sửa trực tiếp ở view.
+                  Nếu backend thay đổi contract của `POST /jobs`, chỉ cần cập
+                  nhật payload mapping trong service recruiter thay vì sửa trực
+                  tiếp ở view.
                 </p>
               </div>
             </div>

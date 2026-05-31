@@ -1,47 +1,29 @@
 import type { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
-
 import type { IResponseApiList } from "@/shared/types/api";
 
-// ─────────────────────── Domain entity ───────────────────────
-
-export interface IJobApplicationEntity {
-  id: string;
-  cvId: string;
-  userId: string;
-  jobId: string;
-  fullName: string | null;
-  contactEmail: string | null;
-  contactPhone: string | null;
-  coverLetter: string | null;
-  matchingScore: number | null;
-  notes: string | null;
-  status: EApplicationStatus;
-  scheduleTime: string | null;
-  scheduleLocation: string | null;
-  scheduleLink: string | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-}
-
-// ─────────────────────── Relations ───────────────────────
-
+// Chú ý sau
 export interface ApplicationCvRef {
   id: string;
   title: string | null;
   fileUrl: string | null;
   summary: string | null;
+  status?: string;
+  processingStatus?: string;
+  createdAt?: string;
+}
+
+export interface ApplicationJobCompanyRef {
+  id: string;
+  name?: string | null;
+  slug?: string | null;
+  logoUrl: string | null;
 }
 
 export interface ApplicationJobRef {
   id: string;
   title: string;
-  location: string | null;
-  company: {
-    id: string;
-    companyName: string | null;
-    logoUrl: string | null;
-  } | null;
+  address?: string | null;
+  company?: ApplicationJobCompanyRef | null;
 }
 
 export interface ApplicationUserRef {
@@ -50,9 +32,7 @@ export interface ApplicationUserRef {
   phone: string | null;
 }
 
-// ─────────────────────── Full API item ───────────────────────
-
-export interface ApplicationApiItem {
+export interface BaseApplicationApiItem {
   id: string;
   cvId: string;
   userId: string;
@@ -62,7 +42,6 @@ export interface ApplicationApiItem {
   contactPhone: string | null;
   coverLetter: string | null;
   matchingScore: number | null;
-  notes: string | null;
   status: EApplicationStatus;
   scheduleTime: string | null;
   scheduleLocation: string | null;
@@ -71,14 +50,28 @@ export interface ApplicationApiItem {
   updatedAt: string;
   cv?: ApplicationCvRef | null;
   job?: ApplicationJobRef | null;
+}
+
+export interface JobSeekerApplicationApiItem extends BaseApplicationApiItem {
+  notes?: never;
+}
+
+export interface RecruiterApplicationApiItem extends BaseApplicationApiItem {
+  notes?: string | null;
   user?: ApplicationUserRef | null;
 }
 
-// ─────────────────────── List response ───────────────────────
+export type ApplicationApiItem =
+  | JobSeekerApplicationApiItem
+  | RecruiterApplicationApiItem;
+
+export type JobSeekerApplicationListResponse =
+  IResponseApiList<JobSeekerApplicationApiItem>;
+
+export type RecruiterApplicationListResponse =
+  IResponseApiList<RecruiterApplicationApiItem>;
 
 export type ApplicationListResponse = IResponseApiList<ApplicationApiItem>;
-
-// ─────────────────────── Create payload ───────────────────────
 
 export interface CreateApplicationPayload {
   cvId: string;
@@ -88,8 +81,6 @@ export interface CreateApplicationPayload {
   contactPhone: string;
   coverLetter?: string;
 }
-
-// ─────────────────────── Update status payload ───────────────────────
 
 export interface UpdateApplicationStatusPayload {
   status: EApplicationStatus;

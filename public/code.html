@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Danh sách công ty | FUSE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#b8c4ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-bright": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#173bab",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary-container": "#00714d",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#380d00",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-variant": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "tertiary-container": "#872d00",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#444653",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#00288e",
+                        "on-tertiary-fixed-variant": "#802a00",
+                        "on-tertiary-container": "#ffa583",
+                        "surface-container-high": "#dce9ff",
+                        "surface-tint": "#3755c3",
+                        "on-primary-container": "#a8b8ff",
+                        "outline": "#757684",
+                        "primary-fixed": "#dde1ff",
+                        "on-primary-fixed": "#001453",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#611e00",
+                        "on-surface": "#0b1c30",
+                        "tertiary-fixed": "#ffdbce",
+                        "secondary-container": "#6cf8bb",
+                        "outline-variant": "#c4c5d5",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#e5eeff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb59a",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed": "#002113",
+                        "primary-container": "#1e40af",
+                        "secondary": "#006c49",
+                        "inverse-surface": "#213145",
+                        "surface-dim": "#cbdbf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "max-width": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "headline-xl": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "code": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .hero-pattern {
+            background-color: #f8f9ff;
+            background-image: radial-gradient(#00288e10 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface-container-lowest w-full sticky top-0 z-50 border-b border-outline-variant">
+<div class="flex justify-between items-center h-16 px-margin-desktop max-w-max-width mx-auto">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<img alt="FUSE Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uhl3Y66JAzJu_PrLBmpx41cSLsm8ULo0w4gWtdE11dn6LpuaRRkWGGMQfjUwnkOLoEQJnqIp4Tklr95-7Q3tNz6GGQYj0OD6qleiHm1Ied1cUiX3Suc0302385SEYmtasEniKAXpoVE7nxiUu4ap45tOrebXK6d47sqzOcOjJRhhula4o3HYWMxXymLp499VeeSwDDMFsKjoBs7nh5LWN1RbCK5nG7MsTNX0jgF_Gg1zveHf2c5u-Qfbw"/>
+<span class="text-headline-md font-headline-md font-black tracking-tight text-primary">FUSE</span>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Jobs</a>
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">Companies</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">AI Analysis</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary" placeholder="Tìm kiếm..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-body-md text-body-md hover:opacity-90 active:scale-95 transition-all">Login</button>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="hero-pattern py-16 md:py-24 border-b border-outline-variant">
+<div class="max-w-max-width mx-auto px-margin-desktop flex flex-col md:flex-row items-center gap-12">
+<div class="flex-1 space-y-6">
+<div class="inline-flex items-center gap-2 bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full text-label-md font-label-md uppercase tracking-wider">
+                        Danh sách công ty
+                    </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface md:text-[48px] md:leading-[56px]">
+                        Khám phá <span class="text-primary">100.000+</span> công ty nổi bật
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Tra cứu thông tin công ty và tìm kiếm nơi làm việc tốt nhất dành cho bạn. Chúng tôi kết nối bạn với những môi trường chuyên nghiệp hàng đầu Việt Nam.
+                    </p>
+<div class="relative max-w-2xl mt-8">
+<div class="flex p-1 bg-white border border-outline-variant rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined self-center ml-4 text-outline">search</span>
+<input class="flex-grow border-none focus:ring-0 text-body-lg px-4 py-3 placeholder:text-outline-variant" placeholder="Nhập tên công ty..." type="text"/>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-lg font-body-md font-bold hover:bg-primary-container transition-colors">
+                                Tìm kiếm
+                            </button>
+</div>
+</div>
+</div>
+<div class="flex-1 hidden lg:block">
+<img alt="Career Growth Illustration" class="w-full max-w-lg mx-auto rounded-2xl" data-alt="A clean, professional 3D isometric illustration showing several tiny people interacting around oversized business tools like a magnifying glass over a building, a chart, and a globe. The scene is bright and airy with a royal blue and emerald green color scheme on a white background, embodying corporate growth and search." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9huj_QdyvUcOkiMHyalUkKklXZlooBlw-hWhbjaUGAX-O0HrBw-YE0Z0P00TIs2NAcHNZaPOnCNd6Qi4C76XBtFBqHvZ5GRdzO50hwNWnpakWGcUexwfDYA2RjoR8D7BqwbdOQywELXqRzbYJzeamLQLOx5YwoeIA33c3gQy6IqlviGA-d_xPtild0oJsg-4MKB2NHPDBejUDnP371eExTAR1J7RDIlNMaX_lXtVYJEioZ7x-QJHvqoqvAPeV2E1mmROxDHp5634"/>
+</div>
+</div>
+</section>
+<!-- Company Directory Grid -->
+<section class="py-16 max-w-max-width mx-auto px-margin-desktop">
+<div class="flex items-center justify-between mb-10">
+<h2 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">DANH SÁCH CÁC CÔNG TY NỔI BẬT</h2>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-outline-variant">view_list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="Dream Viet Education" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A candid photo of a diverse group of young energetic teachers and students in a modern brightly lit classroom. They are laughing and collaborating around a large wooden table with educational tools. The lighting is warm and natural, suggesting a creative and supportive educational environment for a firm like Dream Viet Education." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFALg8FBw-6Y_QHsxxZyY7lREn9S8hF3c4qHRE3rYNfMIHY0dDOOxCbjaOKiRutIjFvXtnRlvcbwLQaUMtZVKFKl1_gakghQPYl2estCSx512V9a85wNoCHnC8S0hOsfW59rYNM4yz6bDcv7hS9V6SRUCbaKnbpi2OWQ7K1Jd_o_2G9jeD6DlWTwLeSsJybYiw1Vb9ri3rcR46fSL4BpoE1HfrDa5lzbsIW74gPrDrzcEkv9WMsWxn_Ra0FVXarhIwsBzunpLD2kA"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">CÔNG TY CỔ PHẦN DREAM VIET EDUCATION</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            Công ty Cổ phần Dream Viet Education - KYNA PTE. LTD. (KYNA ENGLISH) là đơn vị đào tạo trực tuyến hàng đầu dành cho trẻ em, học sinh với hơn 200,000 học sinh trên toàn quốc. KYNA cung cấp chương trình học video, ứng dụng học tập Tiếng Anh chất lượng cao.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Giáo dục</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Trực tuyến</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="Mathnasium Việt Nam" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="An organized desk with a calculator, notebook, fountain pen, and a laptop open to a math learning application. The aesthetic is clean and corporate modern, utilizing high-utility items. Soft morning light casts gentle shadows, creating a focused and professional atmosphere for a tutoring company like Mathnasium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADBQJEzKvFIhB85oAnzbxIEMWQe7wWx9Sh6P-EIh0Q1Wbf6_ZIZoLUN9ODbx2poumAKqZ_5o3oUl6H1QAk1G62UEYbVgl8QSuO6c3GzqQ7bF3y_DfsZI3Xz9OZvZLitus6m5R8K0LEaTrB1-gK7NCfY1656dlgAobpHjLabcI6IBJ3o-op3CUJR2m_Tqm-7X4t2qyV-jcoCOWOGVSWgHvKnxChMmb-YWjEYVKOYas7QaAJJ-REbmcIGbZYKzDmo0hw52UklqTdIrs"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-secondary/10 rounded">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">calculate</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">MATHNASIUM VIỆT NAM</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            Mathnasium là Hệ thống Trung tâm Đào tạo Toán tư duy chuyên nghiệp và giàu kinh nghiệm cho học sinh từ lứa tuổi Mầm non đến Trung học cơ sở. Xuất xứ từ Hoa Kỳ, phương pháp dạy Toán Mathnasium đã được kiểm nghiệm và chứng minh hiệu quả toàn cầu.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Toán tư duy</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Trung tâm</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="SeABank" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Two professional banking advisors in sharp business attire smiling and talking to a client in a modern high-end bank lobby with glass partitions and subtle brand elements. The atmosphere is trustworthy and stable, lit with cool architectural lighting that emphasizes reliability and premium service of SeABank." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAgZi21_NFKs5t8u25NYBM6e9tzUoGAsEAVzd45MLMVapcOSg50GACrotE7_aE4pjPBl6vFz1XLhc0ErIm5v4cSYlXTCN-jkrRU6VbSE-up2K8GO5XddqELbbmoPdFOg89zD5zLd99k2Ci7ZlfqsDvtzWZxE69kUV952GNdvl5QeZhmsyUYN27uIYQruCchWJmuSoZ76qGJgudwyRlo5WZTTSsUZO0GIHfBdY-5gilxfqDC8w0yEGGo-D_dCSgDmd82isvSm4jByY"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-error/10 rounded">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">NGÂN HÀNG TMCP ĐÔNG NAM Á - SEABANK</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            Ngân hàng TMCP Đông Nam Á (SeABank) có trụ sở chính tại 198 Trần Quang Khải, Hà Nội. SeABank được biết đến là một trong nhóm dẫn đầu các ngân hàng thương mại cổ phần lớn nhất Việt Nam về quy mô vốn điều lệ và mạng lưới hoạt động ổn định.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Tài chính</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Ngân hàng</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="FPT Software" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A modern open-plan office space featuring minimalist white desks, ergonomic chairs, and indoor plants. High-key natural lighting fills the room, creating a bright and productive atmosphere. The design is architectural and structured, reflecting a professional environment for a leading technology company." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDokzJoW4Cnz4rfuygeUHHCcqlbLSHJUqWKtkKcZQs1uSiEUnBxVnGEWbcvUItZNLiIpTFs_dUcDmSvAap1LLLhl8Fvx_YCTk97qs6hn0n3_lfToCUNBLwuypKbNNadu-W0nqqHxq_mqtzSnQ3ab83CBf4dM-qf7UzvJd-kH4S8FI2_0P1qPjrJ9m5OP0ODRJsn7UtgfIRGuy8xPlELtn2Dhbt7B3REI8WKEuzJzVwEDv1t3pBZ_1KKDwg4GLp4TGoExmQYSjVqvVM"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">FPT SOFTWARE</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            FPT Software là công ty dịch vụ CNTT lớn nhất Việt Nam và khu vực Đông Nam Á, chuyên cung cấp các giải pháp công nghệ tiên tiến cho hàng trăm khách hàng thuộc danh sách Fortune Global 500 trên toàn cầu.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Công nghệ</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Phần mềm</span>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="VNG Corporation" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A creative workspace with designers working on tablets and large monitors displaying complex user interface prototypes. The room is filled with colorful sticky notes and collaborative whiteboard sessions. Lighting is bright but soft, emphasizing a high-energy yet structured digital design studio environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMuin07P6Q7u6XnojWDVnMMhy2dkguBaXJgkogjzLQ8KHwqyGKea_t2KIZgiRVNi9MzVkW29Gt83cmV_3VK_4YWfvy4ud02nf_ggSoq7L3nA3qeTe8dvKsQJAEf_dsljJBphc8vIHJzOEgNwmzBE7PHJdSx9QszdPrVIe6t0BFHtckYzOZaC3NKCqm0DO_Nei5Np2FFSPFmXmSccQTTs_fa3LgUZkU-802TdhNe0x6wnNE6bdm3ctY26_LIimOkg23e0KLWYrXKFs"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-tertiary/10 rounded">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">VNG CORPORATION</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            VNG là công ty công nghệ kỳ lân đầu tiên của Việt Nam, hoạt động trong các lĩnh vực nội dung số, giải trí trực tuyến, mạng xã hội và thanh toán điện tử (ZaloPay). Một môi trường trẻ trung và năng động.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Internet</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Zalo</span>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+<div class="relative h-48">
+<img alt="Viettel Group" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A professional team meeting in a high-rise office boardroom with floor-to-ceiling windows overlooking a modern city skyline. The furniture is sleek royal blue and gray, reflecting a corporate modern aesthetic. High-key natural lighting emphasizes a sense of openness, stability, and corporate success." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVII6RBA5NulCRZfqIga_hzGyl3FqrQa_XEoQnF45_cURrMsHC9tSuQD93WCC_k4JdYx7l-rytraau5G2A8AoxSpQA6DIuss5UH8OmcKmyqESVs-JrvPAOdA4y8iNsl2vHF_oUR5b-2VlnC8FvfKsfXqgSeTZT-KS-_oG7BFF9MdN-6U9WA-krQmVPSU2v1vg4M8ulYvqzjYqTd-RGWvD0sL5RGXWPslEBsxZR-6C_qp7rHDNBj6Dp81MFACKEMxfomXPQ0Ey2FcA"/>
+<div class="absolute -bottom-6 left-6 p-2 bg-white rounded-lg shadow-md border border-outline-variant">
+<div class="w-12 h-12 flex items-center justify-center bg-secondary/10 rounded">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">cell_tower</span>
+</div>
+</div>
+</div>
+<div class="pt-10 p-6 space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">VIETTEL GROUP</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-4">
+                            Tập đoàn Công nghiệp - Viễn thông Quân đội (Viettel) là tập đoàn viễn thông lớn nhất Việt Nam. Viettel luôn tiên phong trong việc kiến tạo xã hội số và mở rộng thị trường ra quốc tế với nhiều dự án công nghệ trọng điểm.
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Viễn thông</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-md font-label-md text-on-surface-variant">Tập đoàn</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-16 flex justify-center items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container">3</button>
+<span class="px-2">...</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container">12</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Stats / Feature Section -->
+<section class="bg-surface-container-low py-16 border-t border-b border-outline-variant">
+<div class="max-w-max-width mx-auto px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+<div>
+<div class="text-headline-xl font-headline-xl text-primary mb-1">100K+</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Công ty đăng ký</div>
+</div>
+<div>
+<div class="text-headline-xl font-headline-xl text-primary mb-1">2M+</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Lượt xem hàng tháng</div>
+</div>
+<div>
+<div class="text-headline-xl font-headline-xl text-primary mb-1">500+</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Review xác thực</div>
+</div>
+<div>
+<div class="text-headline-xl font-headline-xl text-primary mb-1">24/7</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Hỗ trợ tìm kiếm</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-container w-full mt-auto border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center py-8 px-margin-desktop max-w-max-width mx-auto gap-gutter">
+<div class="flex items-center gap-2 mb-4 md:mb-0">
+<span class="text-headline-md font-headline-md text-primary">FUSE</span>
+<span class="text-label-md font-label-md text-on-surface-variant border-l border-outline pl-4 ml-2">© 2024 FUSE Recruitment Platform. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline decoration-secondary transition-colors" href="#">Privacy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline decoration-secondary transition-colors" href="#">Terms</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline decoration-secondary transition-colors" href="#">Support</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple interactive micro-interactions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.95)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.classList.add('border-primary', 'shadow-md');
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.classList.remove('border-primary', 'shadow-md');
+            });
+        }
+    </script>
+</body></html>

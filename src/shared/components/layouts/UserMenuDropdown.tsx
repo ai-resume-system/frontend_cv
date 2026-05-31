@@ -7,7 +7,7 @@ import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
-import type { AuthUser } from "@/shared/types/auth";
+import type { AuthUser } from "@/shared/types/account";
 import { ChevronDown } from "lucide-react";
 import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
 

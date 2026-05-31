@@ -11,12 +11,12 @@ import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import type { Job } from "@/shared/types/job";
 
-function getCompanyName(job: Job): string {
-  return job.companyName ?? job.company?.companyName ?? "Doanh nghiệp";
+function getCompanyLabel(job: Job): string {
+  return job.company?.name ?? "Doanh nghiệp";
 }
 
-function getLocation(job: Job): string {
-  return job.location ?? job.company?.location ?? "Đang cập nhật";
+function getAddress(job: Job): string {
+  return job.address ?? job.company?.address ?? "Đang cập nhật";
 }
 
 function formatSalary(job: Job): string {
@@ -65,19 +65,19 @@ function buildJobHref(jobId: string): string {
 type SortValue = "newest" | "salary";
 
 interface JobListFilterState {
-  careerCategoryId: string;
+  address: string;
+  category: string;
   experienceYears: string;
   jobType: string;
-  location: string;
   q: string;
   sort: SortValue;
 }
 
 const INITIAL_FILTER_STATE: JobListFilterState = {
-  careerCategoryId: "",
+  address: "",
+  category: "",
   experienceYears: "",
   jobType: "",
-  location: "",
   q: "",
   sort: "newest",
 };
@@ -88,10 +88,13 @@ function readFiltersFromSearchParams(
   const sortParam = searchParams.get("sort");
 
   return {
-    careerCategoryId: searchParams.get("careerCategoryId") ?? "",
+    address: searchParams.get("address") ?? "",
+    category:
+      searchParams.get("category") ??
+      searchParams.get("careerCategorySlug") ??
+      "",
     experienceYears: searchParams.get("experienceYears") ?? "",
     jobType: searchParams.get("jobType") ?? "",
-    location: searchParams.get("location") ?? "",
     q: searchParams.get("q") ?? "",
     sort: sortParam === "salary" ? "salary" : "newest",
   };
@@ -117,13 +120,13 @@ export function JobListPage() {
 
   const queryOptions = useMemo(
     () => ({
-      careerCategoryId: filters.careerCategoryId || undefined,
+      careerCategorySlug: filters.category || undefined,
       experienceYears: filters.experienceYears
         ? Number(filters.experienceYears)
         : undefined,
       jobType: filters.jobType || undefined,
       limit: 9,
-      location: filters.location || undefined,
+      address: filters.address || undefined,
       page,
       q: filters.q || undefined,
       sortBy: filters.sort === "salary" ? "salaryMax" : "createdAt",
@@ -154,12 +157,12 @@ export function JobListPage() {
       nextSearchParams.set("q", filters.q.trim());
     }
 
-    if (filters.location.trim()) {
-      nextSearchParams.set("location", filters.location.trim());
+    if (filters.address.trim()) {
+      nextSearchParams.set("address", filters.address.trim());
     }
 
-    if (filters.careerCategoryId) {
-      nextSearchParams.set("careerCategoryId", filters.careerCategoryId);
+    if (filters.category) {
+      nextSearchParams.set("category", filters.category);
     }
 
     if (filters.jobType) {
@@ -210,12 +213,12 @@ export function JobListPage() {
                 />
 
                 <BaseField
-                  id="job-search-location"
+                  id="job-search-address"
                   label="Địa điểm"
                   placeholder="Hà Nội, TP.HCM, Đà Nẵng..."
-                  value={filters.location}
+                  value={filters.address}
                   onChange={(event) =>
-                    updateFilter("location", event.target.value)
+                    updateFilter("address", event.target.value)
                   }
                 />
 
@@ -223,15 +226,20 @@ export function JobListPage() {
                   id="job-search-category"
                   as="select"
                   label="Lĩnh vực"
-                  value={filters.careerCategoryId}
+                  value={filters.category}
                   onChange={(event) =>
-                    updateFilter("careerCategoryId", event.target.value)
+                    updateFilter("category", event.target.value)
                   }
                   options={[
-                    { label: categoriesLoading ? "Đang tải..." : "Tất cả lĩnh vực", value: "" },
+                    {
+                      label: categoriesLoading
+                        ? "Đang tải..."
+                        : "Tất cả lĩnh vực",
+                      value: "",
+                    },
                     ...categories.map((category) => ({
                       label: category.name,
-                      value: category.id,
+                      value: category.slug,
                     })),
                   ]}
                 />
@@ -241,7 +249,9 @@ export function JobListPage() {
                   as="select"
                   label="Loại hình"
                   value={filters.jobType}
-                  onChange={(event) => updateFilter("jobType", event.target.value)}
+                  onChange={(event) =>
+                    updateFilter("jobType", event.target.value)
+                  }
                   options={[
                     { label: "Tất cả loại hình", value: "" },
                     { label: "Toàn thời gian", value: "full_time" },
@@ -340,7 +350,7 @@ export function JobListPage() {
                   >
                     <div className="flex flex-col gap-5 md:flex-row md:items-center">
                       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-surface-container-high bg-surface-container-low text-xl font-bold text-primary">
-                        {getCompanyName(job).slice(0, 1)}
+                        {getCompanyLabel(job).slice(0, 1)}
                       </div>
 
                       <div className="min-w-0 flex-1">
@@ -360,7 +370,7 @@ export function JobListPage() {
                               ) : null}
                             </div>
                             <p className="mt-1 text-sm font-semibold text-primary">
-                              {getCompanyName(job)}
+                              {getCompanyLabel(job)}
                             </p>
                           </div>
 
@@ -371,7 +381,7 @@ export function JobListPage() {
 
                         <div className="mt-4 flex flex-wrap gap-3 text-sm text-on-surface-variant">
                           <span className="rounded-full bg-surface-container-low px-3 py-1.5">
-                            {getLocation(job)}
+                            {getAddress(job)}
                           </span>
                           <span className="rounded-full bg-surface-container-low px-3 py-1.5">
                             {formatSalary(job)}

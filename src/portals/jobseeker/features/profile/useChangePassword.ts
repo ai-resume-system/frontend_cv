@@ -8,11 +8,15 @@ import {
   changeMyPassword,
   clearCachedAuth,
 } from "@/shared/services/account.service";
+import type { FieldErrors } from "@/shared/types/api";
 
-import type {
-  ChangePasswordFormErrors,
-  ChangePasswordFormValues,
-} from "../../../../shared/types/profile";
+interface ChangePasswordFormValues {
+  confirmNewPassword: string;
+  currentPassword: string;
+  newPassword: string;
+}
+
+type ChangePasswordFormErrors = FieldErrors;
 
 const EMPTY_CHANGE_PASSWORD_FORM: ChangePasswordFormValues = {
   confirmNewPassword: "",

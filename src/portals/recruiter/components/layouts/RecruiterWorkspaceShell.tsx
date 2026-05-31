@@ -109,7 +109,7 @@ export function RecruiterWorkspaceShell({
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-on-surface">
-                  {user?.company?.companyName ?? user?.profile?.fullName ?? "Tài khoản recruiter"}
+                  {user?.company?.name ?? user?.profile?.fullName ?? "Tài khoản recruiter"}
                 </p>
                 <p className="truncate text-xs text-on-surface-variant">
                   {user?.email ?? "Chưa tải thông tin tài khoản"}

@@ -33,8 +33,8 @@ export type AuthMode = "login" | "register";
 export type RegisterStep = "form" | "otp";
 
 export interface AuthFormState {
-  location: string;
-  company_name: string;
+  address: string;
+  name: string;
   confirmPassword: string;
   email: string;
   fullName: string;
@@ -53,8 +53,8 @@ type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
 type AuthTouchedFields = Partial<Record<AuthFieldName, boolean>>;
 
 const initialFormState: AuthFormState = {
-  location: "",
-  company_name: "",
+  address: "",
+  name: "",
   confirmPassword: "",
   email: "",
   fullName: "",
@@ -70,10 +70,7 @@ function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export function useAuthFormController({
-  mode,
-  role,
-}: UseAuthFormControllerOptions) {
+export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
   const router = useRouter();
   const t = AUTH_MESSAGES;
   const isRegister = mode === "register";
@@ -175,8 +172,8 @@ export function useAuthFormController({
 
         return undefined;
 
-      case "company_name":
-        if (isRegister && isRecruiter && !nextForm.company_name.trim()) {
+      case "name":
+        if (isRegister && isRecruiter && !nextForm.name.trim()) {
           return t.validation.required;
         }
 
@@ -197,8 +194,8 @@ export function useAuthFormController({
 
         return undefined;
 
-      case "location":
-        if (isRegister && isRecruiter && !nextForm.location.trim()) {
+      case "address":
+        if (isRegister && isRecruiter && !nextForm.address.trim()) {
           return t.validation.required;
         }
         return undefined;
@@ -226,7 +223,7 @@ export function useAuthFormController({
           "password",
           "confirmPassword",
           ...(isRecruiter
-            ? (["company_name", "phone", "location"] as const)
+            ? (["name", "phone", "address"] as const)
             : (["fullName"] as const)),
         ]
       : ["email", "password"];
@@ -368,25 +365,20 @@ export function useAuthFormController({
     setIsSubmitting(true);
 
     try {
-      const payload = isRecruiter
-        ? {
-            location: form.location || undefined,
-            company_name: form.company_name || undefined,
-            email: form.email,
-            password: form.password,
-            phone: form.phone || undefined,
-          }
-        : {
-            email: form.email,
-            fullName: form.fullName || undefined,
-            password: form.password,
-            phone: form.phone || undefined,
-          };
-
       if (isRecruiter) {
-        await registerRecruiter(payload);
+        await registerRecruiter({
+          address: form.address.trim(),
+          email: form.email,
+          name: form.name.trim(),
+          password: form.password,
+          phone: form.phone.trim() || undefined,
+        });
       } else {
-        await registerJobSeeker(payload);
+        await registerJobSeeker({
+          email: form.email,
+          fullName: form.fullName.trim(),
+          password: form.password,
+        });
       }
 
       setRegisterStep("otp");
@@ -456,6 +448,7 @@ export function useAuthFormController({
       await sendOtp({
         email: form.email,
         type: EOtpType.REGISTER,
+        role,
       });
       setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
     } catch (error) {

@@ -76,7 +76,7 @@ export function Header() {
       {
         ...mainNavItems[0],
         children: categories.map((category) => ({
-          href: `${ROUTES.JOBS}?careerCategoryId=${category.id}`,
+          href: `${ROUTES.JOBS}?category=${category.slug}`,
           label: category.name,
         })),
       },
@@ -357,7 +357,7 @@ export function Header() {
 
                           {isJobsItem && !loading && error ? (
                             <p className="px-4 py-3 text-sm text-muted-foreground">
-                              {t.categories.error}
+                              Chưa tải được danh sách ngành nghề
                             </p>
                           ) : null}
 
@@ -366,7 +366,7 @@ export function Header() {
                           !error &&
                           item.children?.length === 0 ? (
                             <p className="px-4 py-3 text-sm text-muted-foreground">
-                              {t.categories.empty}
+                              Chưa có ngành nghề để hiển thị
                             </p>
                           ) : null}
 
@@ -377,7 +377,7 @@ export function Header() {
                                 href={ROUTES.JOBS}
                                 onClick={closeDrawer}
                               >
-                                {t.categories.viewMore}
+                                Xem thêm
                                 <ChevronRight
                                   aria-hidden="true"
                                   className="h-4 w-4"

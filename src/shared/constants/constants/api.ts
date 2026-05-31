@@ -20,17 +20,31 @@ export const API_ROUTES = {
     ME_DELETE_LOGO: `${API_PREFIX}/account/me/logo`,
     ME_DELETE_BANNER: `${API_PREFIX}/account/me/banner`,
   },
-  CAREER_CATEGORY: {
-    BASE: `${API_PREFIX}/career-categories`,
+  UPLOAD: {
+    BASE: `${API_PREFIX}/uploads`,
   },
   COMPANY: {
     BASE: `${API_PREFIX}/companies`,
+    DETAIL: (slug: string) => `${API_PREFIX}/companies/${slug}`,
+    JOBS: (slug: string) => `${API_PREFIX}/companies/${slug}/jobs`,
+  },
+  CAREER_CATEGORY: {
+    BASE: `${API_PREFIX}/career-categories`,
+    TOP: `${API_PREFIX}/career-categories/top`,
+    DETAIL: (slug: string) => `${API_PREFIX}/career-categories/${slug}`,
+  },
+  SKILL: {
+    BASE: `${API_PREFIX}/skills`,
+    DETAIL: (slug: string) => `${API_PREFIX}/skills/${slug}`,
   },
   CV: {
     BASE: `${API_PREFIX}/cvs`,
+    DETAIL: (id: string) => `${API_PREFIX}/cvs/${id}`,
     DOWNLOAD: (id: string) => `${API_PREFIX}/cvs/${id}/download`,
     PREVIEW: (id: string) => `${API_PREFIX}/cvs/${id}/preview`,
     DEFAULT: (id: string) => `${API_PREFIX}/cvs/${id}/default`,
+    ANALYZE: (id: string) => `${API_PREFIX}/cvs/${id}/analyze`,
+    ANALYSIS: (id: string) => `${API_PREFIX}/cvs/${id}/analysis`,
   },
   JOB_PUBLIC: {
     BASE: `${API_PREFIX}/jobs`,
@@ -41,16 +55,22 @@ export const API_ROUTES = {
     DETAIL: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}`,
     CLOSE: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}/close`,
   },
-  APPLICATION: {
-    BASE: `${API_PREFIX}/applications`,
-    MY: `${API_PREFIX}/applications/my`,
-    JOB: (jobId: string) => `${API_PREFIX}/applications/jobs/${jobId}`,
+  JOB_APPLICATION: {
+    BASE: `${API_PREFIX}/job-applications`,
+    MY: `${API_PREFIX}/job-applications/me`,
+    DETAIL: (id: string) => `${API_PREFIX}/job-applications/${id}`,
   },
   FAVORITE_JOB: {
     BASE: `${API_PREFIX}/favourite-jobs`,
     DETAIL: (jobId: string) => `${API_PREFIX}/favourite-jobs/${jobId}`,
   },
-  UPLOAD: {
-    BASE: `${API_PREFIX}/uploads`,
+  RECRUITER_JOB_APPLICATION: {
+    BY_JOB: (jobId: string) =>
+      `${API_PREFIX}/recruiter/job-applications/jobs/${jobId}`,
+    DETAIL: (id: string) => `${API_PREFIX}/recruiter/job-applications/${id}`,
+    CV: (applicationId: string) =>
+      `${API_PREFIX}/recruiter/job-applications/${applicationId}/cv`,
+    STATUS: (id: string) =>
+      `${API_PREFIX}/recruiter/job-applications/${id}/status`,
   },
 };

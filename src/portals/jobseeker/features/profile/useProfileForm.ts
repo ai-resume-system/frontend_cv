@@ -8,12 +8,17 @@ import {
   setCachedUser,
   updateMyProfile,
 } from "@/shared/services/account.service";
-import type { AuthUser } from "@/shared/types/auth";
+import type { AuthUser } from "@/shared/types/account";
+import type { FieldErrors } from "@/shared/types/api";
 
-import type {
-  ProfileFormErrors,
-  ProfileFormValues,
-} from "../../../../shared/types/profile";
+interface ProfileFormValues {
+  phone: string;
+  fullName: string;
+  email: string;
+  bio: string;
+}
+
+type ProfileFormErrors = FieldErrors;
 
 const EMPTY_PROFILE_FORM: ProfileFormValues = {
   bio: "",

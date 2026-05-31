@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { useCvList } from "@/portals/jobseeker/hooks/data/useCvList";
+import { useCvList } from "@/shared/hooks/data/useCvList";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
@@ -27,12 +27,12 @@ interface ApplicationFormState {
   fullName: string;
 }
 
-function getCompanyName(job: Job): string {
-  return job.companyName ?? job.company?.companyName ?? "Doanh nghiệp";
+function getCompanyLabel(job: Job): string {
+  return job.company?.name ?? "Doanh nghiệp";
 }
 
-function getLocation(job: Job): string {
-  return job.location ?? job.company?.location ?? "Đang cập nhật";
+function getAddress(job: Job): string {
+  return job.address ?? job.company?.address ?? "Đang cập nhật";
 }
 
 function formatSalary(job: Job): string {
@@ -142,8 +142,14 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
       return;
     }
 
-    if (!form.fullName.trim() || !form.contactEmail.trim() || !form.contactPhone.trim()) {
-      await showErrorAlert("Vui lòng điền đầy đủ họ tên, email và số điện thoại.");
+    if (
+      !form.fullName.trim() ||
+      !form.contactEmail.trim() ||
+      !form.contactPhone.trim()
+    ) {
+      await showErrorAlert(
+        "Vui lòng điền đầy đủ họ tên, email và số điện thoại.",
+      );
       return;
     }
 
@@ -165,7 +171,9 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
       });
     } catch (error) {
       await showErrorAlert(
-        error instanceof Error ? error.message : "Không thể ứng tuyển công việc này.",
+        error instanceof Error
+          ? error.message
+          : "Không thể ứng tuyển công việc này.",
       );
     } finally {
       setIsSubmitting(false);
@@ -194,7 +202,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
               <div className="mt-5 flex flex-wrap gap-4 text-sm text-on-surface-variant">
                 <span className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2">
                   <MapPin className="h-4 w-4 text-primary" />
-                  {getLocation(job)}
+                  {getAddress(job)}
                 </span>
                 <span className="rounded-full bg-surface-container-low px-4 py-2">
                   {typeof job.experienceYears === "number"
@@ -215,7 +223,9 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                   disabled={isSubmitting}
                   className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span>{isSubmitting ? "Đang gửi hồ sơ..." : "Ứng tuyển ngay"}</span>
+                  <span>
+                    {isSubmitting ? "Đang gửi hồ sơ..." : "Ứng tuyển ngay"}
+                  </span>
                   <Send className="h-4 w-4" />
                 </button>
 
@@ -268,7 +278,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     Công ty
                   </p>
                   <p className="mt-2 text-lg font-semibold text-on-surface">
-                    {getCompanyName(job)}
+                    {getCompanyLabel(job)}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-surface-container-low p-5">
@@ -284,7 +294,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     Lĩnh vực
                   </p>
                   <p className="mt-2 text-lg font-semibold text-on-surface">
-                    {job.careerCategoryName ?? "Đang cập nhật"}
+                    {job.careerCategory?.name ?? "Đang cập nhật"}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-surface-container-low p-5">
@@ -321,23 +331,25 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
             <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-sm">
               <div className="flex items-center gap-3">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white">
-                  {getCompanyName(job).slice(0, 1)}
+                  {getCompanyLabel(job).slice(0, 1)}
                 </span>
                 <div>
                   <h2 className="text-xl font-bold text-primary">
-                    {getCompanyName(job)}
+                    {getCompanyLabel(job)}
                   </h2>
                   <p className="text-sm text-on-surface-variant">
-                    {job.careerCategoryName ?? "Doanh nghiệp đang cập nhật lĩnh vực"}
+                    {job.careerCategory?.name ??
+                      "Doanh nghiệp đang cập nhật lĩnh vực"}
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 space-y-3 text-sm text-on-surface-variant">
-                <p>{getLocation(job)}</p>
+                <p>{getAddress(job)}</p>
                 <p>
-                  Trang công ty chi tiết chưa có route riêng trong repo, nên khối này
-                  đang hiển thị dữ liệu công ty lấy trực tiếp từ API job detail.
+                  Trang công ty chi tiết chưa có route riêng trong repo, nên
+                  khối này đang hiển thị dữ liệu công ty lấy trực tiếp từ API
+                  job detail.
                 </p>
               </div>
 
@@ -371,8 +383,12 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
 
               {isLoggedIn && !isLoadingCvList && !cvList.length ? (
                 <div className="mt-5 rounded-2xl border border-dashed border-surface-container-high bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
-                  Bạn chưa có CV nào trong hệ thống. Hãy tải CV lên trước tại trang
-                  <Link href={ROUTES.JOB_SEEKER_CV} className="ml-1 font-semibold text-primary">
+                  Bạn chưa có CV nào trong hệ thống. Hãy tải CV lên trước tại
+                  trang
+                  <Link
+                    href={ROUTES.JOB_SEEKER_CV}
+                    className="ml-1 font-semibold text-primary"
+                  >
                     quản lý CV
                   </Link>
                   .
@@ -385,7 +401,9 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     id="apply-full-name"
                     label="Họ và tên"
                     value={form.fullName}
-                    onChange={(event) => updateField("fullName", event.target.value)}
+                    onChange={(event) =>
+                      updateField("fullName", event.target.value)
+                    }
                   />
                   <BaseField
                     id="apply-email"
@@ -408,9 +426,12 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     as="select"
                     label="Chọn CV"
                     value={form.cvId}
-                    onChange={(event) => updateField("cvId", event.target.value)}
+                    onChange={(event) =>
+                      updateField("cvId", event.target.value)
+                    }
                     options={cvList.map((cv) => ({
-                      label: cv.title ?? `CV ${formatDate(new Date(cv.createdAt))}`,
+                      label:
+                        cv.title ?? `CV ${formatDate(new Date(cv.createdAt))}`,
                       value: cv.id,
                     }))}
                   />
@@ -453,11 +474,11 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                         {relatedJob.title}
                       </h3>
                       <p className="mt-1 text-sm text-on-surface-variant">
-                        {getCompanyName(relatedJob)}
+                        {getCompanyLabel(relatedJob)}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-on-surface-variant">
                         <span className="rounded-full bg-white px-3 py-1">
-                          {getLocation(relatedJob)}
+                          {getAddress(relatedJob)}
                         </span>
                         <span className="rounded-full bg-white px-3 py-1">
                           {formatSalary(relatedJob)}

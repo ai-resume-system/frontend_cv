@@ -12,11 +12,10 @@ import {
 } from "@/shared/services/auth-store";
 import { resolveAuthClient } from "@/shared/services/auth-client";
 import type {
-  AuthUser,
-  ApiFieldErrorResponse,
   RefreshTokenResponseData,
 } from "@/shared/types/auth";
-import type { IResponseApiItem } from "@/shared/types/api";
+import type { AuthUser } from "@/shared/types/account";
+import type { ApiFieldErrorResponse, IResponseApiItem } from "@/shared/types/api";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

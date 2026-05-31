@@ -10,8 +10,7 @@ export const metadata: Metadata = {
     default: INFOMATION_WEB.COMPANY_NAME,
     template: `${INFOMATION_WEB.COMPANY_NAME} - %s`,
   },
-  description:
-    "N\u1EC1n t\u1EA3ng tuy\u1EC3n d\u1EE5ng, ph\u00E2n t\u00EDch CV v\u00E0 g\u1EE3i \u00FD vi\u1EC7c l\u00E0m b\u1EB1ng AI.",
+  description: "Nền tảng tuyển dụng, phân tích CV và gợi ý việc làm bằng AI.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

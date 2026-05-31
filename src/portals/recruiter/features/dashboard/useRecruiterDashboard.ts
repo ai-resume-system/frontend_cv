@@ -3,19 +3,17 @@
 import { useEffect, useState } from "react";
 
 import { fetchCurrentUser } from "@/shared/services/account.service";
-import type { AuthUser } from "@/shared/types/auth";
+import { fetchApplicationsByJobId } from "@/shared/services/recruiter-job-application.service";
+import { fetchRecruiterJobs } from "@/shared/services/recruiter-job.service";
+import type { AuthUser } from "@/shared/types/account";
+import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 import type { Job } from "@/shared/types/job";
-
 import {
-  fetchApplicationsByJobId,
-  fetchRecruiterJobs,
-} from "@/portals/recruiter/services/recruiter-job.service";
-import type {
   RecruiterApplicationSummary,
   RecruiterDashboardMetrics,
   RecruiterJobOverview,
   RecruiterTrendPoint,
-} from "@/portals/recruiter/types/dashboard";
+} from "@/shared/types/dashboard";
 
 interface RecruiterDashboardState {
   applications: RecruiterApplicationSummary[];
@@ -35,10 +33,40 @@ const INITIAL_METRICS: RecruiterDashboardMetrics = {
   averageMatchingScore: null,
 };
 
-const EMPTY_TREND: RecruiterTrendPoint[] = Array.from({ length: 6 }, (_, index) => ({
-  label: `T-${5 - index}`,
-  value: 0,
-}));
+const EMPTY_TREND: RecruiterTrendPoint[] = Array.from(
+  { length: 6 },
+  (_, index) => ({
+    label: `T-${5 - index}`,
+    value: 0,
+  }),
+);
+
+function toDate(value: Date | string): Date {
+  return value instanceof Date ? value : new Date(value);
+}
+
+function mapApplicationSummary(
+  application: RecruiterApplicationApiItem,
+): RecruiterApplicationSummary {
+  return {
+    id: application.id,
+    jobId: application.jobId,
+    jobTitle: application.job?.title ?? "Tin tuyá»ƒn dá»¥ng",
+    applicantName:
+      application.fullName ??
+      application.user?.email ??
+      application.contactEmail ??
+      "á»¨ng viÃªn",
+    applicantEmail:
+      application.contactEmail ?? application.user?.email ?? undefined,
+    applicantPhone:
+      application.contactPhone ?? application.user?.phone ?? undefined,
+    cvTitle: application.cv?.title ?? undefined,
+    matchingScore: application.matchingScore ?? undefined,
+    status: application.status,
+    createdAt: toDate(application.createdAt),
+  };
+}
 
 function buildRecentTrend(
   applications: RecruiterApplicationSummary[],
@@ -63,7 +91,8 @@ function buildRecentTrend(
     label: week.label,
     value: applications.filter(
       (application) =>
-        application.createdAt >= week.start && application.createdAt <= week.end,
+        application.createdAt >= week.start &&
+        application.createdAt <= week.end,
     ).length,
   }));
 }
@@ -114,8 +143,10 @@ export function useRecruiterDashboard() {
 
         const applications = applicationSnapshots
           .flatMap((snapshot) => snapshot.applications)
+          .map(mapApplicationSummary)
           .sort(
-            (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+            (left, right) =>
+              right.createdAt.getTime() - left.createdAt.getTime(),
           );
 
         const matchingScores = applications
@@ -130,11 +161,12 @@ export function useRecruiterDashboard() {
           return {
             id: snapshot.job.id,
             title: snapshot.job.title,
-            location: snapshot.job.location,
+            address: snapshot.job.address,
             status: snapshot.job.status,
             applicationCount: snapshot.applications.length,
             matchingAverage: scores.length
-              ? scores.reduce((total, score) => total + score, 0) / scores.length
+              ? scores.reduce((total, score) => total + score, 0) /
+                scores.length
               : null,
             createdAt: snapshot.job.createdAt,
           };
@@ -156,7 +188,9 @@ export function useRecruiterDashboard() {
               : null,
           },
           recruiter,
-          trend: applications.length ? buildRecentTrend(applications) : EMPTY_TREND,
+          trend: applications.length
+            ? buildRecentTrend(applications)
+            : EMPTY_TREND,
         });
       } catch (error) {
         if (cancelled) {

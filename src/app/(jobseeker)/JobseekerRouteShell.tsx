@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Footer } from "@/shared/components/layouts/Footer";
 import { Header } from "@/shared/components/layouts/Header";
 import { PortalShell } from "@/shared/components/layouts/PortalShell";
-import { FloatingFavoriteButton } from "@/shared/features/home/FloatingFavoriteButton";
+import { FloatingFavoriteButton } from "@/shared/components/layouts/FloatingFavoriteButton";
 
 interface JobseekerRouteShellProps {
   children: ReactNode;
@@ -14,9 +14,7 @@ interface JobseekerRouteShellProps {
 
 const AUTH_PATHS = new Set(["/login", "/register", "/forgot-password"]);
 
-export function JobseekerRouteShell({
-  children,
-}: JobseekerRouteShellProps) {
+export function JobseekerRouteShell({ children }: JobseekerRouteShellProps) {
   const pathname = usePathname();
   const isAuthRoute = AUTH_PATHS.has(pathname);
 

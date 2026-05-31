@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
+import { EJobType } from "@/shared/constants/enums/job.enum";
+import { createRecruiterJob } from "@/shared/services/recruiter-job.service";
 import type { CreateJobPayload } from "@/shared/types/job";
-
-import { createRecruiterJob } from "@/portals/recruiter/services/recruiter-job.service";
 
 interface SkillDraft {
   id: string;
@@ -19,7 +19,7 @@ interface RecruiterJobPostingFormValues {
   experienceYears: string;
   expiredAt: string;
   jobType: CreateJobPayload["jobType"];
-  location: string;
+  address: string;
   salaryMax: string;
   salaryMin: string;
   shortDescription: string;
@@ -40,8 +40,8 @@ const INITIAL_FORM: RecruiterJobPostingFormValues = {
   description: "",
   experienceYears: "",
   expiredAt: "",
-  jobType: "full_time",
-  location: "",
+  jobType: EJobType.FULL_TIME,
+  address: "",
   salaryMax: "",
   salaryMin: "",
   shortDescription: "",
@@ -107,7 +107,7 @@ function buildPayload(
     title: values.title.trim(),
     shortDescription: values.shortDescription.trim() || undefined,
     description: values.description.trim(),
-    location: values.location.trim() || undefined,
+    address: values.address.trim() || undefined,
     salaryMin: toOptionalNumber(values.salaryMin),
     salaryMax: toOptionalNumber(values.salaryMax),
     experienceYears: toOptionalNumber(values.experienceYears),

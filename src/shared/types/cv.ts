@@ -3,9 +3,7 @@ import type {
   EProcessingStatus,
 } from "@/shared/constants/enums/cv.enum";
 
-// ─────────────────────── Domain entity ───────────────────────
-
-export interface ICvEntity {
+export interface CvDto {
   id: string;
   userId: string;
   title: string | null;
@@ -17,14 +15,9 @@ export interface ICvEntity {
   status: ECVStatus;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
 }
 
-// ─────────────────────── UI-friendly alias ───────────────────────
-
-export type CvItem = ICvEntity;
-
-// ─────────────────────── Download / Preview ───────────────────────
+export type CvItem = CvDto;
 
 export interface CvDownloadResponse {
   downloadUrl: string;
@@ -34,4 +27,15 @@ export interface CvDownloadResponse {
 export interface CvPreviewResponse {
   previewUrl: string;
   expiresIn: number;
+}
+
+export interface UpdateCvPayload {
+  title?: string;
+}
+
+// Chú ý sau
+export interface CvAnalyzeResponse {
+  cvId: string;
+  processingStatus: EProcessingStatus;
+  message: string;
 }

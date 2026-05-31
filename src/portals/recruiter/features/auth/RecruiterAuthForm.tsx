@@ -20,10 +20,7 @@ import { BaseField } from "@/shared/components/ui/BaseField";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
-import {
-  type AuthMode,
-  useAuthFormController,
-} from "@/shared/features/auth/useAuthFormController";
+import { type AuthMode, useAuth } from "@/shared/hooks/data/useAuth";
 import { cn } from "@/shared/lib/utils/cn";
 import { RecruiterShowcase } from "./function";
 
@@ -40,7 +37,7 @@ function formatCountdown(seconds: number): string {
 
 export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
   const isLogin = mode === "login";
-  const controller = useAuthFormController({
+  const controller = useAuth({
     mode,
     role: EUserRole.RECRUITER,
   });
@@ -185,15 +182,15 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                         onSubmit={handleRegister}
                       >
                         <BaseField
-                          error={getFieldError("company_name")}
-                          id="company_name"
+                          error={getFieldError("name")}
+                          id="name"
                           label="Tên công ty"
                           leadingIcon={<Building2 className="h-5 w-5" />}
                           placeholder="Nhập tên doanh nghiệp"
-                          value={form.company_name}
-                          onBlur={() => handleFieldBlur("company_name")}
+                          value={form.name}
+                          onBlur={() => handleFieldBlur("name")}
                           onChange={(event) =>
-                            updateField("company_name", event.target.value)
+                            updateField("name", event.target.value)
                           }
                           required
                         />
@@ -292,15 +289,15 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
                           />
 
                           <BaseField
-                            error={getFieldError("location")}
-                            id="location"
+                            error={getFieldError("address")}
+                            id="address"
                             label="Địa chỉ"
                             leadingIcon={<MapPin className="h-5 w-5" />}
                             placeholder="Địa chỉ công ty"
-                            value={form.location}
-                            onBlur={() => handleFieldBlur("location")}
+                            value={form.address}
+                            onBlur={() => handleFieldBlur("address")}
                             onChange={(event) =>
-                              updateField("location", event.target.value)
+                              updateField("address", event.target.value)
                             }
                             required
                           />

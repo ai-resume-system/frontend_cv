@@ -10,16 +10,20 @@ export interface FetchJobsParams {
   page?: number;
   limit?: number;
   q?: string;
+  address?: string;
   careerCategoryId?: string;
   careerCategorySlug?: string;
-  location?: string;
   salaryMin?: number;
   salaryMax?: number;
   experienceYears?: number;
+  experienceYearsMin?: number;
+  experienceYearsMax?: number;
   companyId?: string;
+  companySlug?: string;
   status?: string;
   jobType?: string;
-  skillIds?: string;
+  skillIds?: string | string[];
+  skillSlugs?: string | string[];
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
 }
@@ -32,16 +36,20 @@ export interface FetchJobsResult {
 function buildJobsPath({
   page = 1,
   limit = 3,
+  address,
   careerCategoryId,
   careerCategorySlug,
-  location,
   salaryMin,
   salaryMax,
   experienceYears,
+  experienceYearsMin,
+  experienceYearsMax,
   companyId,
+  companySlug,
   status,
   jobType,
   skillIds,
+  skillSlugs,
   sortBy,
   sortOrder,
   q,
@@ -63,8 +71,8 @@ function buildJobsPath({
     searchParams.set("q", q);
   }
 
-  if (location) {
-    searchParams.set("location", location);
+  if (address) {
+    searchParams.set("address", address);
   }
 
   if (typeof salaryMin === "number") {
@@ -75,12 +83,28 @@ function buildJobsPath({
     searchParams.set("salaryMax", `${salaryMax}`);
   }
 
-  if (typeof experienceYears === "number") {
+  if (typeof experienceYearsMin === "number") {
+    searchParams.set("experienceYearsMin", `${experienceYearsMin}`);
+  }
+
+  if (typeof experienceYearsMax === "number") {
+    searchParams.set("experienceYearsMax", `${experienceYearsMax}`);
+  }
+
+  if (
+    typeof experienceYears === "number" &&
+    typeof experienceYearsMin !== "number" &&
+    typeof experienceYearsMax !== "number"
+  ) {
     searchParams.set("experienceYears", `${experienceYears}`);
   }
 
   if (companyId) {
     searchParams.set("companyId", companyId);
+  }
+
+  if (companySlug) {
+    searchParams.set("companySlug", companySlug);
   }
 
   if (status) {
@@ -92,7 +116,17 @@ function buildJobsPath({
   }
 
   if (skillIds) {
-    searchParams.set("skillIds", skillIds);
+    searchParams.set(
+      "skillIds",
+      Array.isArray(skillIds) ? skillIds.join(",") : skillIds,
+    );
+  }
+
+  if (skillSlugs) {
+    searchParams.set(
+      "skillSlugs",
+      Array.isArray(skillSlugs) ? skillSlugs.join(",") : skillSlugs,
+    );
   }
 
   if (sortBy) {
@@ -103,10 +137,18 @@ function buildJobsPath({
     searchParams.set("sortOrder", sortOrder);
   }
 
-  return `${API_ROUTES.JOB.BASE}?${searchParams.toString()}`;
+  return `${API_ROUTES.JOB_PUBLIC.BASE}?${searchParams.toString()}`;
 }
 
-function toOptionalDate(value: string | null): Date | undefined {
+export function buildCompanyJobsPath(
+  basePath: string,
+  params?: FetchJobsParams,
+): string {
+  const query = buildJobsPath(params).split("?")[1];
+  return query ? `${basePath}?${query}` : basePath;
+}
+
+function toOptionalDate(value: string | null | undefined): Date | undefined {
   return value ? new Date(value) : undefined;
 }
 
@@ -114,19 +156,20 @@ function toOptionalNumber(value: number | null): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
-function toOptionalString(value: string | null): string | undefined {
+function toOptionalString(value: string | null | undefined): string | undefined {
   return value ?? undefined;
 }
 
-function mapJobApiItemToJob(job: JobApiItem): Job {
+export function mapJobApiItemToJob(job: JobApiItem): Job {
   return {
     id: job.id,
     title: job.title,
     shortDescription: toOptionalString(job.shortDescription),
     description: toOptionalString(job.description),
-    location: toOptionalString(job.location),
+    address: toOptionalString(job.address),
     salaryMin: toOptionalNumber(job.salaryMin),
     salaryMax: toOptionalNumber(job.salaryMax),
+    vacancyCount: toOptionalNumber(job.vacancyCount ?? null),
     experienceYears: toOptionalNumber(job.experienceYears),
     expiredAt: toOptionalDate(job.expiredAt),
     jobType: job.jobType,
@@ -137,9 +180,7 @@ function mapJobApiItemToJob(job: JobApiItem): Job {
     createdAt: new Date(job.createdAt),
     updatedAt: new Date(job.updatedAt),
     company: job.company ?? undefined,
-    companyName: job.company?.companyName ?? undefined,
     careerCategory: job.careerCategory ?? undefined,
-    careerCategoryName: job.careerCategory?.name ?? undefined,
   };
 }
 
@@ -159,9 +200,9 @@ export async function fetchJobs(
   };
 }
 
-export async function fetchJobById(id: string): Promise<Job> {
+export async function fetchJobBySlug(slug: string): Promise<Job> {
   const response = await apiService.get<IResponseApiItem<JobApiItem>>(
-    API_ROUTES.JOB_PUBLIC.DETAIL(id),
+    API_ROUTES.JOB_PUBLIC.DETAIL(slug),
     {
       cache: "no-store",
     },

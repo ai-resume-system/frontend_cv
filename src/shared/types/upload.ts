@@ -1,29 +1,11 @@
-import type {
-  ECVStatus,
-  EProcessingStatus,
-} from "@/shared/constants/enums/cv.enum";
+import type { EBucketType, EUploadType } from "@/shared/constants/enums/upload.enum";
+import type { CvItem } from "@/shared/types/cv";
 
-// ─────────────────────── CV upload response ───────────────────────
+export type UploadCvResponse = CvItem;
 
-export interface UploadCvResponse {
-  id: string;
-  userId: string;
-  title: string | null;
-  fileUrl: string | null;
-  fileExtension: string | null;
-  processingStatus: EProcessingStatus | null;
-  isDefault: boolean | null;
-  summary: string | null;
-  status: ECVStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// ─────────────────────── Media upload response (avatar / logo / banner) ───────────────────────
-
-export interface UploadMediaResponse {
-  type: string;
-  bucketType: string;
+export interface UploadFileDto {
+  type: EUploadType;
+  bucketType: EBucketType;
   objectKey: string;
   previewUrl: string;
   expiresIn: number;
@@ -32,8 +14,6 @@ export interface UploadMediaResponse {
   mimeType: string;
   size: number;
 }
-
-// ─────────────────────── UI-friendly result ───────────────────────
 
 export interface UploadResult {
   objectKey: string;

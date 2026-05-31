@@ -7,7 +7,8 @@ import {
   logoutUser,
   setCachedUser,
 } from "@/shared/services/account.service";
-import type { AuthUser } from "@/shared/types/auth";
+import type { AuthUser } from "@/shared/types/account";
+import { JOBSEEKER_ROUTES } from "@/shared/constants/constants/routes";
 
 export function useCurrentUser() {
   const [user, setUser] = useState<AuthUser | null>(() => getCachedUser());
@@ -53,7 +54,7 @@ export function useCurrentUser() {
   const logout = useCallback(async () => {
     await logoutUser();
     setUser(null);
-    window.location.href = "/";
+    window.location.href = JOBSEEKER_ROUTES.HOME;
   }, []);
 
   return { user, loading, logout, refreshUser, setUser };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { fetchCareerCategories } from "@/shared/services/category.service";
-import type { CareerCategory } from "@/shared/types/category";
+import type { CareerCategory } from "@/shared/types/career-category";
 
 interface UseCareerCategoriesOptions {
   page?: number;

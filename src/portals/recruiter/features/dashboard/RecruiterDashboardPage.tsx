@@ -80,7 +80,7 @@ export function RecruiterDashboardPage() {
     <RecruiterWorkspaceShell
       heading="Dashboard tuyển dụng"
       subheading={`Theo dõi tiến độ tuyển dụng của ${
-        recruiter?.company?.companyName ?? "doanh nghiệp"
+        recruiter?.company?.name ?? "doanh nghiệp"
       } từ dữ liệu tin đăng và hồ sơ hiện có.`}
       action={
         <Link
@@ -307,7 +307,7 @@ export function RecruiterDashboardPage() {
                           {job.title}
                         </h3>
                         <p className="mt-1 text-sm text-on-surface-variant">
-                          {job.location ?? "Chưa cập nhật địa điểm"} • Tạo ngày{" "}
+                          {job.address ?? "Chưa cập nhật địa điểm"} • Tạo ngày{" "}
                           {formatDate(job.createdAt)}
                         </p>
                       </div>

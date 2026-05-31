@@ -64,3 +64,9 @@ export function forgotPassword(
     payload,
   );
 }
+
+export function logout(): Promise<AuthActionResponse> {
+  return apiService.post<AuthActionResponse>(API_ROUTES.AUTH.LOGOUT, undefined, {
+    auth: true,
+  });
+}

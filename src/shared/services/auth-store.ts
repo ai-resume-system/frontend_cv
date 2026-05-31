@@ -2,7 +2,7 @@ import {
   LOCAL_STORAGE_KEYS,
   SESSION_STORAGE_KEYS,
 } from "@/shared/constants/constants/local-storage";
-import type { AuthUser } from "@/shared/types/auth";
+import type { AuthUser } from "@/shared/types/account";
 
 export const AUTH_STORE_CHANGED_EVENT = "auth-store-changed";
 export const AUTH_SYNC_CHANNEL_NAME = "auth-sync";

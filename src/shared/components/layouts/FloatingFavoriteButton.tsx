@@ -81,24 +81,26 @@ export function FloatingFavoriteButton() {
     <div className="fixed bottom-5 right-4 z-55 sm:bottom-6 sm:right-6 flex items-center">
       <div
         className={cn(
-          "hidden md:block absolute right-16 w-[330px] transition-all duration-300 pointer-events-none opacity-0 translate-x-2",
-          showToast && "opacity-100 translate-x-0 pointer-events-auto",
+          "hidden md:block absolute right-18 w-[330px] transition-all duration-300 opacity-0 translate-x-2",
+          showToast
+            ? "opacity-100 translate-x-0 pointer-events-auto"
+            : "pointer-events-none",
         )}
       >
-        <div className="relative rounded-xl bg-slate-800/95 px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(15,23,42,0.3)]">
+        <div className="relative rounded-xl bg-slate-800/90 px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(15,23,42,0.3)]">
           <p className="text-sm font-semibold">Lưu tin thành công!</p>
           <p className="mt-0.5 text-xs text-slate-200">
             Để xem{" "}
             <Link
-              className="font-semibold text-secondary-container underline underline-offset-2 hover:text-white transition-colors"
               href={ROUTES.JOB_SEEKER_FAVORITES}
+              className="font-semibold text-secondary-container underline underline-offset-2 hover:text-blue-400 transition-colors"
             >
               Danh sách việc làm đã lưu
             </Link>
             , click vào đây!
           </p>
 
-          <div className="absolute right-[10px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-slate-800/95" />
+          <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-slate-800/95" />
         </div>
       </div>
 

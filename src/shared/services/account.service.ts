@@ -8,11 +8,13 @@ import {
   setCurrentUser,
 } from "@/shared/services/auth-store";
 import type {
-  AuthUser,
   ChangePasswordPayload,
+  AuthUser,
+  UpdateMyCompanyPayload,
+  UpdateMyCompanyResponse,
   UpdateMyProfilePayload,
   UpdateMyProfileResponse,
-} from "@/shared/types/auth";
+} from "@/shared/types/account";
 import type { IResponseApiItem } from "@/shared/types/api";
 export const AUTH_USER_UPDATED_EVENT = AUTH_STORE_CHANGED_EVENT;
 
@@ -61,6 +63,19 @@ export async function changeMyPassword(
   );
 }
 
+export async function updateMyCompany(
+  payload: UpdateMyCompanyPayload,
+): Promise<UpdateMyCompanyResponse> {
+  const response = await apiService.patch<
+    IResponseApiItem<UpdateMyCompanyResponse>,
+    UpdateMyCompanyPayload
+  >(API_ROUTES.ACCOUNT.ME_COMPANY, payload, {
+    auth: true,
+  });
+
+  return response.data;
+}
+
 export async function deleteMyAvatar(): Promise<void> {
   await apiService.delete<void>(API_ROUTES.ACCOUNT.ME_DELETE_AVATAR, {
     auth: true,
@@ -81,9 +96,9 @@ export async function deleteMyCompanyBanner(): Promise<void> {
 
 export async function logoutUser(): Promise<void> {
   try {
-    await apiService.post<void, Record<string, never>>(
+    await apiService.post<void>(
       API_ROUTES.AUTH.LOGOUT,
-      {},
+      undefined,
       { auth: true },
     );
   } catch {

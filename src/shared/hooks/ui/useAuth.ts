@@ -6,7 +6,7 @@ import {
   getCachedUser,
 } from "@/shared/services/account.service";
 import { getAccessToken } from "@/shared/services/auth-store";
-import type { AuthUser } from "@/shared/types/auth";
+import type { AuthUser } from "@/shared/types/account";
 
 interface AuthState {
   isLoggedIn: boolean;

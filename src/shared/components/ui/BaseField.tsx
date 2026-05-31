@@ -127,6 +127,7 @@ export function BaseField(props: BaseFieldProps) {
 
   const fieldBaseClass = cn(
     "w-full rounded-2xl border bg-surface-container-low px-4 text-[15px] text-on-surface outline-none transition placeholder:text-outline/75",
+    "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
     error
       ? "border-error focus:border-error focus:ring-2 focus:ring-error/10"
       : "border-primary/30 focus:border-primary/20 focus:bg-white focus:ring-2 focus:ring-primary/10",

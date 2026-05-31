@@ -1,0 +1,172 @@
+import { API_ROUTES } from "@/shared/constants/constants/api";
+import { EUploadType } from "@/shared/constants/enums/upload.enum";
+import { apiService } from "@/shared/services/api-service";
+import type {
+  IResponseApiItem,
+  IResponseApiList,
+  IResponseApiPagination,
+} from "@/shared/types/api";
+import type {
+  CvAnalyzeResponse,
+  CvDownloadResponse,
+  CvItem,
+  CvPreviewResponse,
+  UpdateCvPayload,
+} from "@/shared/types/cv";
+
+export interface FetchMyCvListParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
+  status?: string;
+}
+
+export interface FetchMyCvListResult {
+  cvs: CvItem[];
+  pagination?: IResponseApiPagination;
+}
+
+export interface CvAnalysisDto {
+  cvId: string;
+  processingStatus: string;
+  summary?: string | null;
+  score?: number | null;
+  skills?: Array<{
+    name: string;
+    normalizedName?: string;
+    confidence?: number;
+    skillId?: string;
+  }>;
+  education?: unknown[];
+  experience?: unknown[];
+  suggestions?: string[];
+  rawText?: string;
+  parsedDataId?: string;
+  updatedAt?: string;
+}
+
+function buildCvListPath({
+  page = 1,
+  limit = 10,
+  q,
+  sortBy,
+  sortOrder,
+  status,
+}: FetchMyCvListParams = {}): string {
+  const searchParams = new URLSearchParams({
+    page: `${page}`,
+    limit: `${limit}`,
+  });
+
+  if (q) {
+    searchParams.set("q", q);
+  }
+
+  if (sortBy) {
+    searchParams.set("sortBy", sortBy);
+  }
+
+  if (sortOrder) {
+    searchParams.set("sortOrder", sortOrder);
+  }
+
+  if (status) {
+    searchParams.set("status", status);
+  }
+
+  return `${API_ROUTES.CV.BASE}?${searchParams.toString()}`;
+}
+
+export async function fetchMyCvList(
+  params?: FetchMyCvListParams,
+): Promise<FetchMyCvListResult> {
+  const response = await apiService.get<IResponseApiList<CvItem>>(
+    buildCvListPath(params),
+    { auth: true, cache: "no-store" },
+  );
+
+  return {
+    cvs: response.data ?? [],
+    pagination: response.pagination,
+  };
+}
+
+export async function uploadCv(file: File): Promise<CvItem> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type", EUploadType.CV);
+
+  const response = await apiService.post<IResponseApiItem<CvItem>, FormData>(
+    API_ROUTES.UPLOAD.BASE,
+    formData,
+    { auth: true },
+  );
+
+  return response.data;
+}
+
+export async function updateCv(
+  id: string,
+  payload: UpdateCvPayload,
+): Promise<CvItem> {
+  const response = await apiService.patch<IResponseApiItem<CvItem>, UpdateCvPayload>(
+    API_ROUTES.CV.DETAIL(id),
+    payload,
+    { auth: true },
+  );
+
+  return response.data;
+}
+
+export async function deleteCv(id: string): Promise<void> {
+  await apiService.delete<void>(API_ROUTES.CV.DETAIL(id), { auth: true });
+}
+
+export async function setDefaultCv(id: string): Promise<CvItem> {
+  const response = await apiService.patch<IResponseApiItem<CvItem>>(
+    API_ROUTES.CV.DEFAULT(id),
+    undefined,
+    { auth: true },
+  );
+
+  return response.data;
+}
+
+export async function fetchCvDownload(id: string): Promise<CvDownloadResponse> {
+  const response = await apiService.get<IResponseApiItem<CvDownloadResponse>>(
+    API_ROUTES.CV.DOWNLOAD(id),
+    { auth: true, cache: "no-store" },
+  );
+
+  return response.data;
+}
+
+export async function fetchCvPreview(id: string): Promise<CvPreviewResponse> {
+  const response = await apiService.get<IResponseApiItem<CvPreviewResponse>>(
+    API_ROUTES.CV.PREVIEW(id),
+    { auth: true, cache: "no-store" },
+  );
+
+  return response.data;
+}
+
+export async function queueCvAnalysis(id: string): Promise<CvAnalyzeResponse> {
+  const response = await apiService.post<IResponseApiItem<CvAnalyzeResponse>>(
+    API_ROUTES.CV.ANALYZE(id),
+    undefined,
+    { auth: true },
+  );
+
+  return response.data;
+}
+
+export async function fetchCvAnalysis(id: string): Promise<CvAnalysisDto> {
+  const response = await apiService.get<IResponseApiItem<CvAnalysisDto>>(
+    API_ROUTES.CV.ANALYSIS(id),
+    { auth: true, cache: "no-store" },
+  );
+
+  return response.data;
+}

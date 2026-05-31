@@ -24,7 +24,7 @@ export interface RecruiterDashboardMetrics {
 export interface RecruiterJobOverview {
   id: string;
   title: string;
-  location?: string;
+  address?: string;
   status: EJobStatus;
   applicationCount: number;
   matchingAverage: number | null;

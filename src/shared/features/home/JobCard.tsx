@@ -16,11 +16,11 @@ import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 
 interface JobCardProps {
+  address: string;
   company: string;
   href?: string;
   jobId?: string;
   jobData?: Job;
-  location: string;
   match?: string;
   salary?: string;
   title: string;
@@ -96,12 +96,7 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
   );
 }
 
-function JobCardContent({
-  title,
-  company,
-  location,
-  salary,
-}: JobCardProps) {
+function JobCardContent({ title, company, address, salary }: JobCardProps) {
   return (
     <>
       <div className="mb-5 flex items-start justify-between gap-2">
@@ -129,7 +124,7 @@ function JobCardContent({
         ) : null}
         <Badge className="gap-1 bg-gray-300/70 text-sm text-muted-foreground">
           <MapPin aria-hidden="true" className="h-4 w-4" />
-          {location}
+          {address}
         </Badge>
       </div>
     </>

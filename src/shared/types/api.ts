@@ -1,29 +1,39 @@
-export interface IResponseApiPagination {
+export interface ApiPagination {
   page?: number;
   limit?: number;
   totalItems?: number;
   totalPages?: number;
 }
 
-export interface IResponseApiItem<T> {
+export interface ApiItemResponse<T> {
   status: string;
   message: string;
   data: T;
 }
 
-export interface IResponseApiList<T> {
+export interface ApiListResponse<T> {
   status: string;
   message: string;
   data: T[];
-  pagination?: IResponseApiPagination;
+  pagination?: ApiPagination;
 }
 
-export interface IResponseApiError {
-  status: string;
-  message: string;
-  code?: string | number;
+export interface ApiErrorResponse {
+  status?: string;
+  message?: string;
+  code?: number | string;
+}
+
+export interface ApiFieldErrorResponse extends ApiErrorResponse {
   error?: {
-    code?: string;
     fields?: Record<string, string[]>;
   };
 }
+
+export interface FieldErrors {
+  [key: string]: string | undefined;
+}
+
+export type IResponseApiPagination = ApiPagination;
+export type IResponseApiItem<T> = ApiItemResponse<T>;
+export type IResponseApiList<T> = ApiListResponse<T>;

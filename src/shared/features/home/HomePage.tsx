@@ -1,27 +1,17 @@
 import { Phone } from "lucide-react";
 import Link from "next/link";
 
-import { CategoryCard } from "@/shared/components/layouts/CategoryCard";
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
-import { fetchCareerCategoriesWithPagination } from "@/shared/services/category.service";
+import { fetchTopCareerCategories } from "@/shared/services/category.service";
 import { fetchCompanies } from "@/shared/services/company.service";
 import { fetchJobs } from "@/shared/services/job.service";
 
 import { HotJobsSection } from "./HotJobsSection";
 
-const CATEGORY_ICONS = ["IT", "KD", "MKT", "HR", "OPS", "FIN"] as const;
-
 interface HomeStat {
   label: string;
   value: string;
-}
-
-function formatCompactNumber(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    maximumFractionDigits: 1,
-    notation: "compact",
-  }).format(value);
 }
 
 function buildHomeStats(params: {
@@ -35,25 +25,24 @@ function buildHomeStats(params: {
   return [
     {
       label: "Việc làm đang mở",
-      value: formatCompactNumber(totalJobs),
+      value: `${totalJobs}+`,
     },
     {
       label: "Doanh nghiệp",
-      value: formatCompactNumber(totalCompanies),
+      value: `${totalCompanies}+`,
     },
     {
       label: "Ngành nghề",
-      value: formatCompactNumber(totalCategories),
+      value: `${totalCategories}+`,
     },
     {
       label: "Khu vực tuyển dụng",
-      value: formatCompactNumber(totalLocations),
+      value: `${totalLocations}+`,
     },
   ];
 }
 
 export default async function HomePage() {
-  // Bugs
   const [
     jobsResult,
     companiesResult,
@@ -61,18 +50,17 @@ export default async function HomePage() {
     jobsForLocationsResult,
   ] = await Promise.all([
     fetchJobs({
-      limit: 100,
       page: 1,
+      limit: 100,
       sortBy: "createdAt",
       sortOrder: "DESC",
     }),
     fetchCompanies({
-      limit: 100,
       page: 1,
+      limit: 100,
     }),
-    fetchCareerCategoriesWithPagination({
-      limit: 100,
-      page: 1,
+    fetchTopCareerCategories({
+      limit: 8,
     }),
     fetchJobs({
       limit: 100,
@@ -85,22 +73,21 @@ export default async function HomePage() {
   const totalJobs = jobsResult.pagination?.totalItems ?? jobsResult.jobs.length;
   const totalCompanies =
     companiesResult.pagination?.totalItems ?? companiesResult.companies.length;
-  const totalCategories =
-    categoriesResult.pagination?.totalItems ??
-    categoriesResult.categories.length;
+  const totalCategories = categoriesResult.length;
   const totalLocations = new Set(
     jobsForLocationsResult.jobs
-      .map((job) => job.location ?? job.company?.location ?? "")
-      .map((location) => location.trim())
+      .map((job) => job.address ?? job.company?.address ?? "")
+      .map((address) => address.trim())
       .filter(Boolean),
   ).size;
+
   const stats = buildHomeStats({
     totalCategories,
     totalCompanies,
     totalJobs,
     totalLocations,
   });
-  const categories = categoriesResult.categories.slice(0, 6);
+  const categories = categoriesResult;
 
   return (
     <>
@@ -126,23 +113,29 @@ export default async function HomePage() {
 
       <HotJobsSection />
 
-      <section className="bg-background px-8 py-24">
+      <section className="bg-background px-4 py-16 sm:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-16">
+          <div className="mb-10">
             <h2 className="font-display text-2xl font-bold sm:text-3xl">
-              Khám phá theo ngành nghề
+              Top ngành nghề nổi bật
             </h2>
           </div>
 
           {categories.length > 0 ? (
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
-              {categories.map((category, index) => (
-                <CategoryCard
-                  href={`/jobs?careerCategoryId=${category.id}`}
-                  icon={CATEGORY_ICONS[index % CATEGORY_ICONS.length]}
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+              {categories.map((category) => (
+                <Link
                   key={category.id}
-                  label={category.name}
-                />
+                  href={`/jobs?category=${category.slug}`}
+                  className="group flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-xl sm:p-5"
+                >
+                  <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-foreground text-sm sm:text-base">
+                    {category.name}
+                  </p>
+                  <p className="mt-1.5 text-xs text-primary font-medium sm:text-sm">
+                    {category.jobCount?.toLocaleString("vi-VN")} việc làm
+                  </p>
+                </Link>
               ))}
             </div>
           ) : (

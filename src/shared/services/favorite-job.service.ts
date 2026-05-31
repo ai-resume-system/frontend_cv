@@ -5,10 +5,8 @@ import type { Job, JobApiItem } from "@/shared/types/job";
 
 interface FavoriteJobRelationApiItem {
   id: string;
-  createdAt?: string;
   job?: JobApiItem | null;
   jobId?: string;
-  updatedAt?: string;
 }
 
 type FavoriteJobApiItem = JobApiItem | FavoriteJobRelationApiItem;
@@ -17,11 +15,15 @@ function toOptionalDate(value: string | null | undefined): Date | undefined {
   return value ? new Date(value) : undefined;
 }
 
-function toOptionalNumber(value: number | null | undefined): number | undefined {
+function toOptionalNumber(
+  value: number | null | undefined,
+): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
-function toOptionalString(value: string | null | undefined): string | undefined {
+function toOptionalString(
+  value: string | null | undefined,
+): string | undefined {
   return value ?? undefined;
 }
 
@@ -31,9 +33,10 @@ function mapJobApiItemToJob(job: JobApiItem): Job {
     title: job.title,
     shortDescription: toOptionalString(job.shortDescription),
     description: toOptionalString(job.description),
-    location: toOptionalString(job.location),
+    address: toOptionalString(job.address),
     salaryMin: toOptionalNumber(job.salaryMin),
     salaryMax: toOptionalNumber(job.salaryMax),
+    vacancyCount: toOptionalNumber(job.vacancyCount ?? null),
     experienceYears: toOptionalNumber(job.experienceYears),
     expiredAt: toOptionalDate(job.expiredAt),
     jobType: job.jobType,
@@ -44,9 +47,7 @@ function mapJobApiItemToJob(job: JobApiItem): Job {
     createdAt: new Date(job.createdAt),
     updatedAt: new Date(job.updatedAt),
     company: job.company ?? undefined,
-    companyName: job.company?.companyName ?? undefined,
     careerCategory: job.careerCategory ?? undefined,
-    careerCategoryName: job.careerCategory?.name ?? undefined,
   };
 }
 

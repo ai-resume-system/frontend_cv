@@ -20,8 +20,9 @@ interface Slide {
 const defaultSlides: Slide[] = [
   {
     id: 1,
-    title: "Tìm việc thông minh với AI",
-    subtitle: "Phân tích kỹ năng và kết nối với cơ hội hoàn hảo cho bạn",
+    title: "Tìm việc dễ dàng",
+    subtitle:
+      "Kết nối với các công ty uy tín và tìm được công việc phù hợp với bạn",
     ctaText: "Khám phá ngay",
     ctaLink: ROUTES.JOBS,
     image: "/search-job.png",

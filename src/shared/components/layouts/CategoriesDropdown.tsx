@@ -7,7 +7,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
-import type { CareerCategory } from "@/shared/types/category";
+import type { CareerCategory } from "@/shared/types/career-category";
 
 interface CategoriesDropdownProps {
   categories: CareerCategory[];
@@ -68,7 +68,7 @@ export function CategoriesDropdown({
               : categories.map((category) => (
                   <Link
                     className="group inline-flex items-center text-base font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                    href={`${ROUTES.JOBS}?careerCategoryId=${category.id}`}
+                    href={`${ROUTES.JOBS}?category=${category.slug}`}
                     key={category.id}
                     onClick={() => setIsOpen(false)}
                   >
@@ -80,13 +80,13 @@ export function CategoriesDropdown({
 
           {!loading && error ? (
             <p className="px-6 pb-4 text-sm text-muted-foreground">
-              {t.categories.error}
+              Chưa tải được danh sách ngành nghề
             </p>
           ) : null}
 
           {!loading && !error && categories.length === 0 ? (
             <p className="px-6 pb-4 text-sm text-muted-foreground">
-              {t.categories.empty}
+              Chưa có ngành nghề để hiển thị
             </p>
           ) : null}
 
@@ -96,7 +96,7 @@ export function CategoriesDropdown({
               href={ROUTES.JOBS}
               onClick={() => setIsOpen(false)}
             >
-              {t.categories.viewMore}
+              Xem thêm
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
