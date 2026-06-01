@@ -2,7 +2,7 @@
 
 import { FileX2 } from "lucide-react";
 
-import { JobCardLink } from "@/shared/features/home/JobCard";
+import { JobCardLink } from "@/shared/features/home/JobCardSection";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import type { Job } from "@/shared/types/job";
 

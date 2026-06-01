@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { BriefcaseBusiness, Phone } from "lucide-react";
 import Link from "next/link";
 
 import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
@@ -129,6 +129,7 @@ export default async function HomePage() {
                   href={`/jobs?category=${category.slug}`}
                   className="group flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-xl sm:p-5"
                 >
+                  <BriefcaseBusiness className="mb-2 h-10 w-10 text-primary" />
                   <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-foreground text-sm sm:text-base">
                     {category.name}
                   </p>

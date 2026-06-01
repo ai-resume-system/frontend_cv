@@ -163,6 +163,7 @@ function toOptionalString(value: string | null | undefined): string | undefined 
 export function mapJobApiItemToJob(job: JobApiItem): Job {
   return {
     id: job.id,
+    slug: toOptionalString(job.slug),
     title: job.title,
     shortDescription: toOptionalString(job.shortDescription),
     description: toOptionalString(job.description),

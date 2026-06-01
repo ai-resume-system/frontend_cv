@@ -5,8 +5,7 @@ import { Eye, EyeOff, KeyRound, Lock, X } from "lucide-react";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { cn } from "@/shared/lib/utils/cn";
-
-import { useChangePassword } from "./useChangePassword";
+import { useChangePassword } from "@/shared/hooks/data/useChangePassword";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -64,7 +63,7 @@ export function ChangePasswordModal({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-on-surface/45 px-4 py-6"
+      className="fixed inset-0 z-90 flex items-center justify-center bg-on-surface/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
     >
@@ -74,7 +73,7 @@ export function ChangePasswordModal({
       {/* Hộp thoại Modal chính */}
       <div
         className={cn(
-          "relative z-[91] w-full max-w-xl rounded-2xl border border-border bg-surface-container-lowest p-6 shadow-[0_24px_60px_rgba(25,28,29,0.14)] sm:p-8",
+          "relative z-91 w-full max-w-xl rounded-2xl border border-border bg-surface-container-lowest p-6 shadow-[0_24px_60px_rgba(25,28,29,0.14)] sm:p-8",
         )}
       >
         {/* HEADER - Đã căn chỉnh chuẩn phẳng, khoảng cách rộng rãi, không gạch chân */}
@@ -83,9 +82,13 @@ export function ChangePasswordModal({
             Thay đổi mật khẩu đăng nhập
           </h2>
 
-          <BaseButton variant="ghost" onClick={handleClose} type="button">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="text-foreground hover:opacity-50 cursor-pointer"
+          >
             <X className="h-5 w-5" />
-          </BaseButton>
+          </button>
         </div>
 
         {/* FORM NỘI DUNG */}

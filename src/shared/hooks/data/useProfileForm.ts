@@ -4,7 +4,9 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
+import { showSuccessToast, showErrorToast } from "@/shared/lib/ui/toast";
 import {
+  deleteMyAvatar,
   setCachedUser,
   updateMyProfile,
 } from "@/shared/services/account.service";
@@ -70,6 +72,7 @@ export function useProfileForm() {
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -188,12 +191,50 @@ export function useProfileForm() {
     setHasSubmitted(false);
   }
 
+  async function handleDeleteAvatar() {
+    if (!user?.profile?.avatarUrl || isDeletingAvatar) {
+      return;
+    }
+
+    setIsDeletingAvatar(true);
+
+    try {
+      await deleteMyAvatar();
+
+      const nextUser: AuthUser = {
+        ...user,
+        profile: {
+          avatarUrl: null,
+          bio: user.profile?.bio ?? "",
+          fullName: user.profile?.fullName ?? "",
+        },
+        updatedAt: new Date().toISOString(),
+      };
+
+      setUser(nextUser);
+      setCachedUser(nextUser);
+      await refreshUser();
+
+      showSuccessToast("Ảnh đại diện của bạn đã được xóa thành công.");
+    } catch (error) {
+      showErrorToast(
+        error instanceof Error
+          ? error.message
+          : "Không thể xóa ảnh đại diện lúc này.",
+      );
+    } finally {
+      setIsDeletingAvatar(false);
+    }
+  }
+
   return {
     errors,
     form,
     getVisibleError,
+    handleDeleteAvatar,
     handleFieldBlur,
     handleSubmit,
+    isDeletingAvatar,
     isLoading: loading,
     isSubmitting,
     refreshUser,

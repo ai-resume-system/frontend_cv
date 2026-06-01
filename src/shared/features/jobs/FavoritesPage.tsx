@@ -64,14 +64,10 @@ function formatExperience(job: Job): string | null {
   }
 
   if (job.experienceYears <= 0) {
-    return "Mới đi làm";
+    return "Không yêu cầu kinh nghiệm";
   }
 
   return `${job.experienceYears} năm kinh nghiệm`;
-}
-
-function buildJobHref(jobId: string): string {
-  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
 }
 
 interface FavoriteJobRowProps {
@@ -87,16 +83,14 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
   const experience = formatExperience(job);
 
   return (
-    <article className="group relative rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
+    <article className="group cursor-pointer relative rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
         {/* Logo Công ty */}
         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-2 transition-colors group-hover:border-slate-200 sm:h-20 sm:w-20">
-          <Image
+          <img
             alt={company}
-            className="h-full w-full object-contain mix-blend-multiply"
-            height={80}
-            src="/logo.png"
-            width={80}
+            className="h-[70px] w-[70px] rounded-2xl border border-gray-300 object-contain transition-colors"
+            src={job.company?.logoUrl ?? "/logo.png"}
           />
         </div>
 
@@ -106,7 +100,7 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
             <div className="min-w-0 flex-1">
               <a
                 className="inline-block text-lg font-bold leading-snug text-slate-900 transition-colors hover:text-primary sm:text-xl"
-                href={buildJobHref(job.id)}
+                href={`${ROUTES.JOB_SEEKER_JOB_DETAIL(job.id)}`}
               >
                 {job.title}
               </a>
@@ -149,36 +143,32 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
 
           <hr className="my-4 border-slate-100" />
 
-          {/* Phần Bottom Row hành động */}
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs font-medium text-slate-400">
               {formatSavedDate(job)}
             </p>
 
             <div className="flex items-center gap-2.5">
-              {/* Nút Hủy Lưu */}
+              <BaseButton
+                className="h-10 rounded-xl px-5 text-sm font-semibold opacity-100 transform transition-all duration-200 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
+                href={`${ROUTES.JOB_SEEKER_JOB_APPLY(job.id)}`}
+              >
+                Ứng tuyển ngay
+              </BaseButton>
               <button
-                aria-label="Bỏ lưu việc làm"
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50",
-                  isPending && "animate-pulse",
+                  "flex h-10 w-10 items-center justify-center rounded-full border border-primary-container bg-white shadow-sm transition-all duration-200 hover:bg-primary-soft active:scale-95",
+                  isPending && "animate-pulse opacity-60",
                 )}
                 disabled={isPending}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation(); // Chống nổi bọt sự kiện để không bị click trùng vào card
                   void toggleFavorite(job.id, job);
                 }}
                 type="button"
               >
-                <Heart className="h-4 w-4 fill-red-500 text-red-500 group-hover:scale-105 transition-transform" />
+                <Heart className="h-4 w-4 fill-primary text-primary transition-transform group-hover:scale-105" />
               </button>
-
-              {/* Nút Ứng Tuyển hiển thị mượt mà khi hover */}
-              <BaseButton
-                className="h-10 rounded-xl px-5 text-sm font-semibold opacity-100 transform transition-all duration-200 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
-                href={buildJobHref(job.id)}
-              >
-                Ứng tuyển ngay
-              </BaseButton>
             </div>
           </div>
         </div>

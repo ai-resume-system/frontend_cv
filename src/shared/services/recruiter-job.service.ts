@@ -130,6 +130,18 @@ export async function updateRecruiterJob(
   return mapJobApiItemToJob(response.data);
 }
 
+export async function fetchRecruiterJobDetail(id: string): Promise<Job> {
+  const response = await apiService.get<IResponseApiItem<JobApiItem>>(
+    API_ROUTES.JOB_RECRUITER.DETAIL(id),
+    {
+      auth: true,
+      cache: "no-store",
+    },
+  );
+
+  return mapJobApiItemToJob(response.data);
+}
+
 export async function deleteRecruiterJob(id: string): Promise<void> {
   await apiService.delete<void>(API_ROUTES.JOB_RECRUITER.DETAIL(id), {
     auth: true,

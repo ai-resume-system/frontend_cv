@@ -413,10 +413,6 @@ export function RecruiterJobPostingPage() {
 
             <ul className="mt-6 space-y-3 text-sm leading-6 text-on-surface-variant">
               <li>
-                `career-categories`: đang dùng để load lĩnh vực tuyển dụng.
-              </li>
-              <li>`jobs` POST: đang dùng để tạo tin mới.</li>
-              <li>
                 Skill AI matrix: chưa có API lookup `skillId`, nên chỉ lưu nội
                 bộ trong view.
               </li>
@@ -425,22 +421,6 @@ export function RecruiterJobPostingPage() {
                 endpoint backend riêng.
               </li>
             </ul>
-          </section>
-
-          <section className="rounded-[28px] border border-warning/20 bg-warning/10 p-6 shadow-sm">
-            <div className="flex items-start gap-3">
-              <TriangleAlert className="mt-0.5 h-5 w-5 text-warning" />
-              <div>
-                <h2 className="text-lg font-bold text-on-surface">
-                  Ghi chú vận hành
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-                  Nếu backend thay đổi contract của `POST /jobs`, chỉ cần cập
-                  nhật payload mapping trong service recruiter thay vì sửa trực
-                  tiếp ở view.
-                </p>
-              </div>
-            </div>
           </section>
         </aside>
       </div>

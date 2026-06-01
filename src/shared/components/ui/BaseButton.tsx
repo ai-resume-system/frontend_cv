@@ -8,8 +8,14 @@ import type {
 } from "react";
 import { cn } from "@/shared/lib/utils/cn";
 
-// 1. Định nghĩa các kiểu biến thể và kích thước
-type ButtonVariant = "primary" | "secondary" | "ghost" | "ai";
+// 1. Định nghĩa các kiểu biến thể màu sắc và kích thước
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "ai"
+  | "danger"
+  | "danger-filled";
 type ButtonSize = "sm" | "md" | "lg";
 
 // 2. Props chung cho cả Button và Link
@@ -47,6 +53,10 @@ const variantClasses: Record<ButtonVariant, string> = {
     "border border-primary/50 bg-surface text-primary hover:bg-primary-soft focus-visible:outline-primary",
   ghost: "text-foreground hover:bg-muted focus-visible:outline-primary",
   ai: "bg-ai-strong text-white shadow-sm hover:bg-primary focus-visible:outline-ai-strong",
+  danger:
+    "border border-error bg-surface text-error hover:bg-error-container focus-visible:outline-error",
+  "danger-filled":
+    "bg-error text-white shadow-sm hover:bg-error/90 focus-visible:outline-error",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

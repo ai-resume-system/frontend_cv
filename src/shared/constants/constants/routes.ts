@@ -5,14 +5,18 @@ export const JOBSEEKER_ROUTES = {
   PROFILE: "/profile",
   CV: "/cv",
   ANALYSIS: "/analysis",
+  ANALYSIS_PROCESS: "/analysis/process",
+  ANALYSIS_RESULT: (cvId: string) => `/analysis/result/${cvId}`,
   FAVORITES: "/favorites",
   JOBS: "/jobs",
   JOB_DETAIL: (id: string) => `/jobs/${id}`,
+  JOB_APPLY: (id: string) => `/jobs/${id}/apply`,
   APPLICATIONS: "/applications",
   CHANGE_PASSWORD: "/change-password",
   PROFILE_CHANGE_PASSWORD: "/profile?modal=change-password",
   FORGOT_PASSWORD: "/forgot-password",
   COMPANY: "/company",
+  COMPANY_DETAIL: (slug: string) => `/company/${slug}`,
 } as const;
 
 export const RECRUITER_ROUTES = {
@@ -22,7 +26,12 @@ export const RECRUITER_ROUTES = {
   DASHBOARD: "/recruiter/dashboard",
   JOB_POSTING: "/recruiter/job-posting",
   JOBS: "/recruiter/jobs",
+  JOB_CREATE: "/recruiter/jobs/create",
+  JOB_EDIT: (id: string) => `/recruiter/jobs/${id}/edit`,
   APPLICANTS: "/recruiter/applicants",
+  APPLICANTS_BY_JOB: (jobId: string) => `/recruiter/applicants/${jobId}`,
+  INTERVIEWS: "/recruiter/interviews",
+  COMPANY_PROFILE: "/recruiter/company-profile",
   ANALYTICS: "/recruiter/analytics",
   CV_ANALYSIS: "/recruiter/cv-analysis",
   FORGOT_PASSWORD: "/recruiter/forgot-password",
@@ -34,17 +43,21 @@ export const ROUTES = {
 
   // JobSeeker
   JOB_SEEKER_ANALYSIS: JOBSEEKER_ROUTES.ANALYSIS,
+  JOB_SEEKER_ANALYSIS_PROCESS: JOBSEEKER_ROUTES.ANALYSIS_PROCESS,
+  JOB_SEEKER_ANALYSIS_RESULT: JOBSEEKER_ROUTES.ANALYSIS_RESULT,
   JOB_SEEKER_LOGIN: JOBSEEKER_ROUTES.LOGIN,
   JOB_SEEKER_REGISTER: JOBSEEKER_ROUTES.REGISTER,
   JOB_SEEKER_PROFILE: JOBSEEKER_ROUTES.PROFILE,
   JOB_SEEKER_CV: JOBSEEKER_ROUTES.CV,
   JOB_SEEKER_FAVORITES: JOBSEEKER_ROUTES.FAVORITES,
   JOB_SEEKER_JOB_DETAIL: JOBSEEKER_ROUTES.JOB_DETAIL,
+  JOB_SEEKER_JOB_APPLY: JOBSEEKER_ROUTES.JOB_APPLY,
   JOB_SEEKER_APPLICATIONS: JOBSEEKER_ROUTES.APPLICATIONS,
   JOB_SEEKER_CHANGE_PASSWORD: JOBSEEKER_ROUTES.CHANGE_PASSWORD,
   JOB_SEEKER_PROFILE_CHANGE_PASSWORD: JOBSEEKER_ROUTES.PROFILE_CHANGE_PASSWORD,
   JOB_SEEKER_FORGOT_PASSWORD: JOBSEEKER_ROUTES.FORGOT_PASSWORD,
   JOB_SEEKER_COMPANY: JOBSEEKER_ROUTES.COMPANY,
+  JOB_SEEKER_COMPANY_DETAIL: JOBSEEKER_ROUTES.COMPANY_DETAIL,
 
   // Recruiter
   RECRUITER_HOME: RECRUITER_ROUTES.HOME,

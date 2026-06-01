@@ -65,8 +65,15 @@ function getJobStatusLabel(status: string): string {
 }
 
 export function RecruiterDashboardPage() {
-  const { applications, error, jobOverviews, loading, metrics, recruiter, trend } =
-    useRecruiterDashboard();
+  const {
+    applications,
+    error,
+    jobOverviews,
+    loading,
+    metrics,
+    recruiter,
+    trend,
+  } = useRecruiterDashboard();
 
   const topApplicant = [...applications]
     .filter((application) => typeof application.matchingScore === "number")
@@ -158,7 +165,9 @@ export function RecruiterDashboardPage() {
                 AI Match
               </span>
             </div>
-            <p className="mt-5 text-sm text-white/80">Điểm matching trung bình</p>
+            <p className="mt-5 text-sm text-white/80">
+              Điểm matching trung bình
+            </p>
             <p className="mt-2 text-3xl font-bold">
               {loading
                 ? "..."
@@ -181,8 +190,8 @@ export function RecruiterDashboardPage() {
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">
                   Biểu đồ này đang dựng từ dữ liệu hồ sơ lấy qua endpoint
-                  `applications/jobs/:jobId` của các tin đã tải. Backend hiện chưa
-                  có API analytics tổng hợp theo tháng cho recruiter.
+                  `applications/jobs/:jobId` của các tin đã tải. Backend hiện
+                  chưa có API analytics tổng hợp theo tháng cho recruiter.
                 </p>
               </div>
             </div>
@@ -202,7 +211,9 @@ export function RecruiterDashboardPage() {
                     <p className="text-sm font-semibold text-on-surface">
                       {item.value}
                     </p>
-                    <p className="text-xs text-on-surface-variant">{item.label}</p>
+                    <p className="text-xs text-on-surface-variant">
+                      {item.label}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -246,8 +257,8 @@ export function RecruiterDashboardPage() {
                 </div>
               ) : (
                 <div className="mt-6 rounded-3xl border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm leading-6 text-on-surface-variant">
-                  Chưa có hồ sơ nào trả về `matchingScore`, nên khối này đang chờ
-                  dữ liệu thật từ backend.
+                  Chưa có hồ sơ nào trả về `matchingScore`, nên khối này đang
+                  chờ dữ liệu thật từ backend.
                 </div>
               )}
             </div>
@@ -267,8 +278,8 @@ export function RecruiterDashboardPage() {
                 </div>
               </div>
               <div className="mt-6 rounded-3xl border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm leading-6 text-on-surface-variant">
-                Khi backend cung cấp endpoint lịch phỏng vấn hoặc pipeline, khối này
-                sẽ chuyển từ ghi chú sang dữ liệu thật.
+                Khi backend cung cấp endpoint lịch phỏng vấn hoặc pipeline, khối
+                này sẽ chuyển từ ghi chú sang dữ liệu thật.
               </div>
             </div>
           </div>
@@ -281,9 +292,6 @@ export function RecruiterDashboardPage() {
                 <h2 className="text-xl font-bold text-on-surface">
                   Tin tuyển dụng gần đây
                 </h2>
-                <p className="mt-2 text-sm text-on-surface-variant">
-                  Dữ liệu lấy từ `jobs/my`.
-                </p>
               </div>
               <Link
                 href={RECRUITER_ROUTES.JOB_POSTING}
@@ -329,8 +337,8 @@ export function RecruiterDashboardPage() {
                 ))
               ) : (
                 <div className="rounded-3xl border border-dashed border-outline-variant bg-surface-container-low p-6 text-sm text-on-surface-variant">
-                  Recruiter này chưa có tin tuyển dụng nào hoặc backend chưa trả dữ
-                  liệu cho `jobs/my`.
+                  Recruiter này chưa có tin tuyển dụng nào hoặc backend chưa trả
+                  dữ liệu cho `jobs/my`.
                 </div>
               )}
             </div>

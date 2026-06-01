@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { BaseField } from "@/shared/components/ui/BaseField";
+import { BasePagination } from "@/shared/components/ui/BasePagination";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
@@ -21,7 +22,8 @@ import type { FetchJobsParams } from "@/shared/services/job.service";
 import type { CareerCategory } from "@/shared/types/career-category";
 import type { Job } from "@/shared/types/job";
 
-import { JobCardLink } from "./JobCard";
+import { JobCardLink } from "./JobCardSection";
+import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
 
 type FilterKey = "salary" | "address" | "experience" | "category";
 
@@ -50,7 +52,7 @@ function toSalaryMillion(value?: number): number | undefined {
     return undefined;
   }
 
-  return value / 1_000_000;
+  return value / 1000000;
 }
 
 function formatMillionValue(value: number): string {
@@ -79,10 +81,6 @@ function formatSalary(job: Job): string | undefined {
   }
 
   return undefined;
-}
-
-function buildJobHref(jobId: string): string {
-  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
 }
 
 function buildFilterOptions(
@@ -162,23 +160,6 @@ function getExperienceQuery(
   }
 }
 
-function HotJobSkeleton() {
-  return (
-    <div className="rounded-xl border border-border bg-surface p-7 shadow-sm">
-      <div className="mb-5 flex items-start justify-between">
-        <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
-        <div className="h-7 w-24 animate-pulse rounded-full bg-muted" />
-      </div>
-      <div className="mb-3 h-6 w-4/5 animate-pulse rounded bg-muted" />
-      <div className="mb-8 h-5 w-1/2 animate-pulse rounded bg-muted" />
-      <div className="flex gap-3">
-        <div className="h-7 w-24 animate-pulse rounded-full bg-muted" />
-        <div className="h-7 w-20 animate-pulse rounded-full bg-muted" />
-      </div>
-    </div>
-  );
-}
-
 export function HotJobsSection() {
   const {
     categories,
@@ -194,11 +175,24 @@ export function HotJobsSection() {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [addressInput, setAddressInput] = useState("");
   const [debouncedAddressInput, setDebouncedAddressInput] = useState("");
+  const [page, setPage] = useState(1);
   const chipScrollRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef<{
+    isDragging: boolean;
+    pointerId: number | null;
+    startScrollLeft: number;
+    startX: number;
+  }>({
+    isDragging: false,
+    pointerId: null,
+    startScrollLeft: 0,
+    startX: 0,
+  });
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setDebouncedAddressInput(addressInput.trim());
+      setPage(1);
     }, 300);
 
     return () => window.clearTimeout(timer);
@@ -211,8 +205,8 @@ export function HotJobsSection() {
 
   const queryOptions = useMemo<FetchJobsParams>(() => {
     const baseQuery: FetchJobsParams = {
-      page: 1,
-      limit: 50,
+      page,
+      limit: 3,
       sortBy: "createdAt",
       sortOrder: "DESC",
     };
@@ -248,9 +242,10 @@ export function HotJobsSection() {
       ...baseQuery,
       careerCategorySlug: selectedFilterValue,
     };
-  }, [activeFilterKey, debouncedAddressInput, selectedFilterValue]);
+  }, [activeFilterKey, debouncedAddressInput, page, selectedFilterValue]);
 
-  const { jobs, loading } = useJobs(queryOptions);
+  const { jobs, loading, pagination } = useJobs(queryOptions);
+  const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
   function scrollFilters(direction: "left" | "right") {
     chipScrollRef.current?.scrollBy({
@@ -259,11 +254,57 @@ export function HotJobsSection() {
     });
   }
 
+  function handleChipPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    const container = chipScrollRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const targetElement =
+      event.target instanceof HTMLElement ? event.target : null;
+
+    if (targetElement?.closest("button")) {
+      return;
+    }
+
+    dragStateRef.current = {
+      isDragging: true,
+      pointerId: event.pointerId,
+      startScrollLeft: container.scrollLeft,
+      startX: event.clientX,
+    };
+
+    container.setPointerCapture(event.pointerId);
+  }
+
+  function handleChipPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    const container = chipScrollRef.current;
+    const dragState = dragStateRef.current;
+
+    if (!container || !dragState.isDragging) {
+      return;
+    }
+
+    const deltaX = event.clientX - dragState.startX;
+    container.scrollLeft = dragState.startScrollLeft - deltaX;
+  }
+
+  function handleChipPointerEnd() {
+    dragStateRef.current = {
+      isDragging: false,
+      pointerId: null,
+      startScrollLeft: 0,
+      startX: 0,
+    };
+  }
+
   function handleFilterKeyChange(filterKey: FilterKey) {
     setActiveFilterKey(filterKey);
     setSelectedFilterValue("all");
     setAddressInput("");
     setDebouncedAddressInput("");
+    setPage(1);
     setIsFilterMenuOpen(false);
   }
 
@@ -293,8 +334,10 @@ export function HotJobsSection() {
             <button
               aria-expanded={isFilterMenuOpen}
               aria-haspopup="menu"
-              className="cursor-pointer flex h-11 w-full min-w-[200px] items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-[240px]"
-              onClick={() => setIsFilterMenuOpen((prev) => !prev)}
+              className="flex h-11 w-full min-w-[200px] items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-[240px]"
+              onClick={() =>
+                setIsFilterMenuOpen((currentState) => !currentState)
+              }
               type="button"
             >
               <span className="flex items-center gap-2">
@@ -344,7 +387,7 @@ export function HotJobsSection() {
 
           <div className="flex min-w-0 flex-1 items-center gap-2">
             {activeFilterKey === "address" ? (
-              <div className="w-full max-w-md animate-fadeIn">
+              <div className="w-full xl:max-w-md animate-fadeIn">
                 <BaseField
                   inputClassName="!h-11 rounded-xl border-primary/30 bg-white text-sm placeholder:text-slate-400 focus:border-primary"
                   leadingIcon={
@@ -356,7 +399,10 @@ export function HotJobsSection() {
                     addressInput ? (
                       <button
                         className="rounded-full p-1 transition-colors hover:bg-muted"
-                        onClick={() => setAddressInput("")}
+                        onClick={() => {
+                          setAddressInput("");
+                          setPage(1);
+                        }}
                         type="button"
                       >
                         <XIcon className="h-3.5 w-3.5 text-muted-foreground" />
@@ -369,8 +415,7 @@ export function HotJobsSection() {
             ) : (
               <>
                 <button
-                  aria-label="Cuộn bộ lọc sang trái"
-                  className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary text-primary transition-colors hover:bg-primary-soft lg:flex"
+                  className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary bg-white text-primary transition-colors hover:bg-primary-soft lg:flex"
                   onClick={() => scrollFilters("left")}
                   type="button"
                 >
@@ -378,7 +423,11 @@ export function HotJobsSection() {
                 </button>
 
                 <div
-                  className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  className="flex min-w-0 flex-1 cursor-grab gap-2 overflow-x-auto py-1 touch-pan-x select-none [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                  onPointerCancel={handleChipPointerEnd}
+                  onPointerDown={handleChipPointerDown}
+                  onPointerMove={handleChipPointerMove}
+                  onPointerUp={handleChipPointerEnd}
                   ref={chipScrollRef}
                 >
                   {filterOptions.map((option) => {
@@ -399,7 +448,10 @@ export function HotJobsSection() {
                         )}
                         disabled={isDisabled}
                         key={option.value}
-                        onClick={() => setSelectedFilterValue(option.value)}
+                        onClick={() => {
+                          setSelectedFilterValue(option.value);
+                          setPage(1);
+                        }}
                         type="button"
                       >
                         {option.label}
@@ -409,8 +461,7 @@ export function HotJobsSection() {
                 </div>
 
                 <button
-                  aria-label="Cuộn bộ lọc sang phải"
-                  className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary text-primary transition-colors hover:bg-primary-soft lg:flex"
+                  className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary bg-white text-primary transition-colors hover:bg-primary-soft lg:flex"
                   onClick={() => scrollFilters("right")}
                   type="button"
                 >
@@ -422,50 +473,61 @@ export function HotJobsSection() {
         </div>
 
         {loading && jobs.length === 0 ? (
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <HotJobSkeleton />
             <HotJobSkeleton />
             <HotJobSkeleton />
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-3">
-            {jobs.length > 0 ? (
-              jobs.map((job) => (
-                <JobCardLink
-                  company={getCompanyLabel(job)}
-                  href={buildJobHref(job.id)}
-                  jobData={job}
-                  jobId={job.id}
-                  key={job.id}
-                  address={getAddress(job)}
-                  salary={formatSalary(job)}
-                  title={job.title}
-                />
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-center md:col-span-3">
-                <div className="flex items-center justify-center">
-                  <Image
-                    alt="Không có dữ liệu"
-                    height={100}
-                    priority
-                    src="/no_data.png"
-                    width={100}
-                  />
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {jobs.length > 0 ? (
+                jobs.map((job) => (
+                  <div key={job.id} className="h-full">
+                    <JobCardLink
+                      company={getCompanyLabel(job)}
+                      href={ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug ?? job.id)}
+                      jobData={job}
+                      jobId={job.id}
+                      address={getAddress(job)}
+                      salary={formatSalary(job)}
+                      title={job.title}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                  <div className="flex items-center justify-center">
+                    <Image
+                      alt="Không có dữ liệu"
+                      height={100}
+                      priority
+                      src="/no_data.png"
+                      width={100}
+                    />
+                  </div>
+                  <h4 className="mt-4 text-base font-semibold text-foreground">
+                    Không có việc làm phù hợp
+                  </h4>
+                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                    {activeFilterKey === "address" && debouncedAddressInput
+                      ? `Không tìm thấy kết quả nào tại địa điểm "${debouncedAddressInput}".`
+                      : activeFilterKey === "category" && categoriesError
+                        ? "Chưa tải được danh sách ngành nghề để lọc."
+                        : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."}
+                  </p>
                 </div>
-                <h4 className="mt-4 text-base font-semibold text-foreground">
-                  Không có việc làm phù hợp
-                </h4>
-                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                  {activeFilterKey === "address" && debouncedAddressInput
-                    ? `Không tìm thấy kết quả nào tại địa điểm "${debouncedAddressInput}".`
-                    : activeFilterKey === "category" && categoriesError
-                      ? "Chưa tải được danh sách ngành nghề để lọc."
-                      : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."}
-                </p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+
+            <BasePagination
+              className="mt-8"
+              currentPage={page}
+              onPageChange={setPage}
+              totalPages={totalPages}
+              variant="compact"
+            />
+          </>
         )}
       </div>
     </section>

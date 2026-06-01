@@ -32,10 +32,3 @@ export interface CvPreviewResponse {
 export interface UpdateCvPayload {
   title?: string;
 }
-
-// Chú ý sau
-export interface CvAnalyzeResponse {
-  cvId: string;
-  processingStatus: EProcessingStatus;
-  message: string;
-}

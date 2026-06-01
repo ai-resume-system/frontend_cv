@@ -30,7 +30,8 @@ const defaultSlides: Slide[] = [
   {
     id: 2,
     title: "AI phân tích hồ sơ của bạn",
-    subtitle: "Nhận điểm matching và gợi ý cải thiện từ trí tuệ nhân tạo",
+    subtitle:
+      "Nhận điểm phân tích phù hợp và gợi ý cải thiện từ trí tuệ nhân tạo",
     ctaText: "Phân tích ngay",
     ctaLink: ROUTES.JOB_SEEKER_ANALYSIS,
     image: "/chatbot-ai.webp",
@@ -38,7 +39,7 @@ const defaultSlides: Slide[] = [
   {
     id: 3,
     title: "Nhà tuyển dụng tìm ứng viên",
-    subtitle: "Ưu tiên ứng viên theo điểm AI matching chính xác nhất",
+    subtitle: "Ưu tiên ứng viên theo điểm AI phù hợp chính xác nhất",
     ctaText: "Đăng tin tuyển dụng",
     ctaLink: ROUTES.RECRUITER_REGISTER,
     image: "/recruite-ai.webp",

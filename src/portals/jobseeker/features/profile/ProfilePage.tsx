@@ -18,9 +18,9 @@ import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnE
 
 import { AvatarUploadModal } from "./AvatarUploadModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
-import { useProfileForm } from "./useProfileForm";
 import { JOBSEEKER_ROUTES } from "@/shared/constants/constants/routes";
 import Link from "next/link";
+import { useProfileForm } from "@/shared/hooks/data/useProfileForm";
 
 type SidebarTab = "personal" | "security" | "cv";
 
@@ -64,8 +64,10 @@ export function ProfilePage() {
   const {
     form,
     getVisibleError,
+    handleDeleteAvatar,
     handleFieldBlur,
     handleSubmit,
+    // isDeletingAvatar,
     isLoading,
     isSubmitting,
     refreshUser,
@@ -454,9 +456,12 @@ export function ProfilePage() {
         </div>
       </div>
       <AvatarUploadModal
-        currentAvatarUrl={avatarUrl}
         isOpen={isAvatarUploadOpen}
         onClose={() => setIsAvatarUploadOpen(false)}
+        currentAvatarUrl={avatarUrl}
+        hasExistingAvatar={!!user.profile?.avatarUrl}
+        // isDeletingAvatar={isDeletingAvatar}
+        onDeleteAvatar={handleDeleteAvatar}
         onUploaded={() => void refreshUser()}
       />
       <ChangePasswordModal

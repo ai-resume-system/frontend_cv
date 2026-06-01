@@ -132,7 +132,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
         `}</style>
 
         <div className="flex flex-col items-center">
-          <div className="relative flex h-28 w-56 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
+          <div className="relative flex h-28 w-56 items-center justify-center overflow-hidden">
             <div className="absolute inset-y-0 left-0 flex items-center">
               <div className="animate-infinite-carousel gap-16 px-4">
                 {Array.from({ length: 6 }).map((_, index) => (

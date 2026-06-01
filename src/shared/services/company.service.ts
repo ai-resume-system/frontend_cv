@@ -10,7 +10,7 @@ import type { IResponseApiItem, IResponseApiPagination } from "@/shared/types/ap
 import type { CompanyDto, CompanyListResponse } from "@/shared/types/company";
 import type { JobListResponse } from "@/shared/types/job";
 
-interface FetchCompaniesParams {
+export interface FetchCompaniesParams {
   page?: number;
   limit?: number;
   q?: string;
@@ -21,7 +21,7 @@ interface FetchCompaniesParams {
   careerCategorySlug?: string;
 }
 
-interface FetchCompaniesResult {
+export interface FetchCompaniesResult {
   companies: CompanyDto[];
   pagination?: IResponseApiPagination;
 }

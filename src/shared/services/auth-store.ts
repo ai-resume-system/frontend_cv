@@ -3,6 +3,10 @@ import {
   SESSION_STORAGE_KEYS,
 } from "@/shared/constants/constants/local-storage";
 import type { AuthUser } from "@/shared/types/account";
+import {
+  JOBSEEKER_ROUTES,
+  RECRUITER_ROUTES,
+} from "../constants/constants/routes";
 
 export const AUTH_STORE_CHANGED_EVENT = "auth-store-changed";
 export const AUTH_SYNC_CHANNEL_NAME = "auth-sync";
@@ -78,7 +82,9 @@ export function hydrateAuthStoreFromStorage(): void {
     return;
   }
 
-  const storedToken = window.localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+  const storedToken = window.localStorage.getItem(
+    LOCAL_STORAGE_KEYS.ACCESS_TOKEN,
+  );
   const storedExpiresAt = window.localStorage.getItem(
     LOCAL_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT,
   );
@@ -194,7 +200,9 @@ export function setCurrentUser(user: AuthUser | null): void {
 
 export function clearAuthStore(): void {
   const hadAuthenticatedState =
-    accessToken !== null || currentUser !== null || accessTokenExpiresAt !== null;
+    accessToken !== null ||
+    currentUser !== null ||
+    accessTokenExpiresAt !== null;
 
   accessToken = null;
   accessTokenExpiresAt = null;
@@ -212,7 +220,9 @@ export function clearAuthStore(): void {
 
 export function clearAuthStoreFromSync(): void {
   const hadAuthenticatedState =
-    accessToken !== null || currentUser !== null || accessTokenExpiresAt !== null;
+    accessToken !== null ||
+    currentUser !== null ||
+    accessTokenExpiresAt !== null;
 
   accessToken = null;
   accessTokenExpiresAt = null;
@@ -234,7 +244,9 @@ export function redirectToLogin(): void {
 
   const currentPath = window.location.pathname;
   const isRecruiter = currentPath.startsWith("/recruiter");
-  const loginUrl = isRecruiter ? "/recruiter/login" : "/login";
+  const loginUrl = isRecruiter
+    ? RECRUITER_ROUTES.LOGIN
+    : JOBSEEKER_ROUTES.LOGIN;
 
   if (currentPath !== loginUrl) {
     window.sessionStorage.setItem(

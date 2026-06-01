@@ -185,7 +185,7 @@ export function Header() {
             />
             <Link
               className="flex h-10 items-center gap-1.5 rounded-lg px-3.5 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
-              href={ROUTES.RECRUITER_HOME}
+              href={ROUTES.JOB_SEEKER_COMPANY}
             >
               <span>{t.nav.employers}</span>
             </Link>

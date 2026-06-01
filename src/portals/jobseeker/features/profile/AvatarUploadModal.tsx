@@ -2,13 +2,13 @@
 
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { ImagePlus, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ImagePlus, Upload, X, ZoomIn, ZoomOut, Trash2 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { EUploadType } from "@/shared/constants/enums/upload.enum";
 import { cn } from "@/shared/lib/utils/cn";
-import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
+import { showSuccessToast, showErrorToast } from "@/shared/lib/ui/toast";
 import { uploadFile } from "@/shared/services/upload.service";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -18,8 +18,10 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 interface AvatarUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUploaded: () => void;
+  onUploaded: () => void; // Callback này sẽ được gọi sau khi hoàn tất (cả khi upload mới hoặc xóa)
   currentAvatarUrl?: string;
+  hasExistingAvatar: boolean;
+  onDeleteAvatar: () => Promise<void>; // Hàm API xóa ảnh của bạn
 }
 
 async function getCroppedFile(
@@ -71,13 +73,19 @@ export function AvatarUploadModal({
   isOpen,
   onClose,
   onUploaded,
+  currentAvatarUrl,
+  hasExistingAvatar,
+  onDeleteAvatar,
 }: AvatarUploadModalProps) {
   const [step, setStep] = useState<"pick" | "crop">("pick");
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [fileSize, setFileSize] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Dùng chung cho trạng thái loading khi ấn "Xong"
+
+  // Flag đánh dấu người dùng đã bấm nút "Xóa ảnh hiện tại" tạm thời trên UI
+  const [isDeletedAvatarAction, setIsDeletedAvatarAction] = useState(false);
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -92,7 +100,8 @@ export function AvatarUploadModal({
     setFileName("");
     setFileSize(0);
     setIsDragging(false);
-    setIsUploading(false);
+    setIsProcessing(false);
+    setIsDeletedAvatarAction(false);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
@@ -117,7 +126,7 @@ export function AvatarUploadModal({
   function processFile(file: File) {
     const error = validateFile(file);
     if (error) {
-      showErrorAlert(error);
+      showErrorToast(error);
       return;
     }
 
@@ -197,48 +206,74 @@ export function AvatarUploadModal({
   );
 
   function handleRemoveFile() {
-    reset();
+    // Nếu ở bước crop mà ấn xóa ảnh, quay về bước chọn ảnh ban đầu
+    setImageSrc(null);
+    setFileName("");
+    setFileSize(0);
+    setStep("pick");
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setCroppedPreview(null);
+  }
+
+  function handleDeleteClick() {
+    // Chỉ cập nhật UI: Đánh dấu là muốn xóa ảnh và hiển thị placeholder mặc định
+    setIsDeletedAvatarAction(true);
   }
 
   async function handleConfirm() {
-    if (!imageSrc || !croppedAreaPixels) return;
-
-    setIsUploading(true);
+    setIsProcessing(true);
     try {
-      const croppedFile = await getCroppedFile(imageSrc, croppedAreaPixels);
-      await uploadFile(croppedFile, EUploadType.AVATAR);
-      onUploaded();
-      await showAppAlert({
-        text: "Ảnh đại diện đã được cập nhật thành công.",
-        title: "Đổi ảnh thành công",
-      });
-      handleClose();
+      // TRƯỜNG HỢP 1: Người dùng chọn ảnh mới và tiến hành crop
+      if (step === "crop" && imageSrc && croppedAreaPixels) {
+        const croppedFile = await getCroppedFile(imageSrc, croppedAreaPixels);
+        await uploadFile(croppedFile, EUploadType.AVATAR);
+        onUploaded();
+        showSuccessToast("Ảnh đại diện đã được cập nhật thành công.");
+        handleClose();
+        return;
+      }
+
+      // TRƯỜNG HỢP 2: Người dùng nhấn nút xóa ảnh hiện tại ở Step 1 và nhấn "Xong"
+      if (step === "pick" && isDeletedAvatarAction) {
+        await onDeleteAvatar();
+        onUploaded();
+        handleClose();
+        return;
+      }
     } catch (error) {
-      showErrorAlert(
+      showErrorToast(
         error instanceof Error
           ? error.message
-          : "Không thể tải ảnh lên. Vui lòng thử lại.",
+          : "Không thể xử lý yêu cầu. Vui lòng thử lại.",
       );
     } finally {
-      setIsUploading(false);
+      setIsProcessing(false);
     }
   }
 
   if (!isOpen) return null;
 
+  // Xác định xem nút "Xong" có được kích hoạt hay không
+  // Kích hoạt khi: Đang ở bước crop có ảnh HOẶC đang ở bước pick nhưng có hành động ấn xóa ảnh
+  const isConfirmDisabled =
+    !(step === "crop" && croppedAreaPixels) &&
+    !(step === "pick" && isDeletedAvatarAction);
+
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-on-surface/45 px-4 py-6"
+      className="fixed inset-0 z-90 flex items-center justify-center bg-on-surface/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
     >
       <div className="absolute inset-0" onClick={handleClose} />
 
-      <div className="relative z-[91] w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]">
+      <div className="relative z-91 w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-surface-container-lowest shadow-[0_24px_60px_rgba(25,28,29,0.14)]">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 bg-primary px-6 py-4 sm:px-8">
           <h2 className="text-center text-lg font-bold uppercase tracking-wide text-on-primary">
-            Chỉnh sửa ảnh đại diện
+            Cập nhật ảnh đại diện
           </h2>
           <button
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-on-primary/70 transition-colors hover:bg-white/10 hover:text-on-primary"
@@ -252,51 +287,84 @@ export function AvatarUploadModal({
         {/* Body */}
         <div className="px-6 py-6 sm:px-8 sm:py-8">
           {step === "pick" ? (
-            /* ===== STEP 1: Pick file ===== */
-            <div
-              className={cn(
-                "flex cursor-pointer flex-col items-center gap-4 rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-all duration-200",
-                isDragging
-                  ? "border-primary bg-primary-soft/30"
-                  : "border-outline-variant hover:border-primary hover:bg-surface-container-low",
-              )}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
+            /* ===== STEP 1: Pick file + Current Avatar Preview ===== */
+            <div className="grid gap-6 md:grid-cols-5">
+              {/* Khu vực kéo thả bên trái - Chiếm 3 phần */}
               <div
                 className={cn(
-                  "rounded-2xl p-4 transition-colors duration-200",
+                  "flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-all duration-200 md:col-span-3",
                   isDragging
-                    ? "bg-primary/10 text-primary"
-                    : "bg-surface-container text-on-surface-variant",
+                    ? "border-primary bg-primary-soft/30"
+                    : "border-outline-variant hover:border-primary hover:bg-surface-container-low",
                 )}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
-                <Upload className="h-8 w-8" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-on-surface">
-                  Kéo thả ảnh vào đây
+                <div
+                  className={cn(
+                    "rounded-2xl p-4 transition-colors duration-200",
+                    isDragging
+                      ? "bg-primary/10 text-primary"
+                      : "bg-surface-container text-on-surface-variant",
+                  )}
+                >
+                  <Upload className="h-8 w-8" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-on-surface">
+                    Kéo thả ảnh vào đây
+                  </p>
+                  <p className="mt-1 text-xs text-on-surface-variant">
+                    hoặc nhấn để chọn từ máy tính
+                  </p>
+                </div>
+                <p className="text-xs text-outline">
+                  jpg, png, webp — Tối đa 5MB
                 </p>
-                <p className="mt-1 text-xs text-on-surface-variant">
-                  mặc định nhấn để chọn từ máy tính
-                </p>
               </div>
-              <p className="text-xs text-outline">
-                jpg, png, webp — Tối đa 5MB
-              </p>
+
+              {/* Khu vực hiển thị ảnh hiện tại và nút xóa bên phải - Chiếm 2 phần */}
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface-container-low p-6 md:col-span-2">
+                <p className="mb-3 text-sm font-semibold text-on-surface-variant">
+                  Ảnh hiện tại
+                </p>
+                <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-gray-300 bg-surface-container shadow-sm">
+                  <img
+                    alt="Ảnh đại diện hiện tại"
+                    className="h-full w-full object-cover"
+                    src={
+                      isDeletedAvatarAction
+                        ? "/user-default.png"
+                        : currentAvatarUrl || "/user-default.png"
+                    }
+                  />
+                </div>
+
+                {/* Nút chỉ hiển thị khi tài khoản có ảnh sẵn và chưa bấm nút xóa tạm thời trên UI */}
+                {hasExistingAvatar && !isDeletedAvatarAction && (
+                  <BaseButton
+                    variant="danger"
+                    type="button"
+                    onClick={handleDeleteClick}
+                    startIcon={<Trash2 className="h-4 w-4" />}
+                    className="mt-5 w-full"
+                  >
+                    Xóa ảnh hiện tại
+                  </BaseButton>
+                )}
+              </div>
             </div>
           ) : (
-            /* ===== STEP 2: Crop (Nằm trên cùng hàng ngang nhờ grid-cols-5) ===== */
+            /* ===== STEP 2: Crop ===== */
             <div className="grid gap-6 md:grid-cols-5">
-              {/* Vùng ảnh gốc bên trái - Chiếm 3 phần */}
+              {/* Vùng ảnh gốc bên trái */}
               <div className="flex flex-col md:col-span-3">
                 <p className="mb-2 text-center text-sm font-semibold text-on-surface-variant">
                   Ảnh gốc
                 </p>
-                {/* Thay thế aspect-square thành aspect-[4/3] tạo khung hình chữ nhật */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-surface-container">
+                <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl border border-border bg-surface-container">
                   {imageSrc && (
                     <Cropper
                       image={imageSrc}
@@ -328,7 +396,7 @@ export function AvatarUploadModal({
                 </div>
               </div>
 
-              {/* Vùng ảnh Preview hiển thị bên phải - Chiếm 2 phần */}
+              {/* Vùng ảnh Preview bên phải */}
               <div className="flex flex-col items-center md:col-span-2">
                 <p className="mb-2 text-sm font-semibold text-on-surface-variant">
                   Ảnh hiển thị
@@ -357,23 +425,22 @@ export function AvatarUploadModal({
                   </p>
                 </div>
 
-                {/* Các nút Đổi / Xóa gốc */}
                 <div className="mt-4 flex w-full gap-2">
                   <BaseButton
                     variant="secondary"
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 !px-2 !text-xs"
+                    className="flex-1"
                   >
                     Đổi ảnh
                   </BaseButton>
                   <BaseButton
-                    variant="secondary"
+                    variant="danger"
                     type="button"
                     onClick={handleRemoveFile}
-                    className="flex-1 !border-error !px-2 !text-xs !text-error hover:!bg-error-container"
+                    className="flex-1"
                   >
-                    Xóa ảnh
+                    Hủy chọn
                   </BaseButton>
                 </div>
               </div>
@@ -389,13 +456,13 @@ export function AvatarUploadModal({
           />
         </div>
 
-        {/* Footer nút hành động chính của bạn */}
+        {/* Footer */}
         <div className="flex items-center justify-center gap-3 border-t border-border px-6 py-5 sm:px-8">
           <BaseButton
             type="button"
             onClick={handleConfirm}
-            loading={isUploading}
-            disabled={step === "pick" || !croppedAreaPixels}
+            loading={isProcessing}
+            disabled={isConfirmDisabled}
             className="min-w-40"
           >
             Xong

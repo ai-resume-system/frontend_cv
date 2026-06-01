@@ -23,7 +23,7 @@ export function RecruiterShowcase() {
         fill
         priority
         sizes="50vw"
-        src="/background_2.webp"
+        src="/background_login_recruiter.webp"
       />
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,51,161,0.78)_0%,rgba(41,76,182,0.88)_100%)]" />

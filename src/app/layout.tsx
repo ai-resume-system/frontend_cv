@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AuthBootstrap } from "@/shared/components/providers/AuthBootstrap";
+import { ToastProvider } from "@/shared/components/providers/ToastProvider";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 
 import "./globals.css";
@@ -30,7 +31,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col">
-        <AuthBootstrap>{children}</AuthBootstrap>
+        <AuthBootstrap>
+          <ToastProvider />
+          {children}
+        </AuthBootstrap>
       </body>
     </html>
   );

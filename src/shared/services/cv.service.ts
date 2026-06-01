@@ -7,7 +7,10 @@ import type {
   IResponseApiPagination,
 } from "@/shared/types/api";
 import type {
+  CvAnalysisResponse,
   CvAnalyzeResponse,
+} from "@/shared/types/cv-analysis";
+import type {
   CvDownloadResponse,
   CvItem,
   CvPreviewResponse,
@@ -26,25 +29,6 @@ export interface FetchMyCvListParams {
 export interface FetchMyCvListResult {
   cvs: CvItem[];
   pagination?: IResponseApiPagination;
-}
-
-export interface CvAnalysisDto {
-  cvId: string;
-  processingStatus: string;
-  summary?: string | null;
-  score?: number | null;
-  skills?: Array<{
-    name: string;
-    normalizedName?: string;
-    confidence?: number;
-    skillId?: string;
-  }>;
-  education?: unknown[];
-  experience?: unknown[];
-  suggestions?: string[];
-  rawText?: string;
-  parsedDataId?: string;
-  updatedAt?: string;
 }
 
 function buildCvListPath({
@@ -162,8 +146,8 @@ export async function queueCvAnalysis(id: string): Promise<CvAnalyzeResponse> {
   return response.data;
 }
 
-export async function fetchCvAnalysis(id: string): Promise<CvAnalysisDto> {
-  const response = await apiService.get<IResponseApiItem<CvAnalysisDto>>(
+export async function fetchCvAnalysis(id: string): Promise<CvAnalysisResponse> {
+  const response = await apiService.get<IResponseApiItem<CvAnalysisResponse>>(
     API_ROUTES.CV.ANALYSIS(id),
     { auth: true, cache: "no-store" },
   );

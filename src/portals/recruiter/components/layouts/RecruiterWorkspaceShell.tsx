@@ -6,16 +6,20 @@ import type { ReactNode } from "react";
 import {
   Bell,
   BriefcaseBusiness,
+  CalendarCheck,
   FilePlus2,
   LayoutDashboard,
   LogOut,
   Settings,
   UserRound,
+  UsersRound,
 } from "lucide-react";
 
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { cn } from "@/shared/lib/utils/cn";
+import Image from "next/image";
+import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 
 interface RecruiterWorkspaceShellProps {
   children: ReactNode;
@@ -37,9 +41,29 @@ const NAV_ITEMS: RecruiterNavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    href: RECRUITER_ROUTES.JOB_POSTING,
-    label: "Đăng tin tuyển dụng",
+    href: RECRUITER_ROUTES.JOBS,
+    label: "Tin tuyển dụng",
+    icon: BriefcaseBusiness,
+  },
+  {
+    href: RECRUITER_ROUTES.JOB_CREATE,
+    label: "Đăng tin mới",
     icon: FilePlus2,
+  },
+  {
+    href: RECRUITER_ROUTES.APPLICANTS,
+    label: "Ứng viên",
+    icon: UsersRound,
+  },
+  {
+    href: RECRUITER_ROUTES.INTERVIEWS,
+    label: "Phỏng vấn",
+    icon: CalendarCheck,
+  },
+  {
+    href: RECRUITER_ROUTES.COMPANY_PROFILE,
+    label: "Hồ sơ công ty",
+    icon: Settings,
   },
 ];
 
@@ -57,14 +81,22 @@ export function RecruiterWorkspaceShell({
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside className="hidden w-72 shrink-0 border-r border-white/70 bg-white/75 px-6 py-8 backdrop-blur xl:flex xl:flex-col">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg shadow-primary/15">
-              <BriefcaseBusiness className="h-6 w-6" />
+            <div className="flex h-12 w-12 items-center justify-center">
+              <Image
+                src={user?.company?.logoUrl ?? "/logo.png"}
+                alt="Logo"
+                width={50}
+                height={50}
+                unoptimized
+              />
             </div>
             <div>
+              <h2 className="text-lg font-bold text-primary">
+                {INFOMATION_WEB.COMPANY_NAME}
+              </h2>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/70">
-                Fuse Recruiter
+                Nhà tuyển dụng
               </p>
-              <h2 className="text-lg font-bold text-primary">Nhà tuyển dụng</h2>
             </div>
           </div>
 
@@ -91,17 +123,6 @@ export function RecruiterWorkspaceShell({
             })}
           </nav>
 
-          <div className="mt-8 rounded-3xl border border-primary/10 bg-primary-soft/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-              Ghi chú API
-            </p>
-            <p className="mt-3 text-sm leading-6 text-on-surface-variant">
-              Những khối AI phân tích tổng hợp, lịch phỏng vấn và độ phủ ứng viên
-              đang hiển thị từ dữ liệu hiện có hoặc được gắn nhãn rõ nếu backend
-              chưa cung cấp endpoint chuyên biệt.
-            </p>
-          </div>
-
           <div className="mt-auto space-y-3 rounded-3xl border border-white/80 bg-white/85 p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-container-high text-primary">
@@ -109,7 +130,9 @@ export function RecruiterWorkspaceShell({
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-on-surface">
-                  {user?.company?.name ?? user?.profile?.fullName ?? "Tài khoản recruiter"}
+                  {user?.company?.name ??
+                    user?.profile?.fullName ??
+                    "Tài khoản recruiter"}
                 </p>
                 <p className="truncate text-xs text-on-surface-variant">
                   {user?.email ?? "Chưa tải thông tin tài khoản"}
@@ -134,9 +157,6 @@ export function RecruiterWorkspaceShell({
           <header className="sticky top-0 z-20 border-b border-white/70 bg-white/75 backdrop-blur">
             <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/70">
-                  Bảng điều hành recruiter
-                </p>
                 <h1 className="truncate text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
                   {heading}
                 </h1>

@@ -1,3 +1,4 @@
+import type { EProcessingStatus } from "@/shared/constants/enums/cv.enum";
 import type { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { IResponseApiList } from "@/shared/types/api";
 
@@ -7,8 +8,8 @@ export interface ApplicationCvRef {
   title: string | null;
   fileUrl: string | null;
   summary: string | null;
-  status?: string;
-  processingStatus?: string;
+  status?: string | null;
+  processingStatus?: EProcessingStatus | null;
   createdAt?: string;
 }
 
