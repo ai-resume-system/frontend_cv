@@ -350,9 +350,6 @@ export function RecruiterDashboardPage() {
                 <h2 className="text-xl font-bold text-on-surface">
                   Ứng viên mới ứng tuyển
                 </h2>
-                <p className="mt-2 text-sm text-on-surface-variant">
-                  Snapshot từ `applications/jobs/:jobId`.
-                </p>
               </div>
             </div>
 

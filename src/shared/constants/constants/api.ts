@@ -66,6 +66,9 @@ export const API_ROUTES = {
     DETAIL: (jobId: string) => `${API_PREFIX}/favourite-jobs/${jobId}`,
   },
   RECRUITER_JOB_APPLICATION: {
+    ALL: `${API_PREFIX}/recruiter/job-applications`,
+    NEW: `${API_PREFIX}/recruiter/job-applications/new`,
+    INTERVIEWS: `${API_PREFIX}/recruiter/job-applications/interviews`,
     BY_JOB: (jobId: string) =>
       `${API_PREFIX}/recruiter/job-applications/jobs/${jobId}`,
     DETAIL: (id: string) => `${API_PREFIX}/recruiter/job-applications/${id}`,

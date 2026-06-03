@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import {
   fetchApplicationsByJobId,
+  fetchAllRecruiterJobApplications,
+  fetchRecruiterInterviews,
   updateJobApplicationStatus,
 } from "@/shared/services/recruiter-job-application.service";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
@@ -32,11 +34,15 @@ export function useRecruiterApplications({
       };
       if (status) params.status = status;
 
-      if (jobId) {
+      if (status === EApplicationStatus.INTERVIEW) {
+        const result = await fetchRecruiterInterviews({ ...params, jobId });
+        setApplications(result.applications);
+      } else if (jobId) {
         const result = await fetchApplicationsByJobId(jobId, params);
         setApplications(result.applications);
       } else {
-        setApplications([]);
+        const result = await fetchAllRecruiterJobApplications(params);
+        setApplications(result.applications);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải danh sách ứng viên.");
@@ -47,7 +53,7 @@ export function useRecruiterApplications({
 
   useEffect(() => {
     void loadApplications();
-  }, [jobId]);
+  }, [jobId, status]);
 
   async function handleAccept(id: string) {
     try {

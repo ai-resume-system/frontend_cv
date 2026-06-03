@@ -1,17 +1,14 @@
 "use client";
 
 import {
-  ArrowRight,
   ArrowUpDown,
-  CheckCircle2,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
   Funnel,
-  Heart,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -24,69 +21,12 @@ import {
   JOB_TYPE_OPTIONS,
   type JobFilterSortValue,
 } from "@/shared/constants/constants/filter.constants";
-import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
-import type { Job } from "@/shared/types/job";
 import Image from "next/image";
-import { BaseButton } from "@/shared/components/ui/BaseButton";
-import { cn } from "@/shared/lib/utils/cn";
-import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
-import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
-import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
-import { showErrorAlert } from "@/shared/lib/ui/alert";
 import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
-import { Badge } from "@/shared/components/ui/Badge";
-
-function getAddress(job: Job): string {
-  return job.address ?? job.company?.address ?? "Đang cập nhật";
-}
-
-function formatExperience(years?: number | null): string {
-  if (typeof years !== "number" || years === 0) {
-    return "Không yêu cầu";
-  }
-  return `${years} năm`;
-}
-
-function toSalaryMillion(value?: number): number | undefined {
-  if (typeof value !== "number") return undefined;
-  return value / 1000000;
-}
-
-function formatMillionValue(value: number): string {
-  return Number.isInteger(value)
-    ? value.toLocaleString("vi-VN")
-    : value.toLocaleString("vi-VN", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 1,
-      });
-}
-
-function formatSalary(job: Job): string {
-  const salaryMin = toSalaryMillion(job.salaryMin);
-  const salaryMax = toSalaryMillion(job.salaryMax);
-
-  if ((!salaryMin && !salaryMax) || (salaryMin === 0 && salaryMax === 0)) {
-    return "Thỏa thuận";
-  }
-
-  if (typeof salaryMin === "number" && typeof salaryMax === "number") {
-    return `${formatMillionValue(salaryMin)} - ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  if (typeof salaryMin === "number") {
-    return `Từ ${formatMillionValue(salaryMin)} triệu`;
-  }
-
-  if (typeof salaryMax === "number") {
-    return `Đến ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  return "Thỏa thuận";
-}
+import { JobCard } from "@/shared/components/layouts/JobCard";
 
 function formatDate(value?: Date): string {
   if (!value) return "Đang cập nhật";
@@ -97,15 +37,10 @@ function formatDate(value?: Date): string {
   }).format(value);
 }
 
-function buildJobHref(jobId: string): string {
-  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
-}
-
 export function JobListPage() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoggedIn } = useAuth();
   const {
     applyFilters,
     buildQueryOptions,
@@ -129,13 +64,12 @@ export function JobListPage() {
     },
   });
 
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const { categories } = useCareerCategories({
     page: 1,
     limit: 100,
   });
   const [showAllCategories, setShowAllCategories] = useState(false);
-
-  const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
 
   const queryOptions = buildQueryOptions();
   const { jobs, loading, error, pagination } = useJobs(queryOptions);
@@ -146,14 +80,6 @@ export function JobListPage() {
     ? (categories ?? [])
     : (categories ?? []).slice(0, 5);
   const categoryOptions = buildCategoryFilterOptions(categoriesToRender);
-
-  async function handleApply(slug: string) {
-    if (!isLoggedIn) {
-      router.push(ROUTES.JOB_SEEKER_LOGIN);
-      return;
-    }
-    router.push(ROUTES.JOB_SEEKER_JOB_APPLY(slug));
-  }
 
   return (
     <>
@@ -171,7 +97,7 @@ export function JobListPage() {
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
             <aside className="lg:col-span-1">
-              <div className="sticky top-24 flex flex-col rounded-3xl border border-gray-300 bg-white shadow-lg overflow-hidden max-h-[calc(100vh-120px)]">
+              <div className="sticky top-24 flex flex-col rounded-3xl border border-gray-300 bg-white shadow-lg overflow-hidden max-h-[calc(100vh-200px)]">
                 <div className="flex items-center gap-2 border-b border-slate-100 p-6 pb-4 shrink-0">
                   <Funnel className="h-5 w-5 shrink-0 text-primary" />
                   <h2 className="text-base font-bold uppercase tracking-wider text-slate-800">
@@ -327,32 +253,57 @@ export function JobListPage() {
                   </h1>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+                <div className="relative flex shrink-0 items-center gap-2 self-start sm:self-auto">
                   <span className="flex items-center gap-1 text-sm font-semibold text-slate-600">
                     <ArrowUpDown className="h-4 w-4 text-slate-400" /> Sắp xếp
                     theo:
                   </span>
-                  <select
-                    value={filters.sort}
-                    onChange={(event) => {
-                      const value = event.target.value as JobFilterSortValue;
-                      setFilter("sort", value);
 
-                      const nextSearchParams = new URLSearchParams(
-                        searchParams.toString(),
-                      );
-                      nextSearchParams.set("sort", value);
-                      nextSearchParams.set("page", "1");
-                      router.push(`${pathname}?${nextSearchParams.toString()}`);
-                    }}
-                    className="cursor-pointer rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition outline-none hover:border-slate-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                  <button
+                    onClick={() => setIsSortOpen(!isSortOpen)}
+                    className="flex min-w-[160px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 focus:ring-2 focus:ring-primary/20 outline-none"
                   >
-                    {JOB_SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    {JOB_SORT_OPTIONS.find((o) => o.value === filters.sort)
+                      ?.label || "Chọn..."}
+                    <ChevronDown
+                      className={`h-4 w-4 text-slate-400 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {isSortOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200">
+                      {JOB_SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setFilter(
+                              "sort",
+                              option.value as JobFilterSortValue,
+                            );
+                            const nextSearchParams = new URLSearchParams(
+                              searchParams.toString(),
+                            );
+                            nextSearchParams.set("sort", option.value);
+                            nextSearchParams.set("page", "1");
+                            router.push(
+                              `${pathname}?${nextSearchParams.toString()}`,
+                            );
+                            setIsSortOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition ${
+                            filters.sort === option.value
+                              ? "bg-primary/5 text-primary font-semibold"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {option.label}
+                          {filters.sort === option.value && (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -367,120 +318,7 @@ export function JobListPage() {
               ) : jobs.length ? (
                 <div className="space-y-6">
                   {jobs.map((job) => (
-                    <article
-                      className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-300 p-6 shadow-md transition duration-300 hover:border-primary/40 hover:shadow-lg"
-                      key={job.id}
-                    >
-                      <div className="flex items-start gap-4 w-full">
-                        {/* Logo */}
-                        <div className="flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-sm">
-                          <img
-                            src={job?.company?.logoUrl ?? "/logo.png"}
-                            alt={job.company?.name ?? "Doanh nghiệp"}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-
-                        {/* Content info */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Link
-                                href={buildJobHref(job.slug ?? job.id)}
-                                className="truncate text-lg font-bold text-slate-800 group-hover:text-primary transition"
-                              >
-                                {job.title}
-                              </Link>
-                              <CheckCircle2 className="h-4 w-4 shrink-0 fill-green-100 text-[#00b14f]" />
-                            </div>
-                            <span className="shrink-0 text-base font-bold text-primary/70">
-                              {formatSalary(job)}
-                            </span>
-                          </div>
-
-                          <div className="mt-2 flex flex-col gap-1">
-                            <p className="text-sm font-semibold uppercase text-slate-400 transition">
-                              {job.company?.name ?? "Doanh nghiệp"}
-                            </p>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              <Badge className="rounded bg-gray-300/60 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
-                                {getAddress(job)}
-                              </Badge>
-                              <Badge className="rounded bg-gray-300/60 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
-                                {formatExperience(job.experienceYears)}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-end gap-3 shrink-0 self-end sm:self-auto">
-                        <BaseButton
-                          className="h-10 rounded-full px-5 text-sm font-semibold opacity-100 transform transition-all duration-300 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
-                          onClick={() => handleApply(job.slug ?? job.id)}
-                        >
-                          Ứng tuyển
-                        </BaseButton>
-
-                        <button
-                          className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-full border border-primary-container bg-white shadow-sm transition-all duration-200 hover:bg-primary-soft active:scale-95",
-                            isFavoritePending(job.id) &&
-                              "animate-pulse opacity-60",
-                          )}
-                          disabled={isFavoritePending(job.id)}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-
-                            if (!isLoggedIn) {
-                              if (typeof window !== "undefined") {
-                                const redirectPath = `${window.location.pathname}${window.location.search}`;
-                                window.sessionStorage.setItem(
-                                  SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
-                                  redirectPath,
-                                );
-                              }
-
-                              router.push(ROUTES.JOB_SEEKER_LOGIN);
-                              return;
-                            }
-
-                            try {
-                              const wasAdded = await toggleFavorite(
-                                job.id,
-                                job,
-                              );
-
-                              if (wasAdded && typeof window !== "undefined") {
-                                window.dispatchEvent(
-                                  new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
-                                    detail: {
-                                      jobId: job.id,
-                                      title: job.title,
-                                    },
-                                  }),
-                                );
-                              }
-                            } catch (error) {
-                              showErrorAlert(
-                                error instanceof Error
-                                  ? error.message
-                                  : "Không thể cập nhật danh sách yêu thích.",
-                              );
-                            }
-                          }}
-                          type="button"
-                        >
-                          <Heart
-                            className={cn(
-                              "h-5 w-5 text-slate-500 transition-transform group-hover:scale-105",
-                              isFavorite(job.id) && "fill-primary text-primary",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    </article>
+                    <JobCard key={job.id} job={job} />
                   ))}
                 </div>
               ) : (

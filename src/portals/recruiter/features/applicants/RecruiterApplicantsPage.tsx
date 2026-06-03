@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UsersRound } from "lucide-react";
 import Link from "next/link";
 
@@ -17,12 +17,6 @@ export function RecruiterApplicantsPage() {
   const { jobs } = useRecruiterJobList();
   const { applications, loading, error, reload, handleAccept, handleReject, handleViewCv } =
     useRecruiterApplications({ jobId: selectedJobId });
-
-  useEffect(() => {
-    if (jobs.length > 0 && !selectedJobId) {
-      setSelectedJobId(jobs[0].id);
-    }
-  }, [jobs, selectedJobId]);
 
   return (
     <RecruiterWorkspaceShell
@@ -46,6 +40,17 @@ export function RecruiterApplicantsPage() {
         ) : null}
 
         <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setSelectedJobId(undefined)}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              selectedJobId === undefined
+                ? "bg-primary text-on-primary shadow-lg shadow-primary/15"
+                : "bg-white text-on-surface-variant hover:bg-primary-soft/60"
+            }`}
+          >
+            Tất cả công việc
+          </button>
           {jobs.map((job) => (
             <button
               key={job.id}

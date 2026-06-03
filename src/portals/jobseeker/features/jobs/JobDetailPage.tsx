@@ -32,6 +32,7 @@ import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
+import { JobCard } from "@/shared/components/layouts/JobCard";
 
 interface JobDetailPageProps {
   job: Job;
@@ -66,6 +67,20 @@ function formatDate(value?: Date): string {
     month: "2-digit",
     year: "numeric",
   }).format(value);
+}
+
+function buildMapLink(job: Job): string | undefined {
+  if (
+    typeof job.company?.latitude === "number" &&
+    typeof job.company?.longitude === "number"
+  ) {
+    return `https://www.google.com/maps?q=${job.company.latitude},${job.company.longitude}`;
+  }
+  const addr = getAddress(job);
+  if (addr && addr !== "Đang cập nhật") {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+  }
+  return undefined;
 }
 
 function buildGoogleMapsUrl(job: Job): string | undefined {
@@ -217,10 +232,10 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
               </section>
 
               <section className="rounded-3xl border border-gray-300 bg-white p-8 shadow-lg">
-                <h2 className="text-2xl font-semibold tracking-tight text-primary pl-4 border-l-4 border-secondary-container">
+                <h2 className="relative flex items-center text-2xl font-semibold tracking-tight text-primary pl-4">
+                  <span className="absolute left-0 top-0 h-full w-1 rounded-full bg-linear-to-b from-primary to-secondary-container" />
                   Mô tả chi tiết tuyển dụng
                 </h2>
-
                 <div
                   className="prose prose-sm max-w-none mt-6 text-sm leading-7 text-slate-600 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-5 [&>ol]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&_a]:text-primary [&_a]:underline"
                   dangerouslySetInnerHTML={{
@@ -299,141 +314,20 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
 
               <section className="rounded-3xl border border-gray-300 bg-white p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-primary pl-4 border-l-4 border-secondary-container">
+                  <h2 className="relative flex items-center text-2xl font-semibold text-primary pl-4">
+                    <span className="absolute left-0 top-0 h-full w-1 rounded-full bg-linear-to-b from-primary to-secondary-container" />
                     Việc làm liên quan
                   </h2>
-                  <Link
-                    href={ROUTES.JOBS}
-                    className="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-primary transition"
-                  >
-                    Xem tất cả <ArrowRight className="h-4 w-4" />
-                  </Link>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {relatedJobs.length ? (
-                    relatedJobs.map((relatedJob) => {
-                      const isFav = isFavorite(relatedJob.id);
-                      return (
-                        <div
-                          key={relatedJob.id}
-                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-250 rounded-2xl p-5 bg-white shadow-xs hover:shadow-md transition gap-4 hover:border-primary/30"
-                        >
-                          <div className="flex gap-4 items-center">
-                            <img
-                              src={relatedJob.company?.logoUrl ?? "/logo.png"}
-                              className="h-14 w-14 rounded-xl object-cover border border-gray-100 bg-slate-50 shrink-0 shadow-xs"
-                              alt={getCompanyLabel(relatedJob)}
-                            />
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <Link
-                                  href={ROUTES.JOB_SEEKER_JOB_DETAIL(
-                                    relatedJob.slug ?? relatedJob.id,
-                                  )}
-                                  className="font-semibold text-slate-900 text-base hover:text-primary transition"
-                                >
-                                  {relatedJob.title}
-                                </Link>
-                                <CheckCircle2 className="h-4 w-4 text-blue-500 fill-blue-50 shrink-0" />
-                                <span className="bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                                  Pro
-                                </span>
-                              </div>
-                              <p className="text-sm font-medium text-[#d4a373] mt-1">
-                                {getCompanyLabel(relatedJob)}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1.5">
-                                <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
-                                  {getAddress(relatedJob)}
-                                </span>
-                                <span className="text-slate-400">
-                                  Cập nhật: {formatDate(relatedJob.updatedAt)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-2.5 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
-                            <span className="font-bold text-primary text-base">
-                              {formatSalary(relatedJob)}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => {
-                                  router.push(
-                                    ROUTES.JOB_SEEKER_JOB_APPLY(
-                                      relatedJob.slug ?? relatedJob.id,
-                                    ),
-                                  );
-                                }}
-                                className="bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
-                              >
-                                Ứng tuyển
-                              </button>
-                              <button
-                                disabled={isFavoritePending(relatedJob.id)}
-                                onClick={async () => {
-                                  if (!isLoggedIn) {
-                                    if (typeof window !== "undefined") {
-                                      window.sessionStorage.setItem(
-                                        SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
-                                        ROUTES.JOB_SEEKER_JOB_DETAIL(
-                                          job.slug ?? job.id,
-                                        ),
-                                      );
-                                    }
-                                    router.push(ROUTES.JOB_SEEKER_LOGIN);
-                                    return;
-                                  }
-
-                                  try {
-                                    const wasAdded = await toggleFavorite(
-                                      relatedJob.id,
-                                      relatedJob,
-                                    );
-
-                                    if (
-                                      wasAdded &&
-                                      typeof window !== "undefined"
-                                    ) {
-                                      window.dispatchEvent(
-                                        new CustomEvent(
-                                          FAVORITE_JOB_ADDED_EVENT,
-                                          {
-                                            detail: {
-                                              jobId: relatedJob.id,
-                                              title: relatedJob.title,
-                                            },
-                                          },
-                                        ),
-                                      );
-                                    }
-                                  } catch (error) {
-                                    showErrorAlert(
-                                      error instanceof Error
-                                        ? error.message
-                                        : "Không thể cập nhật danh sách yêu thích.",
-                                    );
-                                  }
-                                }}
-                                className="p-1.5 rounded-full border border-gray-200 hover:bg-slate-50 text-slate-400 hover:text-red-500 transition shrink-0"
-                              >
-                                <Heart
-                                  className={cn(
-                                    "h-4 w-4",
-                                    isFav && "fill-primary text-primary",
-                                  )}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
+                    relatedJobs.map((relatedJob) => (
+                      <JobCard key={relatedJob.id} job={relatedJob} />
+                    ))
                   ) : (
-                    <p className="text-sm text-slate-400 italic">
-                      Chưa có công việc liên quan.
+                    <p className="text-sm text-center text-slate-400 italic">
+                      Chưa có thông tin công việc liên quan.
                     </p>
                   )}
                 </div>
@@ -528,9 +422,20 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
               </section>
 
               {/* Bản đồ địa điểm */}
-              <section className="overflow-hidden border border-gray-300 shadow-lg rounded-3xl">
+              <section className="border border-gray-300 bg-white p-6 shadow-lg rounded-3xl text-left">
+                <h2 className="text-xl font-bold text-slate-800">
+                  Địa điểm công ty
+                </h2>
                 {mapsUrl ? (
-                  <div className="aspect-4/3 w-full rounded-2xl overflow-hidden border border-gray-100">
+                  <div className="relative mt-4 aspect-4/3 w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
+                    <a
+                      href={buildMapLink(job)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="absolute top-4 left-4 z-10 flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-primary shadow-md transition hover:bg-slate-50 cursor-pointer"
+                    >
+                      Mở trong Maps <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
                     <iframe
                       allowFullScreen
                       className="h-full w-full"
@@ -541,7 +446,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     />
                   </div>
                 ) : (
-                  <div className="flex aspect-4/3 flex-col items-center justify-center gap-3 p-6 text-center">
+                  <div className="flex aspect-4/3 flex-col items-center justify-center gap-3 p-6 text-center mt-4">
                     <MapPin className="h-10 w-10 text-slate-400" />
                     <p className="text-sm text-slate-500">
                       Địa điểm chưa được cập nhật
@@ -563,7 +468,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     </div>
                     <div>
                       <p className="text-sm text-slate-400 font-medium">
-                        Loại hình công việc
+                        Loại hình làm việc
                       </p>
                       <p className="text-sm font-semibold text-slate-800 mt-0.5">
                         {EJobTypeLabels[job.jobType]}

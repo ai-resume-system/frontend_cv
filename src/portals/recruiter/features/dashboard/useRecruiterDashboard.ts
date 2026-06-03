@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 
 import { fetchCurrentUser } from "@/shared/services/account.service";
-import { fetchApplicationsByJobId } from "@/shared/services/recruiter-job-application.service";
+import {
+  fetchApplicationsByJobId,
+  fetchAllRecruiterJobApplications,
+  fetchRecruiterNewApplicants,
+} from "@/shared/services/recruiter-job-application.service";
 import { fetchRecruiterJobs } from "@/shared/services/recruiter-job.service";
 import type { AuthUser } from "@/shared/types/account";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
@@ -114,9 +118,11 @@ export function useRecruiterDashboard() {
 
     async function loadDashboard() {
       try {
-        const [recruiter, jobsResult] = await Promise.all([
+        const [recruiter, jobsResult, allAppsResult, newApplicants] = await Promise.all([
           fetchCurrentUser(),
           fetchRecruiterJobs({ page: 1, limit: 12 }),
+          fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
+          fetchRecruiterNewApplicants({ limit: 6 }),
         ]);
 
         const sortedJobs = [...jobsResult.jobs].sort(
@@ -141,15 +147,10 @@ export function useRecruiterDashboard() {
           return;
         }
 
-        const applications = applicationSnapshots
-          .flatMap((snapshot) => snapshot.applications)
-          .map(mapApplicationSummary)
-          .sort(
-            (left, right) =>
-              right.createdAt.getTime() - left.createdAt.getTime(),
-          );
+        const applications = newApplicants.map(mapApplicationSummary);
+        const allApplications = allAppsResult.applications.map(mapApplicationSummary);
 
-        const matchingScores = applications
+        const matchingScores = allApplications
           .map((application) => application.matchingScore)
           .filter((score): score is number => typeof score === "number");
 
@@ -181,15 +182,15 @@ export function useRecruiterDashboard() {
           metrics: {
             totalJobs: sortedJobs.length,
             openJobs: sortedJobs.filter((job) => job.status === "open").length,
-            totalApplications: applications.length,
+            totalApplications: allAppsResult.pagination?.totalItems || allApplications.length,
             averageMatchingScore: matchingScores.length
               ? matchingScores.reduce((total, score) => total + score, 0) /
                 matchingScores.length
               : null,
           },
           recruiter,
-          trend: applications.length
-            ? buildRecentTrend(applications)
+          trend: allApplications.length
+            ? buildRecentTrend(allApplications)
             : EMPTY_TREND,
         });
       } catch (error) {
