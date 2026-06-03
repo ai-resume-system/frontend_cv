@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, XIcon } from "lucide-react";
+import { Search, XIcon, LayoutGrid, List } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
@@ -10,14 +10,12 @@ import { BasePagination } from "@/shared/components/ui/BasePagination";
 import { useCompanies } from "@/shared/hooks/data/useCompanies";
 import Image from "next/image";
 import { CompanyCardSkeleton } from "@/shared/components/ui/CardSkelton";
+import { cn } from "@/shared/lib/utils/cn";
 
 interface CompanyListFilterState {
   q: string;
 }
 
-const INITIAL_FILTER_STATE: CompanyListFilterState = {
-  q: "",
-};
 
 function readFiltersFromSearchParams(
   searchParams: URLSearchParams,
@@ -34,6 +32,7 @@ export function CompanyListPage() {
   const [filters, setFilters] = useState<CompanyListFilterState>(() =>
     readFiltersFromSearchParams(searchParams),
   );
+  const [layoutMode, setLayoutMode] = useState<"grid" | "list">("grid");
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
   useEffect(() => {
@@ -140,10 +139,38 @@ export function CompanyListPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-center">
-          <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-primary">
+        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase">
             DANH SÁCH CÁC CÔNG TY NỔI BẬT ({totalItems} công ty)
           </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLayoutMode("grid")}
+              className={cn(
+                "p-2 rounded-lg border transition-all duration-200 cursor-pointer",
+                layoutMode === "grid"
+                  ? "border-primary bg-blue-50/50 text-primary"
+                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300"
+              )}
+              title="Chế độ lưới"
+              type="button"
+            >
+              <LayoutGrid className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setLayoutMode("list")}
+              className={cn(
+                "p-2 rounded-lg border transition-all duration-200 cursor-pointer",
+                layoutMode === "list"
+                  ? "border-primary bg-blue-50/50 text-primary"
+                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300"
+              )}
+              title="Chế độ danh sách"
+              type="button"
+            >
+              <List className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -169,9 +196,19 @@ export function CompanyListPage() {
           </div>
         ) : companies.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              className={cn(
+                layoutMode === "grid"
+                  ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                  : "grid grid-cols-1 gap-6"
+              )}
+            >
               {companies.map((company) => (
-                <CompanyCard company={company} key={company.id} />
+                <CompanyCard
+                  company={company}
+                  layout={layoutMode}
+                  key={company.id}
+                />
               ))}
             </div>
 

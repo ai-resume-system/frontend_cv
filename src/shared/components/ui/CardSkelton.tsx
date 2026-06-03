@@ -29,3 +29,34 @@ export function HotJobSkeleton() {
     </div>
   );
 }
+
+interface JobCardSkeletonProps {
+  length?: number;
+  type?: "row" | "column";
+}
+
+export function JobCardSkeleton({
+  length = 5,
+  type = "column",
+}: JobCardSkeletonProps) {
+  const containerClass =
+    type === "row"
+      ? "grid grid-cols-1 gap-4"
+      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+
+  return (
+    <div className={containerClass}>
+      {Array.from({ length }).map((_, index) => (
+        <div
+          key={index}
+          className="overflow-hidden rounded-[28px] border border-surface-container-high bg-white shadow-sm"
+        >
+          <div className="h-20 animate-pulse bg-surface-container-low" />
+          <div className="space-y-4 p-6">
+            <div className="h-7 w-4/5 animate-pulse rounded bg-surface-container" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

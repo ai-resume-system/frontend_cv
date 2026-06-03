@@ -96,12 +96,16 @@ function isAlreadyFavoritedError(error: unknown): boolean {
     return false;
   }
 
-  const apiError = error as Error & { status?: number; code?: string | number };
+  const apiError = error as Error & {
+    rawMessage?: string;
+    status?: number;
+  };
+  const comparableMessage = apiError.rawMessage ?? error.message;
 
   return (
     apiError.status === 409 ||
-    apiError.code === "FAVOURITE_JOB_ALREADY_EXISTS" ||
-    error.message.includes("already been added to favourites")
+    comparableMessage.includes("Job already in favourites") ||
+    comparableMessage.includes("already been added to favourites")
   );
 }
 

@@ -1,5 +1,6 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
 import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
+import { resolveApiDisplayMessage } from "@/shared/lib/errors/getErrorDisplayMessage";
 import { env } from "@/shared/lib/config/env";
 import {
   clearAuthStore,
@@ -15,7 +16,11 @@ import type {
   RefreshTokenResponseData,
 } from "@/shared/types/auth";
 import type { AuthUser } from "@/shared/types/account";
-import type { ApiFieldErrorResponse, IResponseApiItem } from "@/shared/types/api";
+import type {
+  ApiFieldErrorResponse,
+  AppApiError,
+  IResponseApiItem,
+} from "@/shared/types/api";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -65,15 +70,18 @@ async function readJson<T>(response: Response): Promise<T> {
   return JSON.parse(text) as T;
 }
 
-async function parseApiError(response: Response): Promise<Error> {
+async function parseApiError(response: Response): Promise<AppApiError> {
   const payload = await readJson<ApiFieldErrorResponse>(response).catch(
     (): ApiFieldErrorResponse => ({}),
   );
-  const message = payload.message ?? `Request failed: ${response.status}`;
+  const rawMessage = payload.message ?? "";
+  const displayMessage = resolveApiDisplayMessage(rawMessage, response.status);
+  const message = displayMessage;
 
   return Object.assign(new Error(message), {
-    code: payload.code,
+    displayMessage,
     fields: payload.error?.fields,
+    rawMessage,
     status: response.status,
   });
 }

@@ -33,6 +33,10 @@ export interface FetchJobsResult {
   pagination?: IResponseApiPagination;
 }
 
+export interface FetchRelatedJobsParams {
+  limit?: number;
+}
+
 function buildJobsPath({
   page = 1,
   limit = 3,
@@ -140,6 +144,23 @@ function buildJobsPath({
   return `${API_ROUTES.JOB_PUBLIC.BASE}?${searchParams.toString()}`;
 }
 
+function buildRelatedJobsPath(
+  slug: string,
+  { limit }: FetchRelatedJobsParams = {},
+): string {
+  const searchParams = new URLSearchParams();
+
+  if (typeof limit === "number") {
+    searchParams.set("limit", `${limit}`);
+  }
+
+  const query = searchParams.toString();
+
+  return query
+    ? `${API_ROUTES.JOB_PUBLIC.RELATED(slug)}?${query}`
+    : API_ROUTES.JOB_PUBLIC.RELATED(slug);
+}
+
 export function buildCompanyJobsPath(
   basePath: string,
   params?: FetchJobsParams,
@@ -210,4 +231,18 @@ export async function fetchJobBySlug(slug: string): Promise<Job> {
   );
 
   return mapJobApiItemToJob(response.data);
+}
+
+export async function fetchRelatedJobs(
+  slug: string,
+  params?: FetchRelatedJobsParams,
+): Promise<Job[]> {
+  const response = await apiService.get<IResponseApiItem<JobApiItem[]>>(
+    buildRelatedJobsPath(slug, params),
+    {
+      cache: "no-store",
+    },
+  );
+
+  return response.data.map(mapJobApiItemToJob);
 }

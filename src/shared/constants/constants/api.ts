@@ -49,6 +49,7 @@ export const API_ROUTES = {
   JOB_PUBLIC: {
     BASE: `${API_PREFIX}/jobs`,
     DETAIL: (slug: string) => `${API_PREFIX}/jobs/${slug}`,
+    RELATED: (slug: string) => `${API_PREFIX}/jobs/${slug}/related`,
   },
   JOB_RECRUITER: {
     BASE: `${API_PREFIX}/recruiter/jobs`,

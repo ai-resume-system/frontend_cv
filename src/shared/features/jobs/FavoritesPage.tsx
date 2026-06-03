@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  FileHeart,
-  Heart,
-  LoaderCircle,
-  MapPin,
-  Briefcase,
-} from "lucide-react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Briefcase, Heart, LoaderCircle, MapPin } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { Badge } from "@/shared/components/ui/Badge";
+import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
@@ -75,12 +69,22 @@ interface FavoriteJobRowProps {
 }
 
 function FavoriteJobRow({ job }: FavoriteJobRowProps) {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const { isFavoritePending, toggleFavorite } = useFavoriteJobs();
   const isPending = isFavoritePending(job.id);
   const salary = formatSalary(job);
   const company = getCompanyLabel(job);
   const address = getAddress(job);
   const experience = formatExperience(job);
+
+  function handleApply(slug: string) {
+    if (!isLoggedIn) {
+      router.push(ROUTES.JOB_SEEKER_LOGIN);
+      return;
+    }
+    router.push(ROUTES.JOB_SEEKER_JOB_APPLY(slug));
+  }
 
   return (
     <article className="group cursor-pointer relative rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
@@ -151,7 +155,7 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
             <div className="flex items-center gap-2.5">
               <BaseButton
                 className="h-10 rounded-xl px-5 text-sm font-semibold opacity-100 transform transition-all duration-200 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
-                href={`${ROUTES.JOB_SEEKER_JOB_APPLY(job.id)}`}
+                onClick={() => handleApply(job.slug ?? job.id)}
               >
                 Ứng tuyển ngay
               </BaseButton>
@@ -227,24 +231,27 @@ export function FavoritesPage() {
             ))}
           </div>
         ) : (
-          <div>
-            {/* Trạng thái trống (Empty State) */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 px-4 text-center shadow-sm">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 border border-slate-100">
-                <FileHeart className="h-6 w-6" />
-              </div>
-              <h2 className="mt-4 text-base font-bold text-slate-900">
-                Danh sách trống
-              </h2>
-              <p className="mt-1 max-w-xs text-sm text-slate-500">
-                Bạn chưa lưu công việc nào. Hãy khám phá và lưu lại những vị trí
-                phù hợp với bạn.
-              </p>
-              <div className="mt-6">
-                <BaseButton className="rounded-xl px-6" href={ROUTES.JOBS}>
-                  Khám phá việc làm ngay
-                </BaseButton>
-              </div>
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+            <div className="flex items-center justify-center">
+              <Image
+                alt="Không có dữ liệu"
+                height={100}
+                priority
+                src="/no_data.png"
+                width={100}
+              />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-slate-800">
+              Danh sách trống
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Bạn chưa lưu công việc nào. Hãy khám phá và lưu lại những vị trí
+              phù hợp với bạn.
+            </p>
+            <div className="mt-6">
+              <BaseButton className="rounded-xl px-6" href={ROUTES.JOBS}>
+                Khám phá việc làm ngay
+              </BaseButton>
             </div>
           </div>
         )}

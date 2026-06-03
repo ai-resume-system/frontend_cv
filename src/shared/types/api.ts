@@ -34,6 +34,13 @@ export interface FieldErrors {
   [key: string]: string | undefined;
 }
 
+export interface AppApiError extends Error {
+  displayMessage: string;
+  fields?: Record<string, string[]>;
+  rawMessage: string;
+  status?: number;
+}
+
 export type IResponseApiPagination = ApiPagination;
 export type IResponseApiItem<T> = ApiItemResponse<T>;
 export type IResponseApiList<T> = ApiListResponse<T>;

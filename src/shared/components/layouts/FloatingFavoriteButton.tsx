@@ -107,7 +107,7 @@ export function FloatingFavoriteButton() {
       <button
         aria-label="Việc làm đã lưu"
         className={cn(
-          "relative inline-flex h-14 w-14 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-[0_16px_40px_rgba(15,23,42,0.14)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(15,23,42,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          "cursor-pointer relative inline-flex h-14 w-14 items-center justify-center rounded-full border border-border bg-white text-foreground shadow-[0_16px_40px_rgba(15,23,42,0.14)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(15,23,42,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           isCelebrating &&
             "animate-[favorite-heart-bounce_0.75s_ease-in-out_4]",
         )}

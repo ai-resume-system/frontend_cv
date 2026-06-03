@@ -7,13 +7,13 @@ import { fetchApplicationsByJobId } from "@/shared/services/recruiter-job-applic
 import { fetchRecruiterJobs } from "@/shared/services/recruiter-job.service";
 import type { AuthUser } from "@/shared/types/account";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
-import type { Job } from "@/shared/types/job";
+import type { RecruiterDashboardMetrics } from "@/shared/types/dashboard";
 import {
   RecruiterApplicationSummary,
-  RecruiterDashboardMetrics,
   RecruiterJobOverview,
   RecruiterTrendPoint,
 } from "@/shared/types/dashboard";
+import type { Job } from "@/shared/types/job";
 
 interface RecruiterDashboardState {
   applications: RecruiterApplicationSummary[];
@@ -51,12 +51,12 @@ function mapApplicationSummary(
   return {
     id: application.id,
     jobId: application.jobId,
-    jobTitle: application.job?.title ?? "Tin tuyá»ƒn dá»¥ng",
+    jobTitle: application.job?.title ?? "Tin tuy\u1ec3n d\u1ee5ng",
     applicantName:
       application.fullName ??
       application.user?.email ??
       application.contactEmail ??
-      "á»¨ng viÃªn",
+      "\u1ee8ng vi\u00ean",
     applicantEmail:
       application.contactEmail ?? application.user?.email ?? undefined,
     applicantPhone:
@@ -202,7 +202,7 @@ export function useRecruiterDashboard() {
           error:
             error instanceof Error
               ? error.message
-              : "Không tải được dashboard recruiter.",
+              : "Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c dashboard recruiter.",
           loading: false,
         }));
       }

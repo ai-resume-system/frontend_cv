@@ -2,6 +2,8 @@
 
 import Swal, { type SweetAlertIcon } from "sweetalert2";
 
+import { getErrorDisplayMessage } from "@/shared/lib/errors/getErrorDisplayMessage";
+
 interface AppAlertOptions {
   confirmButtonText?: string;
   icon?: SweetAlertIcon;
@@ -41,4 +43,12 @@ export function showErrorAlert(message: string, title = "Có lỗi xảy ra") {
     text: message,
     title,
   });
+}
+
+export function showApiErrorAlert(
+  error: unknown,
+  fallbackMessage?: string,
+  title = "Có lỗi xảy ra",
+) {
+  return showErrorAlert(getErrorDisplayMessage(error, fallbackMessage), title);
 }

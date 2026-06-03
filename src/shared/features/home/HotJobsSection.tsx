@@ -1,8 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -11,33 +8,30 @@ import {
   MapPinIcon,
   XIcon,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
+import {
+  buildCategoryFilterOptions,
+  HOT_JOB_FILTER_LABELS,
+  JOB_EXPERIENCE_OPTIONS,
+  JOB_SALARY_OPTIONS,
+  mapFilterOptionsEmptyValue,
+  type FilterOption,
+  type HotJobFilterKey,
+} from "@/shared/constants/constants/filter.constants";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
+import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
 import { cn } from "@/shared/lib/utils/cn";
-import type { FetchJobsParams } from "@/shared/services/job.service";
-import type { CareerCategory } from "@/shared/types/career-category";
 import type { Job } from "@/shared/types/job";
 
 import { JobCardLink } from "./JobCardSection";
-import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
-
-type FilterKey = "salary" | "address" | "experience" | "category";
-
-interface FilterOption {
-  label: string;
-  value: string;
-}
-
-const FILTER_LABELS: Record<FilterKey, string> = {
-  salary: "Mức lương",
-  address: "Địa điểm",
-  experience: "Kinh nghiệm",
-  category: "Ngành nghề",
-};
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp đang cập nhật";
@@ -83,81 +77,27 @@ function formatSalary(job: Job): string | undefined {
   return undefined;
 }
 
-function buildFilterOptions(
-  filterKey: FilterKey,
-  categories: CareerCategory[],
+function getFilterOptions(
+  filterKey: HotJobFilterKey,
+  categories: ReturnType<typeof useCareerCategories>["categories"],
 ): FilterOption[] {
   if (filterKey === "salary") {
-    return [
-      { label: "Tất cả", value: "all" },
-      { label: "Dưới 10 triệu", value: "under-10" },
-      { label: "Từ 10-15 triệu", value: "10-15" },
-      { label: "Từ 15-20 triệu", value: "15-20" },
-      { label: "Từ 20-25 triệu", value: "20-25" },
-      { label: "Từ 25-30 triệu", value: "25-30" },
-      { label: "Trên 30 triệu", value: "over-30" },
-    ];
+    return mapFilterOptionsEmptyValue(JOB_SALARY_OPTIONS, "all");
   }
 
   if (filterKey === "experience") {
-    return [
-      { label: "Tất cả", value: "all" },
-      { label: "Chưa có kinh nghiệm", value: "fresher" },
-      { label: "1-2 năm", value: "1-2" },
-      { label: "3-4 năm", value: "3-4" },
-      { label: "Trên 5 năm", value: "5-plus" },
-    ];
+    return mapFilterOptionsEmptyValue(JOB_EXPERIENCE_OPTIONS, "all");
   }
 
   if (filterKey === "category") {
-    return [
-      { label: "Tất cả", value: "all" },
-      ...categories.map((category) => ({
-        label: category.name,
-        value: category.slug,
-      })),
-    ];
+    return buildCategoryFilterOptions(categories, {
+      includeAll: true,
+      allLabel: "Tất cả",
+      emptyValue: "all",
+    });
   }
 
   return [];
-}
-
-function getSalaryQuery(
-  value: string,
-): Pick<FetchJobsParams, "salaryMin" | "salaryMax"> {
-  switch (value) {
-    case "under-10":
-      return { salaryMax: 10000000 };
-    case "10-15":
-      return { salaryMin: 10000000, salaryMax: 15000000 };
-    case "15-20":
-      return { salaryMin: 15000000, salaryMax: 20000000 };
-    case "20-25":
-      return { salaryMin: 20000000, salaryMax: 25000000 };
-    case "25-30":
-      return { salaryMin: 25000000, salaryMax: 30000000 };
-    case "over-30":
-      return { salaryMin: 30000000 };
-    default:
-      return {};
-  }
-}
-
-function getExperienceQuery(
-  value: string,
-): Pick<FetchJobsParams, "experienceYearsMin" | "experienceYearsMax"> {
-  switch (value) {
-    case "fresher":
-      return { experienceYearsMin: 0, experienceYearsMax: 0 };
-    case "1-2":
-      return { experienceYearsMin: 1, experienceYearsMax: 2 };
-    case "3-4":
-      return { experienceYearsMin: 3, experienceYearsMax: 4 };
-    case "5-plus":
-      return { experienceYearsMin: 5 };
-    default:
-      return {};
-  }
 }
 
 export function HotJobsSection() {
@@ -169,13 +109,36 @@ export function HotJobsSection() {
     page: 1,
     limit: 100,
   });
+  const {
+    applyFilters,
+    buildQueryOptions,
+    filters,
+    page,
+    setFilter,
+    setFilters,
+  } = useJobFilters({
+    mode: "local",
+    initialState: {
+      category: "all",
+      experience: "all",
+      salary: "all",
+    },
+    baseQuery: {
+      limit: 20,
+      sortBy: "createdAt",
+      sortOrder: "DESC",
+    },
+    emptyValues: {
+      category: "all",
+      experience: "all",
+      salary: "all",
+    },
+  });
 
-  const [activeFilterKey, setActiveFilterKey] = useState<FilterKey>("salary");
-  const [selectedFilterValue, setSelectedFilterValue] = useState("all");
+  const [activeFilterKey, setActiveFilterKey] =
+    useState<HotJobFilterKey>("salary");
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [addressInput, setAddressInput] = useState("");
-  const [debouncedAddressInput, setDebouncedAddressInput] = useState("");
-  const [page, setPage] = useState(1);
   const chipScrollRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{
     isDragging: boolean;
@@ -191,59 +154,18 @@ export function HotJobsSection() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setDebouncedAddressInput(addressInput.trim());
-      setPage(1);
+      setFilter("address", addressInput.trim());
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [addressInput]);
+  }, [addressInput, setFilter]);
 
   const filterOptions = useMemo(
-    () => buildFilterOptions(activeFilterKey, categories),
+    () => getFilterOptions(activeFilterKey, categories),
     [activeFilterKey, categories],
   );
 
-  const queryOptions = useMemo<FetchJobsParams>(() => {
-    const baseQuery: FetchJobsParams = {
-      page,
-      limit: 3,
-      sortBy: "createdAt",
-      sortOrder: "DESC",
-    };
-
-    if (activeFilterKey === "address") {
-      return debouncedAddressInput
-        ? {
-            ...baseQuery,
-            address: debouncedAddressInput,
-          }
-        : baseQuery;
-    }
-
-    if (selectedFilterValue === "all") {
-      return baseQuery;
-    }
-
-    if (activeFilterKey === "salary") {
-      return {
-        ...baseQuery,
-        ...getSalaryQuery(selectedFilterValue),
-      };
-    }
-
-    if (activeFilterKey === "experience") {
-      return {
-        ...baseQuery,
-        ...getExperienceQuery(selectedFilterValue),
-      };
-    }
-
-    return {
-      ...baseQuery,
-      careerCategorySlug: selectedFilterValue,
-    };
-  }, [activeFilterKey, debouncedAddressInput, page, selectedFilterValue]);
-
+  const queryOptions = useMemo(() => buildQueryOptions(), [buildQueryOptions]);
   const { jobs, loading, pagination } = useJobs(queryOptions);
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
@@ -299,14 +221,27 @@ export function HotJobsSection() {
     };
   }
 
-  function handleFilterKeyChange(filterKey: FilterKey) {
+  function handleFilterKeyChange(filterKey: HotJobFilterKey) {
     setActiveFilterKey(filterKey);
-    setSelectedFilterValue("all");
+    setFilters((currentState) => ({
+      ...currentState,
+      address: "",
+      category: "all",
+      experience: "all",
+      salary: "all",
+    }));
     setAddressInput("");
-    setDebouncedAddressInput("");
-    setPage(1);
     setIsFilterMenuOpen(false);
   }
+
+  const selectedFilterValue =
+    activeFilterKey === "salary"
+      ? filters.salary
+      : activeFilterKey === "experience"
+        ? filters.experience
+        : activeFilterKey === "category"
+          ? filters.category
+          : filters.address;
 
   return (
     <section className="bg-surface-container-high px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -344,7 +279,7 @@ export function HotJobsSection() {
                 <ListFilterIcon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Lọc theo:</span>
                 <span className="text-sm font-semibold text-foreground">
-                  {FILTER_LABELS[activeFilterKey]}
+                  {HOT_JOB_FILTER_LABELS[activeFilterKey]}
                 </span>
               </span>
               <ChevronDownIcon
@@ -358,7 +293,9 @@ export function HotJobsSection() {
             {isFilterMenuOpen ? (
               <div className="absolute top-full left-0 z-20 mt-1 w-full rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-black/5">
                 {(
-                  Object.entries(FILTER_LABELS) as Array<[FilterKey, string]>
+                  Object.entries(HOT_JOB_FILTER_LABELS) as Array<
+                    [HotJobFilterKey, string]
+                  >
                 ).map(([key, label]) => {
                   const isActive = key === activeFilterKey;
 
@@ -387,7 +324,7 @@ export function HotJobsSection() {
 
           <div className="flex min-w-0 flex-1 items-center gap-2">
             {activeFilterKey === "address" ? (
-              <div className="w-full xl:max-w-md animate-fadeIn">
+              <div className="w-full animate-fadeIn xl:max-w-md">
                 <BaseField
                   inputClassName="!h-11 rounded-xl border-primary/30 bg-white text-sm placeholder:text-slate-400 focus:border-primary"
                   leadingIcon={
@@ -401,7 +338,7 @@ export function HotJobsSection() {
                         className="rounded-full p-1 transition-colors hover:bg-muted"
                         onClick={() => {
                           setAddressInput("");
-                          setPage(1);
+                          setFilter("address", "");
                         }}
                         type="button"
                       >
@@ -449,8 +386,17 @@ export function HotJobsSection() {
                         disabled={isDisabled}
                         key={option.value}
                         onClick={() => {
-                          setSelectedFilterValue(option.value);
-                          setPage(1);
+                          if (activeFilterKey === "salary") {
+                            setFilter("salary", option.value);
+                            return;
+                          }
+
+                          if (activeFilterKey === "experience") {
+                            setFilter("experience", option.value);
+                            return;
+                          }
+
+                          setFilter("category", option.value);
                         }}
                         type="button"
                       >
@@ -506,12 +452,12 @@ export function HotJobsSection() {
                       width={100}
                     />
                   </div>
-                  <h4 className="mt-4 text-base font-semibold text-foreground">
+                  <h4 className="mt-4 text-lg font-semibold text-foreground">
                     Không có việc làm phù hợp
                   </h4>
                   <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                    {activeFilterKey === "address" && debouncedAddressInput
-                      ? `Không tìm thấy kết quả nào tại địa điểm "${debouncedAddressInput}".`
+                    {activeFilterKey === "address" && filters.address
+                      ? `Không tìm thấy kết quả nào tại địa điểm "${filters.address}".`
                       : activeFilterKey === "category" && categoriesError
                         ? "Chưa tải được danh sách ngành nghề để lọc."
                         : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."}
@@ -523,7 +469,7 @@ export function HotJobsSection() {
             <BasePagination
               className="mt-8"
               currentPage={page}
-              onPageChange={setPage}
+              onPageChange={applyFilters}
               totalPages={totalPages}
               variant="compact"
             />

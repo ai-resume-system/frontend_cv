@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { JobDetailPage } from "@/portals/jobseeker/features/jobs/JobDetailPage";
-import { fetchJobBySlug, fetchJobs } from "@/shared/services/job.service";
+import {
+  fetchJobBySlug,
+  fetchRelatedJobs,
+} from "@/shared/services/job.service";
+import type { Job } from "@/shared/types/job";
 
 interface JobDetailRouteProps {
   params: Promise<{
@@ -31,23 +35,20 @@ export async function generateMetadata({
 export default async function JobDetailRoute({ params }: JobDetailRouteProps) {
   const { id: slug } = await params;
 
+  let job: Job;
   try {
-    const job = await fetchJobBySlug(slug);
-    const relatedJobsResult = await fetchJobs({
-      careerCategoryId: job.careerCategory?.id,
-      limit: 3,
-      page: 1,
-      sortBy: "createdAt",
-      sortOrder: "DESC",
-      status: "open",
-    });
-
-    const relatedJobs = relatedJobsResult.jobs.filter(
-      (relatedJob) => relatedJob.id !== job.id,
-    );
-
-    return <JobDetailPage job={job} relatedJobs={relatedJobs} />;
+    job = await fetchJobBySlug(slug);
   } catch {
     notFound();
   }
+
+  let relatedJobs: Job[] = [];
+  try {
+    relatedJobs = await fetchRelatedJobs(slug, { limit: 3 });
+  } catch (error) {
+    console.error("Lỗi khi tải việc làm liên quan:", error);
+  }
+
+  return <JobDetailPage job={job} relatedJobs={relatedJobs} />;
 }
+

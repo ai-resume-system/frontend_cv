@@ -2,22 +2,36 @@
 
 import {
   ArrowRight,
+  Box,
+  Briefcase,
   Building2,
+  CheckCircle2,
+  ClipboardClock,
+  Clock,
+  Coins,
   ExternalLink,
-  Flag,
   Heart,
+  Info,
   MapPin,
   Send,
+  SquareUser,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { TopSearchBar } from "@/shared/components/ui/TopSearchBar";
+
+import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
+import { EJobTypeLabels } from "@/shared/constants/enums/job.enum";
 import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
 import { useAuth } from "@/shared/hooks/ui/useAuth";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
+import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
+import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 
 interface JobDetailPageProps {
   job: Job;
@@ -45,12 +59,6 @@ function formatSalary(job: Job): string {
   return "Thỏa thuận";
 }
 
-function formatJobType(job: Job): string {
-  if (job.jobType === "full_time") return "Toàn thời gian";
-  if (job.jobType === "part_time") return "Bán thời gian";
-  return "Thực tập";
-}
-
 function formatDate(value?: Date): string {
   if (!value) return "Đang cập nhật";
   return new Intl.DateTimeFormat("vi-VN", {
@@ -58,16 +66,6 @@ function formatDate(value?: Date): string {
     month: "2-digit",
     year: "numeric",
   }).format(value);
-}
-
-function splitDescription(value?: string): string[] {
-  if (!value) {
-    return ["Nhà tuyển dụng chưa cập nhật mô tả chi tiết cho vị trí này."];
-  }
-  return value
-    .split(/\n+/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
 }
 
 function buildGoogleMapsUrl(job: Job): string | undefined {
@@ -91,7 +89,6 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
   const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
 
   const saved = isFavorite(job.id);
-  const descriptionBlocks = splitDescription(job.description);
   const mapsUrl = buildGoogleMapsUrl(job);
   const companySlug = job.company?.slug;
   const companyName = getCompanyLabel(job);
@@ -106,56 +103,173 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
 
   return (
     <>
-      <section className="bg-surface px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+      <section className="bg-linear-to-r from-primary/95 via-primary/50 to-primary/95 py-3">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-0">
+          <TopSearchBar />
+        </div>
+      </section>
+
+      <section className="bg-surface px-4 py-10 sm:px-6 lg:px-8 lg:py-10">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-8 lg:col-span-2">
-              <section className="rounded-[28px] border border-white/80 bg-white/80 p-8 shadow-sm backdrop-blur-sm">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="rounded-full bg-tertiary-fixed/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Enterprise Listing
-                  </span>
-                  <span className="rounded-full bg-surface-container-low px-3 py-1 text-xs font-semibold text-on-surface-variant">
-                    {formatJobType(job)}
-                  </span>
-                </div>
-
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+              <section className="rounded-3xl border border-gray-300 bg-white p-8 shadow-lg">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                   {job.title}
                 </h1>
 
-                <div className="mt-5 flex flex-wrap gap-4 text-sm text-on-surface-variant">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    {getAddress(job)}
-                  </span>
-                  <span className="rounded-full bg-surface-container-low px-4 py-2">
-                    {typeof job.experienceYears === "number"
-                      ? `${job.experienceYears} năm kinh nghiệm`
-                      : "Kinh nghiệm đang cập nhật"}
-                  </span>
-                  <span className="rounded-full bg-surface-container-low px-4 py-2">
-                    Hạn nộp: {formatDate(job.expiredAt)}
-                  </span>
+                <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {[
+                    {
+                      icon: Coins,
+                      label: "Mức lương",
+                      value: formatSalary(job),
+                    },
+                    { icon: MapPin, label: "Địa điểm", value: getAddress(job) },
+                    {
+                      icon: ClipboardClock,
+                      label: "Kinh nghiệm",
+                      value:
+                        job.experienceYears === 0
+                          ? "Không yêu cầu"
+                          : `${job.experienceYears} năm`,
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-4 rounded-2xl bg-slate-200 p-4 border border-gray-200/50"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-xs">
+                        <item.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-xs text-slate-500">
+                          {item.label}
+                        </span>
+                        <span className="truncate font-semibold text-slate-900">
+                          {item.value}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="mt-8 flex flex-wrap gap-3 border-t border-surface-container-high pt-8">
-                  <button
-                    type="button"
-                    onClick={handleApply}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-primary-hover"
-                  >
-                    <span>Ứng tuyển ngay</span>
-                    <Send className="h-4 w-4" />
-                  </button>
+                <div className="mt-8 flex flex-col gap-6">
+                  <p className="text-sm text-slate-600">
+                    Hạn nộp hồ sơ:{" "}
+                    <span className="font-bold text-slate-900">
+                      {formatDate(job.expiredAt)}
+                    </span>
+                  </p>
 
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={handleApply}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary-hover px-6 py-2.5 font-semibold text-white shadow-md shadow-primary/10 transition duration-200"
+                    >
+                      <Send className="h-4 w-4" /> Ứng tuyển ngay
+                    </button>
+
+                    <button
+                      disabled={isFavoritePending(job.id)}
+                      onClick={async () => {
+                        if (!isLoggedIn) {
+                          if (typeof window !== "undefined") {
+                            window.sessionStorage.setItem(
+                              SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+                              ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug ?? job.id),
+                            );
+                          }
+                          router.push(ROUTES.JOB_SEEKER_LOGIN);
+                          return;
+                        }
+
+                        try {
+                          const wasAdded = await toggleFavorite(job.id, job);
+
+                          if (wasAdded && typeof window !== "undefined") {
+                            window.dispatchEvent(
+                              new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                                detail: { jobId: job.id, title: job.title },
+                              }),
+                            );
+                          }
+                        } catch (error) {
+                          showErrorAlert(
+                            error instanceof Error
+                              ? error.message
+                              : "Không thể cập nhật danh sách yêu thích.",
+                          );
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-primary bg-white px-6 py-2.5 font-semibold text-primary transition hover:bg-blue-50"
+                    >
+                      <Heart
+                        className={cn(
+                          "h-4 w-4",
+                          saved && "fill-primary text-primary",
+                        )}
+                      />
+                      {saved ? "Đã lưu" : "Lưu tin"}
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-3xl border border-gray-300 bg-white p-8 shadow-lg">
+                <h2 className="text-2xl font-semibold tracking-tight text-primary pl-4 border-l-4 border-secondary-container">
+                  Mô tả chi tiết tuyển dụng
+                </h2>
+
+                <div
+                  className="prose prose-sm max-w-none mt-6 text-sm leading-7 text-slate-600 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-5 [&>ol]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      job.description ||
+                      "<p>Nhà tuyển dụng chưa cập nhật mô tả chi tiết.</p>",
+                  }}
+                />
+
+                <div className="flex gap-3 mt-8 pt-8 border-t border-slate-100">
                   <button
-                    type="button"
+                    onClick={handleApply}
+                    className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold transition"
+                  >
+                    <Send className="h-4 w-4" /> Ứng tuyển ngay
+                  </button>
+                  <button
                     disabled={isFavoritePending(job.id)}
-                    onClick={() => {
-                      void toggleFavorite(job.id, job);
+                    onClick={async () => {
+                      if (!isLoggedIn) {
+                        if (typeof window !== "undefined") {
+                          window.sessionStorage.setItem(
+                            SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+                            ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug ?? job.id),
+                          );
+                        }
+                        router.push(ROUTES.JOB_SEEKER_LOGIN);
+                        return;
+                      }
+
+                      try {
+                        const wasAdded = await toggleFavorite(job.id, job);
+
+                        if (wasAdded && typeof window !== "undefined") {
+                          window.dispatchEvent(
+                            new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                              detail: { jobId: job.id, title: job.title },
+                            }),
+                          );
+                        }
+                      } catch (error) {
+                        showErrorAlert(
+                          error instanceof Error
+                            ? error.message
+                            : "Không thể cập nhật danh sách yêu thích.",
+                        );
+                      }
                     }}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-surface-container-high bg-surface-container-low px-5 py-4 text-sm font-semibold text-primary transition hover:bg-primary-soft disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 border border-primary text-primary px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition"
                   >
                     <Heart
                       className={cn(
@@ -163,150 +277,260 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                         saved && "fill-primary text-primary",
                       )}
                     />
-                    <span>{saved ? "Đã lưu" : "Lưu tin"}</span>
+                    {saved ? "Đã lưu" : "Lưu tin"}
                   </button>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void showAppAlert({
-                        icon: "info",
-                        title: "Chưa có API báo cáo",
-                        text: "Backend hiện chưa cung cấp endpoint báo cáo tin tuyển dụng.",
-                      });
-                    }}
-                    className="ml-auto inline-flex items-center gap-2 rounded-2xl px-4 py-4 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-low"
+                <div className="flex items-start gap-3 bg-blue-50/40 border border-blue-100 p-4 rounded-xl mt-6 text-sm text-slate-600">
+                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <p>
+                    Báo cáo tin tuyển dụng: Nếu bạn thấy rằng tin tuyển dụng này
+                    không đúng hoặc có dấu hiệu lừa đảo,{" "}
+                    <Link
+                      href={`tel:${INFOMATION_WEB.PHONE}`}
+                      className="text-primary font-semibold underline hover:text-blue-700 transition"
+                    >
+                      hãy phản ánh với chúng tôi
+                    </Link>
+                    .
+                  </p>
+                </div>
+              </section>
+
+              <section className="rounded-3xl border border-gray-300 bg-white p-8 shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-primary pl-4 border-l-4 border-secondary-container">
+                    Việc làm liên quan
+                  </h2>
+                  <Link
+                    href={ROUTES.JOBS}
+                    className="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-primary transition"
                   >
-                    <Flag className="h-4 w-4" />
-                    <span>Báo cáo</span>
-                  </button>
-                </div>
-              </section>
-
-              <section className="rounded-[28px] border border-white/80 bg-white/80 p-8 shadow-sm">
-                <h2 className="border-l-4 border-tertiary-fixed pl-4 text-2xl font-bold uppercase tracking-tight text-primary">
-                  Mô tả công việc
-                </h2>
-                <div className="mt-6 space-y-4 text-sm leading-7 text-on-surface-variant">
-                  {descriptionBlocks.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
-              </section>
-
-              <section className="rounded-[28px] border border-white/80 bg-white/80 p-8 shadow-sm">
-                <h2 className="border-l-4 border-tertiary-fixed pl-4 text-2xl font-bold uppercase tracking-tight text-primary">
-                  Thông tin vị trí
-                </h2>
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl bg-surface-container-low p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70">
-                      Công ty
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-on-surface">
-                      {companyName}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-surface-container-low p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70">
-                      Mức lương
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-on-surface">
-                      {formatSalary(job)}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-surface-container-low p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70">
-                      Lĩnh vực
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-on-surface">
-                      {job.careerCategory?.name ?? "Đang cập nhật"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-surface-container-low p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70">
-                      Cập nhật
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-on-surface">
-                      {formatDate(job.updatedAt)}
-                    </p>
-                  </div>
+                    Xem tất cả <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
 
-                {job.skills?.length ? (
-                  <div className="mt-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70">
-                      Kỹ năng nổi bật
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {job.skills.map((skill) => (
-                        <span
-                          className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary"
-                          key={skill.id}
+                <div className="space-y-4">
+                  {relatedJobs.length ? (
+                    relatedJobs.map((relatedJob) => {
+                      const isFav = isFavorite(relatedJob.id);
+                      return (
+                        <div
+                          key={relatedJob.id}
+                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-250 rounded-2xl p-5 bg-white shadow-xs hover:shadow-md transition gap-4 hover:border-primary/30"
                         >
-                          {skill.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
+                          <div className="flex gap-4 items-center">
+                            <img
+                              src={relatedJob.company?.logoUrl ?? "/logo.png"}
+                              className="h-14 w-14 rounded-xl object-cover border border-gray-100 bg-slate-50 shrink-0 shadow-xs"
+                              alt={getCompanyLabel(relatedJob)}
+                            />
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Link
+                                  href={ROUTES.JOB_SEEKER_JOB_DETAIL(
+                                    relatedJob.slug ?? relatedJob.id,
+                                  )}
+                                  className="font-semibold text-slate-900 text-base hover:text-primary transition"
+                                >
+                                  {relatedJob.title}
+                                </Link>
+                                <CheckCircle2 className="h-4 w-4 text-blue-500 fill-blue-50 shrink-0" />
+                                <span className="bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                  Pro
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium text-[#d4a373] mt-1">
+                                {getCompanyLabel(relatedJob)}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1.5">
+                                <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                                  {getAddress(relatedJob)}
+                                </span>
+                                <span className="text-slate-400">
+                                  Cập nhật: {formatDate(relatedJob.updatedAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-2.5 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
+                            <span className="font-bold text-primary text-base">
+                              {formatSalary(relatedJob)}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  router.push(
+                                    ROUTES.JOB_SEEKER_JOB_APPLY(
+                                      relatedJob.slug ?? relatedJob.id,
+                                    ),
+                                  );
+                                }}
+                                className="bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
+                              >
+                                Ứng tuyển
+                              </button>
+                              <button
+                                disabled={isFavoritePending(relatedJob.id)}
+                                onClick={async () => {
+                                  if (!isLoggedIn) {
+                                    if (typeof window !== "undefined") {
+                                      window.sessionStorage.setItem(
+                                        SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
+                                        ROUTES.JOB_SEEKER_JOB_DETAIL(
+                                          job.slug ?? job.id,
+                                        ),
+                                      );
+                                    }
+                                    router.push(ROUTES.JOB_SEEKER_LOGIN);
+                                    return;
+                                  }
+
+                                  try {
+                                    const wasAdded = await toggleFavorite(
+                                      relatedJob.id,
+                                      relatedJob,
+                                    );
+
+                                    if (
+                                      wasAdded &&
+                                      typeof window !== "undefined"
+                                    ) {
+                                      window.dispatchEvent(
+                                        new CustomEvent(
+                                          FAVORITE_JOB_ADDED_EVENT,
+                                          {
+                                            detail: {
+                                              jobId: relatedJob.id,
+                                              title: relatedJob.title,
+                                            },
+                                          },
+                                        ),
+                                      );
+                                    }
+                                  } catch (error) {
+                                    showErrorAlert(
+                                      error instanceof Error
+                                        ? error.message
+                                        : "Không thể cập nhật danh sách yêu thích.",
+                                    );
+                                  }
+                                }}
+                                className="p-1.5 rounded-full border border-gray-200 hover:bg-slate-50 text-slate-400 hover:text-red-500 transition shrink-0"
+                              >
+                                <Heart
+                                  className={cn(
+                                    "h-4 w-4",
+                                    isFav && "fill-primary text-primary",
+                                  )}
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">
+                      Chưa có công việc liên quan.
+                    </p>
+                  )}
+                </div>
               </section>
             </div>
 
+            {/* Đại diện nội dung liên quan tới công ty */}
             <aside className="space-y-6">
-              <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white">
-                    {companyName.slice(0, 1)}
-                  </span>
-                  <div>
-                    <h2 className="text-xl font-bold text-primary">
-                      {companyName}
-                    </h2>
-                    <p className="text-sm text-on-surface-variant">
-                      {job.careerCategory?.name ??
-                        "Doanh nghiệp đang cập nhật lĩnh vực"}
+              <section className="border border-gray-300 bg-white rounded-3xl overflow-hidden shadow-lg">
+                {job.company?.bannerUrl ? (
+                  <img
+                    src={job.company.bannerUrl}
+                    className="h-40 w-full object-cover"
+                    alt="Company Banner"
+                  />
+                ) : (
+                  <div className="bg-linear-to-r from-primary to-secondary-container h-28 w-full relative" />
+                )}
+
+                <div className="px-6 pb-6 text-left">
+                  <img
+                    src={job.company?.logoUrl ?? "/logo.png"}
+                    className="h-20 w-20 rounded-2xl object-cover border-2 border-gray-200 shadow-md -mt-10 relative z-10"
+                    alt={companyName}
+                  />
+                  <h2 className="font-bold uppercase text-lg text-slate-700 mt-3 truncate">
+                    {companyName}
+                  </h2>
+
+                  <div className="mt-5 space-y-3 text-sm text-left">
+                    <p className="flex items-start gap-2.5 text-slate-600">
+                      <Box className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span className="font-semibold">Lĩnh vực: </span>
+                      <span className="font-medium line-clamp-2 text-primary">
+                        {job.careerCategory?.name ??
+                          "Doanh nghiệp đang cập nhật lĩnh vực"}
+                      </span>
+                    </p>
+                    <p className="flex items-start gap-2.5 text-slate-600">
+                      <Users className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span className="font-semibold">Quy mô:</span>{" "}
+                      <span className="font-medium line-clamp-2 text-primary">
+                        {job.company?.employeeMin ||
+                        job.company?.employeeMax ? (
+                          <>
+                            {job.company.employeeMin && job.company.employeeMax
+                              ? `${job.company.employeeMin} - ${job.company.employeeMax} nhân viên`
+                              : job.company.employeeMin
+                                ? `Từ ${job.company.employeeMin} nhân viên`
+                                : `Đến ${job.company.employeeMax} nhân viên`}
+                          </>
+                        ) : (
+                          "Đang cập nhật quy mô"
+                        )}
+                      </span>
+                    </p>
+                    <p className="flex items-start gap-2.5 text-slate-600">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span className="font-semibold">Địa điểm:</span>{" "}
+                      <span className="font-medium line-clamp-2 text-primary">
+                        {getAddress(job)}
+                      </span>
                     </p>
                   </div>
-                </div>
 
-                <div className="mt-5 space-y-3 text-sm text-on-surface-variant">
-                  <p className="flex items-start gap-2">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{getAddress(job)}</span>
-                  </p>
+                  {companySlug ? (
+                    <Link
+                      href={ROUTES.JOB_SEEKER_COMPANY_DETAIL(companySlug)}
+                      className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      Xem trang công ty
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void showAppAlert({
+                          icon: "info",
+                          title: "Chưa có thông tin",
+                          text: "Công ty chưa có trang thông tin trên hệ thống.",
+                        });
+                      }}
+                      className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      Xem trang công ty
+                    </button>
+                  )}
                 </div>
-
-                {companySlug ? (
-                  <Link
-                    href={ROUTES.JOB_SEEKER_COMPANY_DETAIL(companySlug)}
-                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary px-4 py-3 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
-                  >
-                    <Building2 className="h-4 w-4" />
-                    Xem trang công ty
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void showAppAlert({
-                        icon: "info",
-                        title: "Chưa có thông tin",
-                        text: "Công ty chưa có trang thông tin trên hệ thống.",
-                      });
-                    }}
-                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary px-4 py-3 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
-                  >
-                    <Building2 className="h-4 w-4" />
-                    Xem trang công ty
-                  </button>
-                )}
               </section>
 
-              <section className="overflow-hidden rounded-[28px] border border-white/80 bg-white/85 shadow-sm">
+              {/* Bản đồ địa điểm */}
+              <section className="overflow-hidden border border-gray-300 shadow-lg rounded-3xl">
                 {mapsUrl ? (
-                  <div className="aspect-4/3 w-full">
+                  <div className="aspect-4/3 w-full rounded-2xl overflow-hidden border border-gray-100">
                     <iframe
                       allowFullScreen
                       className="h-full w-full"
@@ -318,84 +542,86 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                   </div>
                 ) : (
                   <div className="flex aspect-4/3 flex-col items-center justify-center gap-3 p-6 text-center">
-                    <MapPin className="h-10 w-10 text-on-surface-variant/40" />
-                    <p className="text-sm text-on-surface-variant">
+                    <MapPin className="h-10 w-10 text-slate-400" />
+                    <p className="text-sm text-slate-500">
                       Địa điểm chưa được cập nhật
                     </p>
                   </div>
                 )}
               </section>
 
-              <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-primary">
-                    Việc làm liên quan
-                  </h2>
-                  <Link
-                    href={ROUTES.JOBS}
-                    className="flex items-center gap-1 text-sm font-semibold text-on-surface-variant transition hover:text-primary"
-                  >
-                    Xem tất cả
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+              {/* Thông tin chung */}
+              <section className="border border-gray-300 bg-white p-8 shadow-lg rounded-3xl">
+                <h2 className="text-2xl font-bold text-slate-700 mb-6">
+                  Thông tin chung
+                </h2>
+                <div className="space-y-6">
+                  {" "}
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <Briefcase className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 font-medium">
+                        Loại hình công việc
+                      </p>
+                      <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                        {EJobTypeLabels[job.jobType]}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <SquareUser className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 font-medium">
+                        Số lượng tuyển dụng
+                      </p>
+                      <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                        {job.vacancyCount
+                          ? `${job.vacancyCount} người`
+                          : "Đang cập nhật"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 font-medium">
+                        Cập nhật
+                      </p>
+                      <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                        {formatDate(job.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-5 space-y-4">
-                  {relatedJobs.length ? (
-                    relatedJobs.map((relatedJob) => (
-                      <Link
-                        className="block rounded-2xl border border-surface-container-high bg-surface-container-low p-4 transition hover:border-primary/20 hover:bg-white"
-                        href={ROUTES.JOB_SEEKER_JOB_DETAIL(
-                          relatedJob.slug ?? relatedJob.id,
-                        )}
-                        key={relatedJob.id}
-                      >
-                        <h3 className="text-base font-semibold text-on-surface">
-                          {relatedJob.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-on-surface-variant">
-                          {getCompanyLabel(relatedJob)}
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-on-surface-variant">
-                          <span className="rounded-full bg-white px-3 py-1">
-                            {getAddress(relatedJob)}
-                          </span>
-                          <span className="rounded-full bg-white px-3 py-1">
-                            {formatSalary(relatedJob)}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-dashed border-surface-container-high bg-surface-container-low p-4 text-sm text-on-surface-variant">
-                      Chưa có công việc liên quan.
+                {job.skills?.length ? (
+                  <div className="mt-6 pt-6 border-t border-slate-100">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70 mb-3">
+                      Kỹ năng nổi bật
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {job.skills.map((skill) => (
+                        <span
+                          className="rounded-full bg-blue-50 border border-blue-100 px-3 py-1.5 text-xs font-semibold text-primary"
+                          key={skill.id}
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : null}
               </section>
             </aside>
           </div>
         </div>
       </section>
-
-      <div className="sticky bottom-0 z-40 border-t border-surface-container-high bg-white/90 px-4 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="hidden min-w-0 sm:block">
-            <p className="truncate text-sm font-semibold text-on-surface">
-              {job.title}
-            </p>
-            <p className="text-xs text-on-surface-variant">{companyName}</p>
-          </div>
-          <button
-            type="button"
-            onClick={handleApply}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary-hover sm:w-auto"
-          >
-            <Send className="h-4 w-4" />
-            Ứng tuyển ngay
-          </button>
-        </div>
-      </div>
     </>
   );
 }

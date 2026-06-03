@@ -111,6 +111,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* <HomeHeroSection stats={stats} /> */}
+
       <HotJobsSection />
 
       <section className="bg-background px-4 py-16 sm:px-8">
@@ -168,6 +170,36 @@ export default async function HomePage() {
               <Phone aria-hidden="true" className="h-6 w-6" />
               {INFOMATION_WEB.PHONE}
             </Link>
+          </div>
+        </div>
+
+        <div className="relative overflow-hidden bg-linear-to-r from-blue-900 via-blue-950 to-slate-950 px-6 py-12 sm:px-8 md:px-10 md:py-16 shadow-2xl">
+          <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:justify-between">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+                Bạn cần tư vấn nghề nghiệp?
+              </h2>
+              <p className="mt-3 text-lg text-blue-200">
+                Trao đổi với chuyên gia tư vấn để nhận định hướng cá nhân hóa
+                cho bước đi nghề nghiệp tiếp theo.
+              </p>
+            </div>
+
+            <Link
+              className="flex items-center gap-4 rounded-2xl bg-surface px-10 py-5 text-2xl font-semibold text-primary transition-transform hover:scale-105"
+              href={`tel:${INFOMATION_WEB.PHONE}`}
+            >
+              <Phone aria-hidden="true" className="h-6 w-6" />
+              {INFOMATION_WEB.PHONE}
+            </Link>
+
+            {/* <a
+              href={`tel:${INFOMATION_WEB.PHONE}`}
+              className="group flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 font-bold text-white shadow-xl transition-all hover:bg-white/20 hover:scale-105"
+            >
+              <Phone aria-hidden="true" className="h-6 w-6" />
+              {INFOMATION_WEB.PHONE}
+            </a> */}
           </div>
         </div>
       </section>
