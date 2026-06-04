@@ -204,7 +204,7 @@ h3 {
   background-clip: content-box;
 }
 
-@keyframes favorite-heart-bounce {
+@keyframes favourite-heart-bounce {
   0%,
   100% {
     transform: translateY(0) scale(1) rotate(0deg);

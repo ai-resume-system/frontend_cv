@@ -3,11 +3,11 @@
 import { CheckCircle2, Heart, MapPin, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
-import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
+import { useFavouriteJobs } from "@/shared/hooks/data/useFavouriteJobs";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
-import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
+import { FAVOURITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favourite-job";
 import { showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import { Badge } from "@/shared/components/ui/Badge";
@@ -88,14 +88,14 @@ function formatRelativeTime(value?: Date | string | null): string {
   return `${Math.floor(diffMonths / 12)} năm trước`;
 }
 
-function buildJobHref(jobId: string): string {
-  return ROUTES.JOB_SEEKER_JOB_DETAIL(jobId);
+function buildJobHref(slug: string): string {
+  return ROUTES.JOB_SEEKER_JOB_DETAIL(slug);
 }
 
 export function JobCard({ job, showSkills = false }: JobCardProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
+  const { isFavourite, isFavouritePending, toggleFavourite } = useFavouriteJobs();
 
   async function handleApply(slug: string) {
     if (!isLoggedIn) {
@@ -176,7 +176,11 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
 
           <BaseButton
             className="hidden md:inline-flex h-10 rounded-full px-5 text-sm font-semibold transform transition-all duration-300 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
-            onClick={() => handleApply(job.slug ?? job.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleApply(job.slug ?? job.id);
+            }}
           >
             Ứng tuyển
           </BaseButton>
@@ -185,9 +189,9 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
         <button
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-full border border-primary-container bg-white shadow-sm transition-all duration-200 hover:bg-primary-soft active:scale-95",
-            isFavoritePending(job.id) && "animate-pulse opacity-60"
+            isFavouritePending(job.id) && "animate-pulse opacity-60",
           )}
-          disabled={isFavoritePending(job.id)}
+          disabled={isFavouritePending(job.id)}
           onClick={async (e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -197,7 +201,7 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
                 const redirectPath = `${window.location.pathname}${window.location.search}`;
                 window.sessionStorage.setItem(
                   SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
-                  redirectPath
+                  redirectPath,
                 );
               }
 
@@ -206,23 +210,23 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
             }
 
             try {
-              const wasAdded = await toggleFavorite(job.id, job);
+              const wasAdded = await toggleFavourite(job.id, job);
 
               if (wasAdded && typeof window !== "undefined") {
                 window.dispatchEvent(
-                  new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                  new CustomEvent(FAVOURITE_JOB_ADDED_EVENT, {
                     detail: {
                       jobId: job.id,
                       title: job.title,
                     },
-                  })
+                  }),
                 );
               }
             } catch (error) {
               showErrorAlert(
                 error instanceof Error
                   ? error.message
-                  : "Không thể cập nhật danh sách yêu thích."
+                  : "Không thể cập nhật danh sách yêu thích.",
               );
             }
           }}
@@ -231,7 +235,7 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
           <Heart
             className={cn(
               "h-5 w-5 text-slate-500 transition-transform group-hover:scale-105",
-              isFavorite(job.id) && "fill-primary text-primary"
+              isFavourite(job.id) && "fill-primary text-primary",
             )}
           />
         </button>

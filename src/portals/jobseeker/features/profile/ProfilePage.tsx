@@ -14,13 +14,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
-import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
+import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
 
-import { AvatarUploadModal } from "./AvatarUploadModal";
-import { ChangePasswordModal } from "./ChangePasswordModal";
+import { AvatarUploadModal } from "../../components/profile/AvatarUploadModal";
+import { ChangePasswordModal } from "../../components/profile/ChangePasswordModal";
 import { JOBSEEKER_ROUTES } from "@/shared/constants/constants/routes";
 import Link from "next/link";
-import { useProfileForm } from "@/shared/hooks/data/useProfileForm";
+import { useProfileForm } from "@/shared/hooks/forms/useProfileForm";
 
 type SidebarTab = "personal" | "security" | "cv";
 
@@ -67,7 +67,6 @@ export function ProfilePage() {
     handleDeleteAvatar,
     handleFieldBlur,
     handleSubmit,
-    // isDeletingAvatar,
     isLoading,
     isSubmitting,
     refreshUser,
@@ -213,6 +212,7 @@ export function ProfilePage() {
     );
   }
 
+  // Tối ưu
   if (!user) {
     return (
       <div className="mx-auto max-w-7xl px-8 py-12">
@@ -460,7 +460,6 @@ export function ProfilePage() {
         onClose={() => setIsAvatarUploadOpen(false)}
         currentAvatarUrl={avatarUrl}
         hasExistingAvatar={!!user.profile?.avatarUrl}
-        // isDeletingAvatar={isDeletingAvatar}
         onDeleteAvatar={handleDeleteAvatar}
         onUploaded={() => void refreshUser()}
       />

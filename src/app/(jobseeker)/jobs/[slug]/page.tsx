@@ -10,14 +10,14 @@ import type { Job } from "@/shared/types/job";
 
 interface JobDetailRouteProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
 export async function generateMetadata({
   params,
 }: JobDetailRouteProps): Promise<Metadata> {
-  const { id: slug } = await params;
+  const { slug } = await params;
 
   try {
     const job = await fetchJobBySlug(slug);
@@ -33,7 +33,7 @@ export async function generateMetadata({
 }
 
 export default async function JobDetailRoute({ params }: JobDetailRouteProps) {
-  const { id: slug } = await params;
+  const { slug } = await params;
 
   let job: Job;
   try {
@@ -51,4 +51,3 @@ export default async function JobDetailRoute({ params }: JobDetailRouteProps) {
 
   return <JobDetailPage job={job} relatedJobs={relatedJobs} />;
 }
-

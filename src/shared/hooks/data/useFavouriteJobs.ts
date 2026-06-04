@@ -7,13 +7,13 @@ import {
   getCachedToken,
 } from "@/shared/services/account.service";
 import {
-  addFavoriteJob,
-  fetchFavoriteJobs,
-  removeFavoriteJob,
-} from "@/shared/services/favorite-job.service";
+  addFavouriteJob,
+  fetchFavouriteJobs,
+  removeFavouriteJob,
+} from "@/shared/services/favourite-job.service";
 import type { Job } from "@/shared/types/job";
 
-interface FavoriteJobsStoreSnapshot {
+interface FavouriteJobsStoreSnapshot {
   error: string | null;
   isLoaded: boolean;
   isLoading: boolean;
@@ -21,7 +21,7 @@ interface FavoriteJobsStoreSnapshot {
   pendingJobIds: string[];
 }
 
-const EMPTY_SNAPSHOT: FavoriteJobsStoreSnapshot = {
+const EMPTY_SNAPSHOT: FavouriteJobsStoreSnapshot = {
   error: null,
   isLoaded: false,
   isLoading: false,
@@ -29,28 +29,28 @@ const EMPTY_SNAPSHOT: FavoriteJobsStoreSnapshot = {
   pendingJobIds: [],
 };
 
-let favoriteJobsSnapshot = EMPTY_SNAPSHOT;
-let pendingFavoriteJobsRequest: Promise<Job[]> | null = null;
-const pendingFavoriteJobIds = new Set<string>();
+let favouriteJobsSnapshot = EMPTY_SNAPSHOT;
+let pendingFavouriteJobsRequest: Promise<Job[]> | null = null;
+const pendingFavouriteJobIds = new Set<string>();
 
 const listeners = new Set<() => void>();
 
-function emitFavoriteJobsChange() {
+function emitFavouriteJobsChange() {
   for (const listener of listeners) {
     listener();
   }
 }
 
-function setFavoriteJobsSnapshot(nextSnapshot: FavoriteJobsStoreSnapshot) {
-  favoriteJobsSnapshot = nextSnapshot;
-  emitFavoriteJobsChange();
+function setFavouriteJobsSnapshot(nextSnapshot: FavouriteJobsStoreSnapshot) {
+  favouriteJobsSnapshot = nextSnapshot;
+  emitFavouriteJobsChange();
 }
 
-function getFavoriteJobsSnapshot() {
-  return favoriteJobsSnapshot;
+function getFavouriteJobsSnapshot() {
+  return favouriteJobsSnapshot;
 }
 
-function subscribeToFavoriteJobsStore(listener: () => void) {
+function subscribeToFavouriteJobsStore(listener: () => void) {
   listeners.add(listener);
 
   return () => {
@@ -69,24 +69,24 @@ function dedupeJobs(jobs: Job[]): Job[] {
 }
 
 function withPendingJobIds(
-  snapshot: Omit<FavoriteJobsStoreSnapshot, "pendingJobIds">,
-): FavoriteJobsStoreSnapshot {
+  snapshot: Omit<FavouriteJobsStoreSnapshot, "pendingJobIds">,
+): FavouriteJobsStoreSnapshot {
   return {
     ...snapshot,
-    pendingJobIds: Array.from(pendingFavoriteJobIds),
+    pendingJobIds: Array.from(pendingFavouriteJobIds),
   };
 }
 
-function setFavoriteJobPending(jobId: string, isPending: boolean) {
+function setFavouriteJobPending(jobId: string, isPending: boolean) {
   if (isPending) {
-    pendingFavoriteJobIds.add(jobId);
+    pendingFavouriteJobIds.add(jobId);
   } else {
-    pendingFavoriteJobIds.delete(jobId);
+    pendingFavouriteJobIds.delete(jobId);
   }
 
-  setFavoriteJobsSnapshot(
+  setFavouriteJobsSnapshot(
     withPendingJobIds({
-      ...getFavoriteJobsSnapshot(),
+      ...getFavouriteJobsSnapshot(),
     }),
   );
 }
@@ -109,19 +109,19 @@ function isAlreadyFavoritedError(error: unknown): boolean {
   );
 }
 
-function applyFavoriteAdded(jobId: string, jobData?: Job): boolean {
+function applyFavouriteAdded(jobId: string, jobData?: Job): boolean {
   if (!jobData) {
     return false;
   }
 
-  const snapshot = getFavoriteJobsSnapshot();
+  const snapshot = getFavouriteJobsSnapshot();
   const nextJobs = dedupeJobs(
     snapshot.jobs.some((job) => job.id === jobId)
       ? snapshot.jobs
       : [...snapshot.jobs, jobData],
   );
 
-  setFavoriteJobsSnapshot(
+  setFavouriteJobsSnapshot(
     withPendingJobIds({
       ...snapshot,
       jobs: nextJobs,
@@ -131,10 +131,10 @@ function applyFavoriteAdded(jobId: string, jobData?: Job): boolean {
   return true;
 }
 
-function applyFavoriteRemoved(jobId: string) {
-  const snapshot = getFavoriteJobsSnapshot();
+function applyFavouriteRemoved(jobId: string) {
+  const snapshot = getFavouriteJobsSnapshot();
 
-  setFavoriteJobsSnapshot(
+  setFavouriteJobsSnapshot(
     withPendingJobIds({
       ...snapshot,
       jobs: snapshot.jobs.filter((job) => job.id !== jobId),
@@ -142,9 +142,9 @@ function applyFavoriteRemoved(jobId: string) {
   );
 }
 
-async function loadFavoriteJobs(force = false): Promise<Job[]> {
+async function loadFavouriteJobs(force = false): Promise<Job[]> {
   if (!getCachedToken()) {
-    setFavoriteJobsSnapshot(
+    setFavouriteJobsSnapshot(
       withPendingJobIds({
         error: null,
         isLoaded: true,
@@ -156,25 +156,25 @@ async function loadFavoriteJobs(force = false): Promise<Job[]> {
     return [];
   }
 
-  if (!force && favoriteJobsSnapshot.isLoaded) {
-    return favoriteJobsSnapshot.jobs;
+  if (!force && favouriteJobsSnapshot.isLoaded) {
+    return favouriteJobsSnapshot.jobs;
   }
 
-  if (pendingFavoriteJobsRequest) {
-    return pendingFavoriteJobsRequest;
+  if (pendingFavouriteJobsRequest) {
+    return pendingFavouriteJobsRequest;
   }
 
-  setFavoriteJobsSnapshot(
+  setFavouriteJobsSnapshot(
     withPendingJobIds({
-      ...favoriteJobsSnapshot,
+      ...favouriteJobsSnapshot,
       error: null,
       isLoading: true,
     }),
   );
 
-  pendingFavoriteJobsRequest = fetchFavoriteJobs()
+  pendingFavouriteJobsRequest = fetchFavouriteJobs()
     .then((jobs) => {
-      setFavoriteJobsSnapshot(
+      setFavouriteJobsSnapshot(
         withPendingJobIds({
           error: null,
           isLoaded: true,
@@ -186,42 +186,42 @@ async function loadFavoriteJobs(force = false): Promise<Job[]> {
       return jobs;
     })
     .catch((error: unknown) => {
-      setFavoriteJobsSnapshot(
+      setFavouriteJobsSnapshot(
         withPendingJobIds({
-          ...favoriteJobsSnapshot,
+          ...favouriteJobsSnapshot,
           error:
             error instanceof Error
               ? error.message
-              : "Khong the tai viec lam da luu.",
+              : "Không thể tải việc làm đã lưu.",
           isLoaded: true,
           isLoading: false,
         }),
       );
 
-      return favoriteJobsSnapshot.jobs;
+      return favouriteJobsSnapshot.jobs;
     })
     .finally(() => {
-      pendingFavoriteJobsRequest = null;
+      pendingFavouriteJobsRequest = null;
     });
 
-  return pendingFavoriteJobsRequest;
+  return pendingFavouriteJobsRequest;
 }
 
-export function useFavoriteJobs() {
+export function useFavouriteJobs() {
   const snapshot = useSyncExternalStore(
-    subscribeToFavoriteJobsStore,
-    getFavoriteJobsSnapshot,
-    getFavoriteJobsSnapshot,
+    subscribeToFavouriteJobsStore,
+    getFavouriteJobsSnapshot,
+    getFavouriteJobsSnapshot,
   );
 
   useEffect(() => {
-    void loadFavoriteJobs();
+    void loadFavouriteJobs();
 
     function handleAuthChange() {
-      pendingFavoriteJobIds.clear();
-      favoriteJobsSnapshot = EMPTY_SNAPSHOT;
-      emitFavoriteJobsChange();
-      void loadFavoriteJobs(true);
+      pendingFavouriteJobIds.clear();
+      favouriteJobsSnapshot = EMPTY_SNAPSHOT;
+      emitFavouriteJobsChange();
+      void loadFavouriteJobs(true);
     }
 
     window.addEventListener(AUTH_USER_UPDATED_EVENT, handleAuthChange);
@@ -231,62 +231,62 @@ export function useFavoriteJobs() {
     };
   }, []);
 
-  const refreshFavorites = useCallback(async () => {
-    await loadFavoriteJobs(true);
+  const refreshFavourites = useCallback(async () => {
+    await loadFavouriteJobs(true);
   }, []);
 
-  const toggleFavorite = useCallback(async (jobId: string, jobData?: Job) => {
-    const currentSnapshot = getFavoriteJobsSnapshot();
+  const toggleFavourite = useCallback(async (jobId: string, jobData?: Job) => {
+    const currentSnapshot = getFavouriteJobsSnapshot();
 
     if (currentSnapshot.pendingJobIds.includes(jobId)) {
       return currentSnapshot.jobs.some((job) => job.id === jobId);
     }
 
-    const isFavorite = currentSnapshot.jobs.some((job) => job.id === jobId);
-    setFavoriteJobPending(jobId, true);
+    const isFavourite = currentSnapshot.jobs.some((job) => job.id === jobId);
+    setFavouriteJobPending(jobId, true);
 
     try {
-      if (isFavorite) {
-        await removeFavoriteJob(jobId);
-        applyFavoriteRemoved(jobId);
+      if (isFavourite) {
+        await removeFavouriteJob(jobId);
+        applyFavouriteRemoved(jobId);
         return false;
       }
 
       try {
-        await addFavoriteJob(jobId);
+        await addFavouriteJob(jobId);
       } catch (error) {
         if (!isAlreadyFavoritedError(error)) {
           throw error;
         }
       }
 
-      const appliedLocally = applyFavoriteAdded(jobId, jobData);
+      const appliedLocally = applyFavouriteAdded(jobId, jobData);
 
       if (!appliedLocally) {
-        await loadFavoriteJobs(true);
+        await loadFavouriteJobs(true);
       }
 
       return true;
     } finally {
-      setFavoriteJobPending(jobId, false);
+      setFavouriteJobPending(jobId, false);
     }
   }, []);
 
-  const favoriteJobIds = snapshot.jobs.map((job) => job.id);
-  const favoriteJobIdSet = new Set(favoriteJobIds);
+  const favouriteJobIds = snapshot.jobs.map((job) => job.id);
+  const favouriteJobIdSet = new Set(favouriteJobIds);
   const pendingJobIdSet = new Set(snapshot.pendingJobIds);
 
   return {
     error: snapshot.error,
-    favoriteJobCount: snapshot.jobs.length,
-    favoriteJobIds,
-    favoriteJobs: snapshot.jobs,
-    isFavorite: (jobId: string) => favoriteJobIdSet.has(jobId),
-    isFavoritePending: (jobId: string) => pendingJobIdSet.has(jobId),
+    favouriteJobCount: snapshot.jobs.length,
+    favouriteJobIds,
+    favouriteJobs: snapshot.jobs,
+    isFavourite: (jobId: string) => favouriteJobIdSet.has(jobId),
+    isFavouritePending: (jobId: string) => pendingJobIdSet.has(jobId),
     isLoaded: snapshot.isLoaded,
     isLoading: snapshot.isLoading,
     pendingJobIds: snapshot.pendingJobIds,
-    refreshFavorites,
-    toggleFavorite,
+    refreshFavourites,
+    toggleFavourite,
   };
 }

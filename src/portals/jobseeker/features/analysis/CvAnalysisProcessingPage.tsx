@@ -15,7 +15,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { showErrorAlert } from "@/shared/lib/ui/alert";
 import {
   fetchCvAnalysis,
@@ -24,12 +24,20 @@ import {
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 
-type ProcessingStage = "queueing" | "analyzing" | "finalizing" | "completed" | "failed";
+type ProcessingStage =
+  | "queueing"
+  | "analyzing"
+  | "finalizing"
+  | "completed"
+  | "failed";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 60;
 
-const STAGE_CONFIG: Record<ProcessingStage, { label: string; percent: number }> = {
+const STAGE_CONFIG: Record<
+  ProcessingStage,
+  { label: string; percent: number }
+> = {
   queueing: { label: "Đưa CV vào hàng đợi xử lý...", percent: 15 },
   analyzing: { label: "AI đang quét nội dung CV...", percent: 45 },
   finalizing: { label: "Hoàn thiện báo cáo phân tích...", percent: 80 },
@@ -45,7 +53,8 @@ export function CvAnalysisProcessingPage() {
 
   const [cvTitle, setCvTitle] = useState<string>("");
   const [stage, setStage] = useState<ProcessingStage>("queueing");
-  const [analysisResult, setAnalysisResult] = useState<CvAnalysisResponse | null>(null);
+  const [analysisResult, setAnalysisResult] =
+    useState<CvAnalysisResponse | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const attemptsRef = useRef(0);
 
@@ -81,7 +90,9 @@ export function CvAnalysisProcessingPage() {
             if (pollingRef.current) clearInterval(pollingRef.current);
             if (!cancelled) {
               setStage("failed");
-              await showErrorAlert("Quá thời gian chờ phân tích. Vui lòng thử lại.");
+              await showErrorAlert(
+                "Quá thời gian chờ phân tích. Vui lòng thử lại.",
+              );
             }
             return;
           }
@@ -284,48 +295,60 @@ export function CvAnalysisProcessingPage() {
               </div>
 
               <div className="space-y-4">
-                {(["queueing", "analyzing", "finalizing", "completed"] as const).map(
-                  (step) => {
-                    const stepIndex = ["queueing", "analyzing", "finalizing", "completed"].indexOf(step);
-                    const currentIndex = ["queueing", "analyzing", "finalizing", "completed"].indexOf(stage === "failed" ? "queueing" : stage);
-                    const isDone = stepIndex < currentIndex;
-                    const isCurrent = stepIndex === currentIndex && !isFailed;
+                {(
+                  ["queueing", "analyzing", "finalizing", "completed"] as const
+                ).map((step) => {
+                  const stepIndex = [
+                    "queueing",
+                    "analyzing",
+                    "finalizing",
+                    "completed",
+                  ].indexOf(step);
+                  const currentIndex = [
+                    "queueing",
+                    "analyzing",
+                    "finalizing",
+                    "completed",
+                  ].indexOf(stage === "failed" ? "queueing" : stage);
+                  const isDone = stepIndex < currentIndex;
+                  const isCurrent = stepIndex === currentIndex && !isFailed;
 
-                    return (
+                  return (
+                    <div
+                      className={`flex items-center gap-3 ${isDone || isCurrent ? "opacity-100" : "opacity-40"}`}
+                      key={step}
+                    >
                       <div
-                        className={`flex items-center gap-3 ${isDone || isCurrent ? "opacity-100" : "opacity-40"}`}
-                        key={step}
+                        className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                          isDone
+                            ? "bg-tertiary-fixed-dim/30 text-tertiary-container"
+                            : isCurrent
+                              ? "bg-primary text-white"
+                              : "bg-surface-container-high text-on-surface-variant"
+                        }`}
                       >
-                        <div
-                          className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                            isDone
-                              ? "bg-tertiary-fixed-dim/30 text-tertiary-container"
-                              : isCurrent
-                                ? "bg-primary text-white"
-                                : "bg-surface-container-high text-on-surface-variant"
-                          }`}
-                        >
-                          {isDone ? (
-                            <CheckCircle2 className="h-4 w-4" />
-                          ) : (
-                            <span className="text-[10px] font-bold">{stepIndex + 1}</span>
-                          )}
-                        </div>
-                        <span
-                          className={`text-sm font-medium ${
-                            isDone
-                              ? "text-tertiary-container"
-                              : isCurrent
-                                ? "font-semibold text-on-surface"
-                                : "text-on-surface-variant"
-                          }`}
-                        >
-                          {STAGE_CONFIG[step].label}
-                        </span>
+                        {isDone ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <span className="text-[10px] font-bold">
+                            {stepIndex + 1}
+                          </span>
+                        )}
                       </div>
-                    );
-                  },
-                )}
+                      <span
+                        className={`text-sm font-medium ${
+                          isDone
+                            ? "text-tertiary-container"
+                            : isCurrent
+                              ? "font-semibold text-on-surface"
+                              : "text-on-surface-variant"
+                        }`}
+                      >
+                        {STAGE_CONFIG[step].label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

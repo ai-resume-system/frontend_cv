@@ -12,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
+import { HotJobSkeleton } from "@/shared/components/layouts/CardSkelton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
 import {

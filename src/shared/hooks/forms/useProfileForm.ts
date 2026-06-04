@@ -45,7 +45,7 @@ function validateProfileForm(values: ProfileFormValues): ProfileFormErrors {
   const errors: ProfileFormErrors = {};
 
   if (!values.fullName.trim()) {
-    errors.fullName = "Vui lòng nhập họ và tên.";
+    errors.fullName = "Vui lÃ²ng nháº­p há» vÃ  tÃªn.";
   }
 
   return errors;
@@ -155,8 +155,8 @@ export function useProfileForm() {
       setErrors({});
 
       await showAppAlert({
-        text: "Thông tin cá nhân của bạn đã được cập nhật.",
-        title: "Lưu thay đổi thành công",
+        text: "ThÃ´ng tin cÃ¡ nhÃ¢n cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t.",
+        title: "LÆ°u thay Ä‘á»•i thÃ nh cÃ´ng",
       });
     } catch (error) {
       const fieldErrors: ProfileFormErrors = {
@@ -175,7 +175,7 @@ export function useProfileForm() {
         showErrorAlert(
           error instanceof Error
             ? error.message
-            : "Không thể cập nhật thông tin cá nhân.",
+            : "KhÃ´ng thá»ƒ cáº­p nháº­t thÃ´ng tin cÃ¡ nhÃ¢n.",
         );
       }
     } finally {
@@ -215,12 +215,12 @@ export function useProfileForm() {
       setCachedUser(nextUser);
       await refreshUser();
 
-      showSuccessToast("Ảnh đại diện của bạn đã được xóa thành công.");
+      showSuccessToast("áº¢nh Ä‘áº¡i diá»‡n cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c xÃ³a thÃ nh cÃ´ng.");
     } catch (error) {
       showErrorToast(
         error instanceof Error
           ? error.message
-          : "Không thể xóa ảnh đại diện lúc này.",
+          : "KhÃ´ng thá»ƒ xÃ³a áº£nh Ä‘áº¡i diá»‡n lÃºc nÃ y.",
       );
     } finally {
       setIsDeletingAvatar(false);

@@ -9,13 +9,12 @@ import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
 import { useCompanies } from "@/shared/hooks/data/useCompanies";
 import Image from "next/image";
-import { CompanyCardSkeleton } from "@/shared/components/ui/CardSkelton";
+import { CompanyCardSkeleton } from "@/shared/components/layouts/CardSkelton";
 import { cn } from "@/shared/lib/utils/cn";
 
 interface CompanyListFilterState {
   q: string;
 }
-
 
 function readFiltersFromSearchParams(
   searchParams: URLSearchParams,
@@ -150,7 +149,7 @@ export function CompanyListPage() {
                 "p-2 rounded-lg border transition-all duration-200 cursor-pointer",
                 layoutMode === "grid"
                   ? "border-primary bg-blue-50/50 text-primary"
-                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300"
+                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300",
               )}
               title="Chế độ lưới"
               type="button"
@@ -163,7 +162,7 @@ export function CompanyListPage() {
                 "p-2 rounded-lg border transition-all duration-200 cursor-pointer",
                 layoutMode === "list"
                   ? "border-primary bg-blue-50/50 text-primary"
-                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300"
+                  : "border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:border-slate-300",
               )}
               title="Chế độ danh sách"
               type="button"
@@ -200,7 +199,7 @@ export function CompanyListPage() {
               className={cn(
                 layoutMode === "grid"
                   ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                  : "grid grid-cols-1 gap-6"
+                  : "grid grid-cols-1 gap-6",
               )}
             >
               {companies.map((company) => (

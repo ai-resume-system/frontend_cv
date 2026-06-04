@@ -1,4 +1,4 @@
-import type { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import type { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { EJobStatus } from "@/shared/constants/enums/job.enum";
 
 export interface RecruiterApplicationSummary {
@@ -10,7 +10,7 @@ export interface RecruiterApplicationSummary {
   applicantPhone?: string;
   cvTitle?: string;
   matchingScore?: number;
-  status: EApplicationStatus;
+  status: EJobApplicationStatus;
   createdAt: Date;
 }
 

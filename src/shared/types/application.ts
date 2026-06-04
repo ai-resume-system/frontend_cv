@@ -1,5 +1,5 @@
 import type { EProcessingStatus } from "@/shared/constants/enums/cv.enum";
-import type { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import type { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { IResponseApiList } from "@/shared/types/api";
 
 // Chú ý sau
@@ -43,7 +43,7 @@ export interface BaseApplicationApiItem {
   contactPhone: string | null;
   coverLetter: string | null;
   matchingScore: number | null;
-  status: EApplicationStatus;
+  status: EJobApplicationStatus;
   scheduleTime: string | null;
   scheduleLocation: string | null;
   scheduleLink: string | null;
@@ -84,7 +84,7 @@ export interface CreateApplicationPayload {
 }
 
 export interface UpdateApplicationStatusPayload {
-  status: EApplicationStatus;
+  status: EJobApplicationStatus;
   notes?: string;
   scheduleTime?: string;
   scheduleLocation?: string;

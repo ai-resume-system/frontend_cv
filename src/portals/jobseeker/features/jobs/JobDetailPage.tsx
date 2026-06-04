@@ -10,8 +10,10 @@ import {
   Clock,
   Coins,
   ExternalLink,
+  GraduationCap,
   Heart,
   Info,
+  Laptop,
   MapPin,
   Send,
   SquareUser,
@@ -20,17 +22,21 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { TopSearchBar } from "@/shared/components/ui/TopSearchBar";
+import { TopSearchBar } from "@/shared/components/layouts/TopSearchBar";
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { EJobTypeLabels } from "@/shared/constants/enums/job.enum";
-import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import {
+  EJobTypeLabels,
+  EJobEducationLevelLabels,
+  EJobWorkArrangementLabels,
+} from "@/shared/constants/enums/job.enum";
+import { useFavouriteJobs } from "@/shared/hooks/data/useFavouriteJobs";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
-import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
+import { FAVOURITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favourite-job";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { JobCard } from "@/shared/components/layouts/JobCard";
 
@@ -101,9 +107,10 @@ function buildGoogleMapsUrl(job: Job): string | undefined {
 export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
+  const { isFavourite, isFavouritePending, toggleFavourite } =
+    useFavouriteJobs();
 
-  const saved = isFavorite(job.id);
+  const saved = isFavourite(job.id);
   const mapsUrl = buildGoogleMapsUrl(job);
   const companySlug = job.company?.slug;
   const companyName = getCompanyLabel(job);
@@ -186,7 +193,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     </button>
 
                     <button
-                      disabled={isFavoritePending(job.id)}
+                      disabled={isFavouritePending(job.id)}
                       onClick={async () => {
                         if (!isLoggedIn) {
                           if (typeof window !== "undefined") {
@@ -200,11 +207,11 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                         }
 
                         try {
-                          const wasAdded = await toggleFavorite(job.id, job);
+                          const wasAdded = await toggleFavourite(job.id, job);
 
                           if (wasAdded && typeof window !== "undefined") {
                             window.dispatchEvent(
-                              new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                              new CustomEvent(FAVOURITE_JOB_ADDED_EVENT, {
                                 detail: { jobId: job.id, title: job.title },
                               }),
                             );
@@ -253,7 +260,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     <Send className="h-4 w-4" /> Ứng tuyển ngay
                   </button>
                   <button
-                    disabled={isFavoritePending(job.id)}
+                    disabled={isFavouritePending(job.id)}
                     onClick={async () => {
                       if (!isLoggedIn) {
                         if (typeof window !== "undefined") {
@@ -267,11 +274,11 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                       }
 
                       try {
-                        const wasAdded = await toggleFavorite(job.id, job);
+                        const wasAdded = await toggleFavourite(job.id, job);
 
                         if (wasAdded && typeof window !== "undefined") {
                           window.dispatchEvent(
-                            new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+                            new CustomEvent(FAVOURITE_JOB_ADDED_EVENT, {
                               detail: { jobId: job.id, title: job.title },
                             }),
                           );
@@ -472,6 +479,36 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                       </p>
                       <p className="text-sm font-semibold text-slate-800 mt-0.5">
                         {EJobTypeLabels[job.jobType]}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <Laptop className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 font-medium">
+                        Hình thức làm việc
+                      </p>
+                      <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                        {job.workArrangement
+                          ? EJobWorkArrangementLabels[job.workArrangement]
+                          : "Đang cập nhật"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <GraduationCap className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 font-medium">
+                        Trình độ học vấn
+                      </p>
+                      <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                        {job.educationLevel
+                          ? EJobEducationLevelLabels[job.educationLevel]
+                          : "Đang cập nhật"}
                       </p>
                     </div>
                   </div>

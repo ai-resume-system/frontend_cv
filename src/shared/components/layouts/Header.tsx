@@ -20,12 +20,12 @@ import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { cn } from "@/shared/lib/utils/cn";
 
 import { CategoriesDropdown } from "./CategoriesDropdown";
 import { UserMenuContent, UserMenuDropdown } from "./UserMenuDropdown";
-import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
+import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
 
 type DrawerState = "menu" | "user" | null;
 type NavIcon = typeof BriefcaseBusiness;

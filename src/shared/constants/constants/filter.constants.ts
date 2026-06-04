@@ -1,4 +1,4 @@
-import { EJobType, EJobTypeLabels } from "@/shared/constants/enums/job.enum";
+import { EJobType, EJobTypeLabels, EJobEducationLevel, EJobEducationLevelLabels, EJobWorkArrangement, EJobWorkArrangementLabels } from "@/shared/constants/enums/job.enum";
 import type { FetchJobsParams } from "@/shared/services/job.service";
 import type { CareerCategory } from "@/shared/types/career-category";
 
@@ -15,6 +15,8 @@ export type JobFilterKey =
   | "experience"
   | "salary"
   | "jobType"
+  | "educationLevel"
+  | "workArrangement"
   | "q"
   | "sort";
 
@@ -24,6 +26,8 @@ export interface JobFilterState {
   experience: string;
   salary: string;
   jobType: string;
+  educationLevel: string;
+  workArrangement: string;
   q: string;
   sort: JobFilterSortValue;
 }
@@ -47,6 +51,8 @@ export const INITIAL_JOB_FILTER_STATE: JobFilterState = {
   experience: "",
   salary: "",
   jobType: "",
+  educationLevel: "",
+  workArrangement: "",
   q: "",
   sort: "createdAt",
 };
@@ -83,6 +89,21 @@ export const JOB_TYPE_OPTIONS: FilterOption[] = [
   { label: EJobTypeLabels[EJobType.INTERNSHIP], value: EJobType.INTERNSHIP },
 ];
 
+export const JOB_EDUCATION_LEVEL_OPTIONS: FilterOption[] = [
+  { label: "Tất cả trình độ", value: "" },
+  { label: EJobEducationLevelLabels[EJobEducationLevel.NONE], value: EJobEducationLevel.NONE },
+  { label: EJobEducationLevelLabels[EJobEducationLevel.COLLEGE], value: EJobEducationLevel.COLLEGE },
+  { label: EJobEducationLevelLabels[EJobEducationLevel.UNIVERSITY], value: EJobEducationLevel.UNIVERSITY },
+  { label: EJobEducationLevelLabels[EJobEducationLevel.POSTGRADUATE], value: EJobEducationLevel.POSTGRADUATE },
+];
+
+export const JOB_WORK_ARRANGEMENT_OPTIONS: FilterOption[] = [
+  { label: "Tất cả hình thức", value: "" },
+  { label: EJobWorkArrangementLabels[EJobWorkArrangement.ONSITE], value: EJobWorkArrangement.ONSITE },
+  { label: EJobWorkArrangementLabels[EJobWorkArrangement.HYBRID], value: EJobWorkArrangement.HYBRID },
+  { label: EJobWorkArrangementLabels[EJobWorkArrangement.REMOTE], value: EJobWorkArrangement.REMOTE },
+];
+
 export const JOB_SORT_OPTIONS: FilterOption<JobFilterSortValue>[] = [
   { label: "Ngày đăng", value: "createdAt" },
   { label: "Ngày cập nhật", value: "updatedAt" },
@@ -95,6 +116,8 @@ export const JOB_FILTER_SEARCH_PARAM_KEYS: Record<JobFilterKey, string> = {
   experience: "experience",
   salary: "salary",
   jobType: "jobType",
+  educationLevel: "educationLevel",
+  workArrangement: "workArrangement",
   q: "q",
   sort: "sort",
 };
@@ -105,6 +128,8 @@ export const DEFAULT_JOB_FILTER_EMPTY_VALUES: Record<JobFilterKey, string> = {
   experience: "",
   salary: "",
   jobType: "",
+  educationLevel: "",
+  workArrangement: "",
   q: "",
   sort: "createdAt",
 };
@@ -180,6 +205,12 @@ export const JOB_FILTER_QUERY_BUILDERS: Record<
   },
   jobType: (value) => ({
     jobType: value || undefined,
+  }),
+  educationLevel: (value) => ({
+    educationLevel: value || undefined,
+  }),
+  workArrangement: (value) => ({
+    workArrangement: value || undefined,
   }),
   q: (value) => ({
     q: value.trim() || undefined,

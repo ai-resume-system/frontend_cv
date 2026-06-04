@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Badge } from "@/shared/components/ui/Badge";
-import { FAVORITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favorite-job";
+import { FAVOURITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favourite-job";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useFavouriteJobs } from "@/shared/hooks/data/useFavouriteJobs";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import { resolveMediaUrl } from "@/shared/lib/utils/resolveMediaUrl";
@@ -37,9 +37,9 @@ interface FavoriteButtonProps {
 function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavorite, isFavoritePending, toggleFavorite } = useFavoriteJobs();
-  const saved = isFavorite(jobId);
-  const isSubmitting = isFavoritePending(jobId);
+  const { isFavourite, isFavouritePending, toggleFavourite } = useFavouriteJobs();
+  const saved = isFavourite(jobId);
+  const isSubmitting = isFavouritePending(jobId);
 
   return (
     <button
@@ -65,11 +65,11 @@ function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
         }
 
         try {
-          const wasAdded = await toggleFavorite(jobId, jobData);
+          const wasAdded = await toggleFavourite(jobId, jobData);
 
           if (wasAdded && typeof window !== "undefined") {
             window.dispatchEvent(
-              new CustomEvent(FAVORITE_JOB_ADDED_EVENT, {
+              new CustomEvent(FAVOURITE_JOB_ADDED_EVENT, {
                 detail: { jobId, title: jobData?.title },
               }),
             );
@@ -150,9 +150,10 @@ export function JobCard(props: JobCardProps) {
 }
 
 export function JobCardLink(props: JobCardProps) {
+  const slugOrId = props.jobData?.slug ?? props.jobId;
   const href =
     props.href ??
-    (props.jobId ? ROUTES.JOB_SEEKER_JOB_DETAIL(props.jobId) : ROUTES.JOBS);
+    (slugOrId ? ROUTES.JOB_SEEKER_JOB_DETAIL(slugOrId) : ROUTES.JOBS);
   const logoUrl = resolveMediaUrl(props.jobData?.company?.logoUrl);
 
   return (

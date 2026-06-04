@@ -91,7 +91,7 @@ export function RecruiterDashboardPage() {
       } từ dữ liệu tin đăng và hồ sơ hiện có.`}
       action={
         <Link
-          href={RECRUITER_ROUTES.JOB_POSTING}
+          href={RECRUITER_ROUTES.JOB_CREATE}
           className="inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-on-primary shadow-lg shadow-primary/15 transition hover:bg-primary-hover"
         >
           <BriefcaseBusiness className="h-4 w-4" />
@@ -156,7 +156,7 @@ export function RecruiterDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-3xl bg-[linear-gradient(135deg,_#00288e_0%,_#1e40af_100%)] p-6 text-on-primary shadow-lg shadow-primary/15">
+          <div className="rounded-3xl bg-[linear-gradient(135deg,#00288e_0%,#1e40af_100%)] p-6 text-on-primary shadow-lg shadow-primary/15">
             <div className="flex items-center justify-between">
               <span className="rounded-2xl bg-white/15 p-3">
                 <Sparkles className="h-5 w-5" />
@@ -201,7 +201,7 @@ export function RecruiterDashboardPage() {
                 <div key={item.label} className="space-y-3">
                   <div className="flex h-56 items-end">
                     <div
-                      className="w-full rounded-t-3xl bg-[linear-gradient(180deg,_rgba(0,88,190,0.35)_0%,_rgba(0,40,142,0.92)_100%)] transition hover:opacity-90"
+                      className="w-full rounded-t-3xl bg-[linear-gradient(180deg,rgba(0,88,190,0.35)_0%,rgba(0,40,142,0.92)_100%)] transition hover:opacity-90"
                       style={{
                         height: `${Math.max((item.value / trendMax) * 100, 10)}%`,
                       }}
@@ -294,7 +294,7 @@ export function RecruiterDashboardPage() {
                 </h2>
               </div>
               <Link
-                href={RECRUITER_ROUTES.JOB_POSTING}
+                href={RECRUITER_ROUTES.JOB_CREATE}
                 className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary-hover"
               >
                 <span>Tạo tin mới</span>

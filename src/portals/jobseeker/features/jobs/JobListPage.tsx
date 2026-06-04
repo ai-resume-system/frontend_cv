@@ -10,22 +10,24 @@ import {
   Funnel,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-import { TopSearchBar } from "@/shared/components/ui/TopSearchBar";
+import { TopSearchBar } from "@/shared/components/layouts/TopSearchBar";
 import {
   buildCategoryFilterOptions,
   JOB_EXPERIENCE_OPTIONS,
   JOB_SALARY_OPTIONS,
   JOB_SORT_OPTIONS,
   JOB_TYPE_OPTIONS,
+  JOB_EDUCATION_LEVEL_OPTIONS,
+  JOB_WORK_ARRANGEMENT_OPTIONS,
   type JobFilterSortValue,
 } from "@/shared/constants/constants/filter.constants";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
 import Image from "next/image";
-import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
+import { JobCardSkeleton } from "@/shared/components/layouts/CardSkelton";
 import { JobCard } from "@/shared/components/layouts/JobCard";
 
 function formatDate(value?: Date): string {
@@ -65,6 +67,22 @@ export function JobListPage() {
   });
 
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsSortOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const { categories } = useCareerCategories({
     page: 1,
     limit: 100,
@@ -224,6 +242,56 @@ export function JobListPage() {
                       ))}
                     </div>
                   </div>
+
+                  <div className="border-t border-slate-100 pt-4">
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-800">
+                      TRÌNH ĐỘ HỌC VẤN
+                    </h3>
+                    <div className="space-y-2">
+                      {JOB_EDUCATION_LEVEL_OPTIONS.map((opt) => (
+                        <label
+                          key={opt.value}
+                          className="flex cursor-pointer items-center gap-2.5 py-0.5 text-sm text-slate-600 hover:text-primary"
+                        >
+                          <input
+                            type="radio"
+                            name="educationLevel"
+                            checked={filters.educationLevel === opt.value}
+                            onChange={() =>
+                              setFilter("educationLevel", opt.value)
+                            }
+                            className="h-4 w-4 border-slate-300 text-primary focus:ring-primary focus:outline-none"
+                          />
+                          <span>{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-4">
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-800">
+                      HÌNH THỨC LÀM VIỆC
+                    </h3>
+                    <div className="space-y-2">
+                      {JOB_WORK_ARRANGEMENT_OPTIONS.map((opt) => (
+                        <label
+                          key={opt.value}
+                          className="flex cursor-pointer items-center gap-2.5 py-0.5 text-sm text-slate-600 hover:text-primary"
+                        >
+                          <input
+                            type="radio"
+                            name="workArrangement"
+                            checked={filters.workArrangement === opt.value}
+                            onChange={() =>
+                              setFilter("workArrangement", opt.value)
+                            }
+                            className="h-4 w-4 border-slate-300 text-primary focus:ring-primary focus:outline-none"
+                          />
+                          <span>{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="border-t border-slate-100 p-4 bg-slate-50 shrink-0 flex justify-center items-center">
@@ -253,7 +321,7 @@ export function JobListPage() {
                   </h1>
                 </div>
 
-                <div className="relative flex shrink-0 items-center gap-2 self-start sm:self-auto">
+                <div ref={sortDropdownRef} className="relative flex shrink-0 items-center gap-2 self-start sm:self-auto">
                   <span className="flex items-center gap-1 text-sm font-semibold text-slate-600">
                     <ArrowUpDown className="h-4 w-4 text-slate-400" /> Sắp xếp
                     theo:
@@ -261,7 +329,7 @@ export function JobListPage() {
 
                   <button
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex min-w-[160px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="flex min-w-[160px] cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 focus:ring-2 focus:ring-primary/20 outline-none"
                   >
                     {JOB_SORT_OPTIONS.find((o) => o.value === filters.sort)
                       ?.label || "Chọn..."}

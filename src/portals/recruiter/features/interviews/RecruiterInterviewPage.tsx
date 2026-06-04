@@ -4,7 +4,7 @@ import { CalendarCheck, ExternalLink, MapPin } from "lucide-react";
 
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
-import { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 
 function formatDateTime(value: string | null): string {
   if (!value) return "---";
@@ -19,7 +19,7 @@ function formatDateTime(value: string | null): string {
 
 export function RecruiterInterviewPage() {
   const { applications, loading, error } = useRecruiterApplications({
-    status: EApplicationStatus.INTERVIEW,
+    status: EJobApplicationStatus.INTERVIEW,
   });
 
   return (

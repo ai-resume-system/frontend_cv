@@ -9,10 +9,11 @@ import { Badge } from "@/shared/components/ui/Badge";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { useFavoriteJobs } from "@/shared/hooks/data/useFavoriteJobs";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useFavouriteJobs } from "@/shared/hooks/data/useFavouriteJobs";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
+import Link from "next/link";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp";
@@ -39,7 +40,7 @@ function formatSalary(job: Job): string | undefined {
 }
 
 function formatSavedDate(job: Job): string {
-  const value = job.updatedAt ?? job.createdAt;
+  const value = job.createdAt;
 
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
     return "Đã lưu gần đây";
@@ -64,15 +65,15 @@ function formatExperience(job: Job): string | null {
   return `${job.experienceYears} năm kinh nghiệm`;
 }
 
-interface FavoriteJobRowProps {
+interface FavouriteJobRowProps {
   job: Job;
 }
 
-function FavoriteJobRow({ job }: FavoriteJobRowProps) {
+function FavouriteJobRow({ job }: FavouriteJobRowProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavoritePending, toggleFavorite } = useFavoriteJobs();
-  const isPending = isFavoritePending(job.id);
+  const { isFavouritePending, toggleFavourite } = useFavouriteJobs();
+  const isPending = isFavouritePending(job.id);
   const salary = formatSalary(job);
   const company = getCompanyLabel(job);
   const address = getAddress(job);
@@ -88,12 +89,15 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
 
   return (
     <article className="group cursor-pointer relative rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+      <Link
+        href={ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug ?? job.id)}
+        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5"
+      >
         {/* Logo Công ty */}
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-2 transition-colors group-hover:border-slate-200 sm:h-20 sm:w-20">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-300 transition-colors group-hover:border-slate-200 sm:h-24 sm:w-24">
           <img
             alt={company}
-            className="h-[70px] w-[70px] rounded-2xl border border-gray-300 object-contain transition-colors"
+            className=" h-full w-full object-contain transition-colors"
             src={job.company?.logoUrl ?? "/logo.png"}
           />
         </div>
@@ -102,12 +106,9 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between md:gap-4">
             <div className="min-w-0 flex-1">
-              <a
-                className="inline-block text-lg font-bold leading-snug text-slate-900 transition-colors hover:text-primary sm:text-xl"
-                href={`${ROUTES.JOB_SEEKER_JOB_DETAIL(job.id)}`}
-              >
+              <span className="inline-block text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-primary sm:text-xl">
                 {job.title}
-              </a>
+              </span>
               <p className="mt-1 text-sm font-semibold tracking-wide text-slate-500 uppercase">
                 {company}
               </p>
@@ -155,19 +156,24 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
             <div className="flex items-center gap-2.5">
               <BaseButton
                 className="h-10 rounded-xl px-5 text-sm font-semibold opacity-100 transform transition-all duration-200 md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0"
-                onClick={() => handleApply(job.slug ?? job.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleApply(job.slug ?? job.id);
+                }}
               >
                 Ứng tuyển ngay
               </BaseButton>
               <button
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border border-primary-container bg-white shadow-sm transition-all duration-200 hover:bg-primary-soft active:scale-95",
+                  "flex h-10 w-10 items-center justify-center rounded-full border border-primary-container bg-white shadow-sm transition-all duration-200 hover:bg-primary-soft active:scale-95 cursor-pointer",
                   isPending && "animate-pulse opacity-60",
                 )}
                 disabled={isPending}
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation(); // Chống nổi bọt sự kiện để không bị click trùng vào card
-                  void toggleFavorite(job.id, job);
+                  void toggleFavourite(job.id, job);
                 }}
                 type="button"
               >
@@ -176,15 +182,15 @@ function FavoriteJobRow({ job }: FavoriteJobRowProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     </article>
   );
 }
 
-export function FavoritesPage() {
+export function FavouritesPage() {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { favoriteJobs, isLoading, isLoaded } = useFavoriteJobs();
+  const { favouriteJobs, isLoading, isLoaded } = useFavouriteJobs();
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -194,7 +200,7 @@ export function FavoritesPage() {
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem(
         SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
-        ROUTES.JOB_SEEKER_FAVORITES,
+        ROUTES.JOB_SEEKER_FAVOURITES,
       );
     }
 
@@ -208,26 +214,23 @@ export function FavoritesPage() {
   return (
     <section className="bg-slate-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8 lg:py-12">
       <div className="mx-auto max-w-7xl">
-        {/* Header trang tối giản, tinh tế */}
         <div className="mb-8 flex flex-col gap-2 border-b border-slate-100 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Danh sách việc làm đã lưu
           </h1>
           <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:text-sm">
-            Hiện có {favoriteJobs.length} công việc
+            Hiện có {favouriteJobs.length} công việc
           </span>
         </div>
 
-        {/* Trạng thái Loading */}
         {isLoading && !isLoaded ? (
           <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-100 bg-white">
             <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : favoriteJobs.length > 0 ? (
-          // Danh sách Card công việc
+        ) : favouriteJobs.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {favoriteJobs.map((job) => (
-              <FavoriteJobRow job={job} key={job.id} />
+            {favouriteJobs.map((job) => (
+              <FavouriteJobRow job={job} key={job.id} />
             ))}
           </div>
         ) : (
@@ -255,6 +258,15 @@ export function FavoritesPage() {
             </div>
           </div>
         )}
+      </div>
+      <div>
+        <Image
+          alt="Logo"
+          height={1000}
+          priority
+          src="/favourite_background.png"
+          width={300}
+        />
       </div>
     </section>
   );

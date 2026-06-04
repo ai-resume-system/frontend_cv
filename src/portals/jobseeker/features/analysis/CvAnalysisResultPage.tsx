@@ -1,13 +1,25 @@
 "use client";
 
-import { ArrowLeft, Bolt, Download, Eye, FileText, Lightbulb, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Bolt,
+  Download,
+  Eye,
+  FileText,
+  Lightbulb,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { JOBSEEKER_ROUTES, ROUTES } from "@/shared/constants/constants/routes";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { cn } from "@/shared/lib/utils/cn";
-import { fetchCvAnalysis, fetchCvDownload, fetchCvPreview } from "@/shared/services/cv.service";
+import {
+  fetchCvAnalysis,
+  fetchCvDownload,
+  fetchCvPreview,
+} from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 
 interface CvAnalysisResultPageProps {
@@ -24,20 +36,31 @@ function ScoreGauge({ score }: { score: number }) {
       <svg className="w-full h-full transform -rotate-90">
         <circle
           className="text-surface-container-highest"
-          cx="64" cy="64" fill="transparent" r={radius}
-          stroke="currentColor" strokeWidth="12"
+          cx="64"
+          cy="64"
+          fill="transparent"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="12"
         />
         <circle
           className="transition-all duration-1000"
-          cx="64" cy="64" fill="transparent" r={radius}
-          stroke="#4edea3" strokeDasharray={circumference}
-          strokeDashoffset={offset} strokeWidth="12"
+          cx="64"
+          cy="64"
+          fill="transparent"
+          r={radius}
+          stroke="#4edea3"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeWidth="12"
           strokeLinecap="round"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-extrabold text-on-surface">{score}</span>
-        <span className="text-[10px] text-on-surface-variant font-semibold uppercase">Điểm số</span>
+        <span className="text-[10px] text-on-surface-variant font-semibold uppercase">
+          Điểm số
+        </span>
       </div>
     </div>
   );
@@ -71,14 +94,20 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
         setCvTitle(result.cvId.slice(0, 12) + "...");
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Không thể tải kết quả phân tích.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Không thể tải kết quả phân tích.",
+        );
       } finally {
         if (!cancelled) setIsLoading(false);
       }
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [cvId, isLoggedIn]);
 
   if (!isLoggedIn) return null;
@@ -92,7 +121,9 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               <div className="animate-spin text-primary mx-auto">
                 <Sparkles className="h-8 w-8" />
               </div>
-              <p className="text-sm text-on-surface-variant">Đang tải kết quả phân tích...</p>
+              <p className="text-sm text-on-surface-variant">
+                Đang tải kết quả phân tích...
+              </p>
             </div>
           </div>
         </div>
@@ -106,7 +137,9 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center space-y-4">
-              <p className="text-error font-semibold">{error ?? "Không có dữ liệu phân tích."}</p>
+              <p className="text-error font-semibold">
+                {error ?? "Không có dữ liệu phân tích."}
+              </p>
               <Link
                 href={ROUTES.JOB_SEEKER_ANALYSIS}
                 className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover"
@@ -162,7 +195,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               <>
                 <span className="text-outline text-xs">•</span>
                 <span className="text-on-surface-variant text-xs">
-                  Cập nhật: {new Date(analysis.analyzedAt).toLocaleDateString("vi-VN")}
+                  Cập nhật:{" "}
+                  {new Date(analysis.analyzedAt).toLocaleDateString("vi-VN")}
                 </span>
               </>
             ) : null}
@@ -178,7 +212,9 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               <div className="flex items-center justify-between border-b border-surface-container-high bg-white px-6 py-4">
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-semibold text-on-surface">{cvTitle}</span>
+                  <span className="text-sm font-semibold text-on-surface">
+                    {cvTitle}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -218,7 +254,9 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/90 px-6 py-3 shadow-xl backdrop-blur-sm">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-primary">Đã phân tích bởi AI</span>
+                    <span className="text-sm font-semibold text-primary">
+                      Đã phân tích bởi AI
+                    </span>
                   </div>
                 </div>
               </div>
@@ -232,14 +270,18 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                   <span className="text-xs font-bold text-primary uppercase tracking-widest">
                     Phân tích phù hợp AI
                   </span>
-                  <h4 className={cn("text-2xl font-bold mt-1", scoreInfo.color)}>
+                  <h4
+                    className={cn("text-2xl font-bold mt-1", scoreInfo.color)}
+                  >
                     Đánh giá: {scoreInfo.label}
                   </h4>
                 </div>
                 {score >= 70 ? (
                   <div className="bg-tertiary-fixed/20 px-3 py-1 rounded-full flex items-center gap-1 border border-tertiary-fixed-dim/30">
                     <span className="w-2 h-2 rounded-full bg-tertiary-fixed-dim" />
-                    <span className="text-[10px] font-bold text-on-tertiary-fixed-variant uppercase">Đã tối ưu</span>
+                    <span className="text-[10px] font-bold text-on-tertiary-fixed-variant uppercase">
+                      Đã tối ưu
+                    </span>
                   </div>
                 ) : null}
               </div>
@@ -249,29 +291,50 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 <div className="flex-1 w-full space-y-4">
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-on-surface-variant">Phù hợp yêu cầu</span>
-                      <span className="text-primary">{Math.min(100, score + 7)}%</span>
+                      <span className="text-on-surface-variant">
+                        Phù hợp yêu cầu
+                      </span>
+                      <span className="text-primary">
+                        {Math.min(100, score + 7)}%
+                      </span>
                     </div>
                     <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, score + 7)}%` }} />
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${Math.min(100, score + 7)}%` }}
+                      />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-on-surface-variant">Từ khóa kỹ thuật</span>
-                      <span className="text-primary">{Math.max(30, score - 5)}%</span>
+                      <span className="text-on-surface-variant">
+                        Từ khóa kỹ thuật
+                      </span>
+                      <span className="text-primary">
+                        {Math.max(30, score - 5)}%
+                      </span>
                     </div>
                     <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${Math.max(30, score - 5)}%` }} />
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${Math.max(30, score - 5)}%` }}
+                      />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-on-surface-variant">Trình bày & Định dạng</span>
-                      <span className="text-primary">{Math.max(30, score - 2)}%</span>
+                      <span className="text-on-surface-variant">
+                        Trình bày & Định dạng
+                      </span>
+                      <span className="text-primary">
+                        {Math.max(30, score - 2)}%
+                      </span>
                     </div>
                     <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${Math.max(30, score - 2)}%` }} />
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${Math.max(30, score - 2)}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -322,12 +385,18 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                     )}
                   >
                     <div className="flex gap-3">
-                      <Lightbulb className={cn(
-                        "h-5 w-5 shrink-0",
-                        index === 0 ? "text-primary" : "text-tertiary-container",
-                      )} />
+                      <Lightbulb
+                        className={cn(
+                          "h-5 w-5 shrink-0",
+                          index === 0
+                            ? "text-primary"
+                            : "text-tertiary-container",
+                        )}
+                      />
                       <div className="flex-1">
-                        <p className="text-sm leading-relaxed text-on-surface-variant">{suggestion}</p>
+                        <p className="text-sm leading-relaxed text-on-surface-variant">
+                          {suggestion}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -346,22 +415,33 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 <div className="space-y-4">
                   {analysis.experience.slice(0, 3).map((exp, index) => (
                     <div className="flex gap-4" key={index}>
-                      <div className={cn(
-                        "w-1 rounded-full",
-                        index === 0 ? "bg-tertiary-fixed-dim" : "bg-primary-fixed-dim",
-                      )} />
+                      <div
+                        className={cn(
+                          "w-1 rounded-full",
+                          index === 0
+                            ? "bg-tertiary-fixed-dim"
+                            : "bg-primary-fixed-dim",
+                        )}
+                      />
                       <div>
-                        <p className="font-bold text-on-surface text-sm">{exp.title ?? "Chưa có thông tin"}</p>
+                        <p className="font-bold text-on-surface text-sm">
+                          {exp.title ?? "Chưa có thông tin"}
+                        </p>
                         {exp.company ? (
-                          <p className="text-xs text-on-surface-variant">{exp.company}</p>
+                          <p className="text-xs text-on-surface-variant">
+                            {exp.company}
+                          </p>
                         ) : null}
-                        {(exp.startDate || exp.endDate) ? (
+                        {exp.startDate || exp.endDate ? (
                           <p className="text-xs text-on-surface-variant mt-1">
-                            {exp.startDate ?? "—"} {exp.endDate ? `— ${exp.endDate}` : ""}
+                            {exp.startDate ?? "—"}{" "}
+                            {exp.endDate ? `— ${exp.endDate}` : ""}
                           </p>
                         ) : null}
                         {exp.description ? (
-                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">{exp.description}</p>
+                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                            {exp.description}
+                          </p>
                         ) : null}
                       </div>
                     </div>
@@ -376,9 +456,12 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                   <Lightbulb className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase text-primary mb-1">MẸO TỪ FUSE AI</p>
+                  <p className="text-xs font-bold uppercase text-primary mb-1">
+                    MẸO TỪ FUSE AI
+                  </p>
                   <p className="text-sm text-on-surface-variant leading-relaxed">
-                    {analysis.summary ?? "Hãy đảm bảo CV của bạn có đầy đủ thông tin liên lạc, kỹ năng và kinh nghiệm làm việc để nhận được phân tích chính xác nhất."}
+                    {analysis.summary ??
+                      "Hãy đảm bảo CV của bạn có đầy đủ thông tin liên lạc, kỹ năng và kinh nghiệm làm việc để nhận được phân tích chính xác nhất."}
                   </p>
                 </div>
               </div>

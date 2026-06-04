@@ -33,19 +33,19 @@ function validateChangePasswordForm(
   const errors: ChangePasswordFormErrors = {};
 
   if (!values.currentPassword) {
-    errors.currentPassword = "Vui lòng nhập mật khẩu hiện tại";
+    errors.currentPassword = "Vui lÃ²ng nháº­p máº­t kháº©u hiá»‡n táº¡i";
   }
 
   if (!values.newPassword) {
-    errors.newPassword = "Vui lòng nhập mật khẩu mới";
+    errors.newPassword = "Vui lÃ²ng nháº­p máº­t kháº©u má»›i";
   } else if (values.newPassword.length < 6) {
-    errors.newPassword = "Mật khẩu mới cần tối thiểu 6 ký tự";
+    errors.newPassword = "Máº­t kháº©u má»›i cáº§n tá»‘i thiá»ƒu 6 kÃ½ tá»±";
   }
 
   if (!values.confirmNewPassword) {
-    errors.confirmNewPassword = "Vui lòng xác nhận mật khẩu mới";
+    errors.confirmNewPassword = "Vui lÃ²ng xÃ¡c nháº­n máº­t kháº©u má»›i";
   } else if (values.newPassword !== values.confirmNewPassword) {
-    errors.confirmNewPassword = "Mật khẩu xác nhận không khớp";
+    errors.confirmNewPassword = "Máº­t kháº©u xÃ¡c nháº­n khÃ´ng khá»›p";
   }
 
   if (
@@ -53,7 +53,7 @@ function validateChangePasswordForm(
     values.newPassword &&
     values.currentPassword === values.newPassword
   ) {
-    errors.newPassword = "Mật khẩu mới phải khác mật khẩu hiện tại";
+    errors.newPassword = "Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i";
   }
 
   return errors;
@@ -151,9 +151,9 @@ export function useChangePassword({ onClose }: UseChangePasswordOptions) {
       onClose();
 
       await showAppAlert({
-        confirmButtonText: "Đăng nhập lại",
-        text: "Mật khẩu đã được đổi. Vui lòng đăng nhập lại để tiếp tục.",
-        title: "Đổi mật khẩu thành công",
+        confirmButtonText: "ÄÄƒng nháº­p láº¡i",
+        text: "Máº­t kháº©u Ä‘Ã£ Ä‘Æ°á»£c Ä‘á»•i. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ tiáº¿p tá»¥c.",
+        title: "Äá»•i máº­t kháº©u thÃ nh cÃ´ng",
       });
 
       window.location.href = ROUTES.JOB_SEEKER_LOGIN;
@@ -172,7 +172,7 @@ export function useChangePassword({ onClose }: UseChangePasswordOptions) {
 
       if (!hasFieldErrors) {
         showErrorAlert(
-          error instanceof Error ? error.message : "Không thể đổi mật khẩu.",
+          error instanceof Error ? error.message : "KhÃ´ng thá»ƒ Ä‘á»•i máº­t kháº©u.",
         );
       }
     } finally {

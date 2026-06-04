@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Footer } from "@/shared/components/layouts/Footer";
 import { Header } from "@/shared/components/layouts/Header";
 import { PortalShell } from "@/shared/components/layouts/PortalShell";
-import { FloatingFavoriteButton } from "@/shared/components/layouts/FloatingFavoriteButton";
+import { FloatingFavouriteButton } from "@/shared/components/layouts/FloatingFavouriteButton";
 
 interface JobseekerRouteShellProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export function JobseekerRouteShell({ children }: JobseekerRouteShellProps) {
 
   return (
     <PortalShell
-      floatingContent={<FloatingFavoriteButton />}
+      floatingContent={<FloatingFavouriteButton />}
       footer={<Footer />}
       header={<Header />}
       mainClassName="flex-1 bg-background text-foreground"

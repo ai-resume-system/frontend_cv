@@ -30,10 +30,10 @@ const JOB_TYPE_OPTIONS = [
 ] as const;
 
 interface RecruiterJobEditPageProps {
-  jobId: string;
+  jobSlug: string;
 }
 
-export function RecruiterJobEditPage({ jobId }: RecruiterJobEditPageProps) {
+export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
   const { categories, error: categoriesError, loading: categoriesLoading } =
     useCareerCategories({ page: 1, limit: 50 });
 
@@ -60,7 +60,7 @@ export function RecruiterJobEditPage({ jobId }: RecruiterJobEditPageProps) {
   useEffect(() => {
     async function load() {
       try {
-        const data = await fetchRecruiterJobDetail(jobId);
+        const data = await fetchRecruiterJobDetail(jobSlug);
         setJob(data);
         setForm({
           title: data.title,
@@ -83,7 +83,7 @@ export function RecruiterJobEditPage({ jobId }: RecruiterJobEditPageProps) {
       }
     }
     void load();
-  }, [jobId]);
+  }, [jobSlug]);
 
   function updateField<K extends keyof typeof form>(
     key: K,
@@ -94,6 +94,7 @@ export function RecruiterJobEditPage({ jobId }: RecruiterJobEditPageProps) {
   }
 
   async function handleSave() {
+    if (!job) return;
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -109,7 +110,7 @@ export function RecruiterJobEditPage({ jobId }: RecruiterJobEditPageProps) {
       if (form.experienceYears) payload.experienceYears = Number(form.experienceYears);
       if (form.salaryMin) payload.salaryMin = Number(form.salaryMin);
       if (form.salaryMax) payload.salaryMax = Number(form.salaryMax);
-      await updateRecruiterJob(jobId, payload);
+      await updateRecruiterJob(job.id, payload);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cập nhật thất bại.");

@@ -10,9 +10,12 @@ import {
   fetchMyCvList,
   queueCvAnalysis,
   uploadCv,
+  setDefaultCv,
+  updateCv,
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 import type { CvItem } from "@/shared/types/cv";
+import type { IResponseApiPagination } from "@/shared/types/api";
 
 interface UseCvListReturn {
   cvList: CvItem[];
@@ -34,6 +37,19 @@ interface UseCvListReturn {
   handleDownload: (id: string) => Promise<void>;
   handleAnalyze: (id: string) => Promise<void>;
   handleLoadAnalysis: (id: string) => Promise<CvAnalysisResponse | null>;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+  sortBy: string;
+  setSortBy: (sortBy: string) => void;
+  sortOrder: "ASC" | "DESC";
+  setSortOrder: (order: "ASC" | "DESC") => void;
+  q: string;
+  setQ: (q: string) => void;
+  pagination?: IResponseApiPagination;
+  handleSetDefault: (id: string, isDefault: boolean) => Promise<void>;
+  handleRename: (id: string, title: string) => Promise<void>;
 }
 
 function triggerFileDownload(url: string) {
@@ -61,6 +77,15 @@ export function useCvList(): UseCvListReturn {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // States for query filters, sorting and pagination
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(6);
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+  const [q, setQ] = useState("");
+  const [pagination, setPagination] = useState<IResponseApiPagination | undefined>(undefined);
+
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -75,10 +100,17 @@ export function useCvList(): UseCvListReturn {
     try {
       setIsLoading(true);
       setLoadError(null);
-      const { cvs } = await fetchMyCvList();
+      const { cvs, pagination: apiPagination } = await fetchMyCvList({
+        page,
+        limit,
+        sortBy,
+        sortOrder,
+        q: q.trim() || undefined,
+      });
 
       if (isMounted.current) {
         setCvList(cvs);
+        setPagination(apiPagination);
       }
     } catch (error) {
       if (isMounted.current) {
@@ -91,7 +123,7 @@ export function useCvList(): UseCvListReturn {
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [page, limit, sortBy, sortOrder, q]);
 
   useEffect(() => {
     void refresh();
@@ -261,6 +293,40 @@ export function useCvList(): UseCvListReturn {
     [handleLoadAnalysis, refresh],
   );
 
+  const handleSetDefault = useCallback(
+    async (id: string, isDefault: boolean) => {
+      setActionError(null);
+      try {
+        await setDefaultCv(id, { isDefault });
+        await refresh();
+      } catch (error) {
+        if (isMounted.current) {
+          setActionError(
+            error instanceof Error ? error.message : "Không thể cập nhật trạng thái mặc định CV.",
+          );
+        }
+      }
+    },
+    [refresh],
+  );
+
+  const handleRename = useCallback(
+    async (id: string, title: string) => {
+      setActionError(null);
+      try {
+        await updateCv(id, { title });
+        await refresh();
+      } catch (error) {
+        if (isMounted.current) {
+          setActionError(
+            error instanceof Error ? error.message : "Không thể đổi tên CV.",
+          );
+        }
+      }
+    },
+    [refresh],
+  );
+
   return {
     cvList,
     isLoading,
@@ -281,5 +347,18 @@ export function useCvList(): UseCvListReturn {
     handleDownload,
     handleAnalyze,
     handleLoadAnalysis,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    q,
+    setQ,
+    pagination,
+    handleSetDefault,
+    handleRename,
   };
 }

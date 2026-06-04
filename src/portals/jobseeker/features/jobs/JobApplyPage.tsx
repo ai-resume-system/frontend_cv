@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCvList } from "@/shared/hooks/data/useCvList";
-import { useAuth } from "@/shared/hooks/ui/useAuth";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
 import { createJobApplication } from "@/shared/services/application.service";
 import type { Job } from "@/shared/types/job";

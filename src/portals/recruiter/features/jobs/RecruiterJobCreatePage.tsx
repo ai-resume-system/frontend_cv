@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
-import { useRecruiterJobPostingForm } from "@/portals/recruiter/features/job-posting/useRecruiterJobPostingForm";
+import { useRecruiterJobPostingForm } from "@/portals/recruiter/features/jobs/useRecruiterJobPostingForm";
 import { EJobType } from "@/shared/constants/enums/job.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";

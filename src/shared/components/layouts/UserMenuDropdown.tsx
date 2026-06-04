@@ -9,7 +9,7 @@ import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { cn } from "@/shared/lib/utils/cn";
 import type { AuthUser } from "@/shared/types/account";
 import { ChevronDown } from "lucide-react";
-import { useAvatarRefreshOnError } from "@/shared/hooks/data/useAvatarRefreshOnError";
+import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
 
 interface UserMenuItem {
   href: string;
@@ -53,7 +53,7 @@ export function getUserMenuSections(): UserMenuSection[] {
       title: t.jobManagement,
       items: [
         {
-          href: ROUTES.JOB_SEEKER_FAVORITES,
+          href: ROUTES.JOB_SEEKER_FAVOURITES,
           label: t.savedJobs,
         },
         {

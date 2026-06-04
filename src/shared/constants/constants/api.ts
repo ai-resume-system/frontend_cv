@@ -53,7 +53,8 @@ export const API_ROUTES = {
   },
   JOB_RECRUITER: {
     BASE: `${API_PREFIX}/recruiter/jobs`,
-    DETAIL: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}`,
+    DETAIL: (slug: string) => `${API_PREFIX}/recruiter/jobs/${slug}`,
+    ACTION: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}`,
     CLOSE: (id: string) => `${API_PREFIX}/recruiter/jobs/${id}/close`,
   },
   JOB_APPLICATION: {

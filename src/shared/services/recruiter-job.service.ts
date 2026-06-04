@@ -1,8 +1,16 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
-import type { EJobStatus } from "@/shared/constants/enums/job.enum";
+import type {
+  EJobEducationLevel,
+  EJobStatus,
+  EJobType,
+  EJobWorkArrangement,
+} from "@/shared/constants/enums/job.enum";
 import { apiService } from "@/shared/services/api-service";
 import { mapJobApiItemToJob } from "@/shared/services/job.service";
-import type { IResponseApiItem, IResponseApiPagination } from "@/shared/types/api";
+import type {
+  IResponseApiItem,
+  IResponseApiPagination,
+} from "@/shared/types/api";
 import type {
   CreateJobPayload,
   Job,
@@ -22,7 +30,9 @@ export interface FetchRecruiterJobsParams {
   careerCategoryId?: string;
   careerCategorySlug?: string;
   status?: EJobStatus;
-  jobType?: string;
+  jobType?: EJobType;
+  educationLevel?: EJobEducationLevel;
+  workArrangement?: EJobWorkArrangement;
   skillIds?: string | string[];
   skillSlugs?: string | string[];
   sortBy?: string;
@@ -46,6 +56,8 @@ function buildRecruiterJobsPath({
   careerCategorySlug,
   status,
   jobType,
+  educationLevel,
+  workArrangement,
   skillIds,
   skillSlugs,
   sortBy,
@@ -58,8 +70,10 @@ function buildRecruiterJobsPath({
 
   if (q) searchParams.set("q", q);
   if (address) searchParams.set("address", address);
-  if (typeof salaryMin === "number") searchParams.set("salaryMin", `${salaryMin}`);
-  if (typeof salaryMax === "number") searchParams.set("salaryMax", `${salaryMax}`);
+  if (typeof salaryMin === "number")
+    searchParams.set("salaryMin", `${salaryMin}`);
+  if (typeof salaryMax === "number")
+    searchParams.set("salaryMax", `${salaryMax}`);
   if (typeof experienceYears === "number") {
     searchParams.set("experienceYears", `${experienceYears}`);
   }
@@ -69,6 +83,8 @@ function buildRecruiterJobsPath({
   }
   if (status) searchParams.set("status", status);
   if (jobType) searchParams.set("jobType", jobType);
+  if (educationLevel) searchParams.set("educationLevel", educationLevel);
+  if (workArrangement) searchParams.set("workArrangement", workArrangement);
   if (skillIds) {
     searchParams.set(
       "skillIds",
@@ -90,10 +106,13 @@ function buildRecruiterJobsPath({
 export async function fetchRecruiterJobs(
   params?: FetchRecruiterJobsParams,
 ): Promise<FetchRecruiterJobsResult> {
-  const response = await apiService.get<JobListResponse>(buildRecruiterJobsPath(params), {
-    auth: true,
-    cache: "no-store",
-  });
+  const response = await apiService.get<JobListResponse>(
+    buildRecruiterJobsPath(params),
+    {
+      auth: true,
+      cache: "no-store",
+    },
+  );
 
   return {
     jobs: response.data.map(mapJobApiItemToJob),
@@ -104,13 +123,12 @@ export async function fetchRecruiterJobs(
 export async function createRecruiterJob(
   payload: CreateJobPayload,
 ): Promise<Job> {
-  const response = await apiService.post<IResponseApiItem<JobApiItem>, CreateJobPayload>(
-    API_ROUTES.JOB_RECRUITER.BASE,
-    payload,
-    {
-      auth: true,
-    },
-  );
+  const response = await apiService.post<
+    IResponseApiItem<JobApiItem>,
+    CreateJobPayload
+  >(API_ROUTES.JOB_RECRUITER.BASE, payload, {
+    auth: true,
+  });
 
   return mapJobApiItemToJob(response.data);
 }
@@ -119,20 +137,19 @@ export async function updateRecruiterJob(
   id: string,
   payload: UpdateJobPayload,
 ): Promise<Job> {
-  const response = await apiService.patch<IResponseApiItem<JobApiItem>, UpdateJobPayload>(
-    API_ROUTES.JOB_RECRUITER.DETAIL(id),
-    payload,
-    {
-      auth: true,
-    },
-  );
+  const response = await apiService.patch<
+    IResponseApiItem<JobApiItem>,
+    UpdateJobPayload
+  >(API_ROUTES.JOB_RECRUITER.ACTION(id), payload, {
+    auth: true,
+  });
 
   return mapJobApiItemToJob(response.data);
 }
 
-export async function fetchRecruiterJobDetail(id: string): Promise<Job> {
+export async function fetchRecruiterJobDetail(slug: string): Promise<Job> {
   const response = await apiService.get<IResponseApiItem<JobApiItem>>(
-    API_ROUTES.JOB_RECRUITER.DETAIL(id),
+    API_ROUTES.JOB_RECRUITER.DETAIL(slug),
     {
       auth: true,
       cache: "no-store",
@@ -143,15 +160,18 @@ export async function fetchRecruiterJobDetail(id: string): Promise<Job> {
 }
 
 export async function deleteRecruiterJob(id: string): Promise<void> {
-  await apiService.delete<void>(API_ROUTES.JOB_RECRUITER.DETAIL(id), {
+  await apiService.delete<void>(API_ROUTES.JOB_RECRUITER.ACTION(id), {
     auth: true,
   });
 }
 
-export async function closeRecruiterJob(id: string): Promise<Job> {
+export async function closeRecruiterJob(
+  id: string,
+  closeReason: string,
+): Promise<Job> {
   const response = await apiService.patch<IResponseApiItem<JobApiItem>>(
     API_ROUTES.JOB_RECRUITER.CLOSE(id),
-    undefined,
+    { closeReason },
     {
       auth: true,
     },

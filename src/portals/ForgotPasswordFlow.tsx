@@ -14,8 +14,7 @@ import {
   Mail,
 } from "lucide-react";
 
-import { JobSeekerShowcase } from "@/portals/jobseeker/features/auth/function";
-import { RecruiterShowcase } from "@/portals/recruiter/features/auth/function";
+import { AuthLayout } from "@/shared/components/layouts/AuthLayout";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
@@ -402,18 +401,18 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
     switch (step) {
       case "email":
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
                 Quên mật khẩu?
               </h1>
-              <p className="mt-3 text-sm leading-6 text-on-surface-variant sm:text-base">
+              <p className="mt-1 text-sm leading-6 text-on-surface-variant sm:text-base">
                 Nhập email đăng ký của bạn bên dưới. Chúng tôi sẽ gửi mã xác
                 thực để bạn đặt lại thông tin truy cập.
               </p>
             </div>
 
-            <form className="space-y-5" noValidate onSubmit={handleSendEmail}>
+            <form className="space-y-3 sm:space-y-4" noValidate onSubmit={handleSendEmail}>
               <BaseField
                 error={emailTouched || emailSubmitted ? emailError : undefined}
                 id="email"
@@ -439,13 +438,13 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
       case "otp":
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
                   Xác minh danh tính
                 </h1>
-                <p className="mt-3 text-sm leading-6 text-on-surface-variant sm:text-base">
+                <p className="mt-1 text-sm leading-6 text-on-surface-variant sm:text-base">
                   Mã xác thực 6 chữ số đã được gửi đến email của bạn.
                 </p>
               </div>
@@ -460,7 +459,7 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
               </button>
             </div>
 
-            <form className="space-y-5" noValidate onSubmit={handleVerifyOtp}>
+            <form className="space-y-3 sm:space-y-4" noValidate onSubmit={handleVerifyOtp}>
               <div className="grid w-full grid-cols-6 gap-3">
                 {otpValue.map((char, index) => (
                   <input
@@ -504,19 +503,19 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
       case "password":
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
                 Thiết lập mật khẩu mới
               </h1>
-              <p className="mt-3 text-sm leading-6 text-on-surface-variant sm:text-base">
+              <p className="mt-1 text-sm leading-6 text-on-surface-variant sm:text-base">
                 Vui lòng nhập mật khẩu mới của bạn bên dưới. Mật khẩu nên có ít
                 nhất 8 ký tự.
               </p>
             </div>
 
             <form
-              className="space-y-5"
+              className="space-y-3 sm:space-y-4"
               noValidate
               onSubmit={handleResetPassword}
             >
@@ -599,13 +598,13 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
       case "success":
         return (
-          <div className="flex flex-col items-center space-y-6 text-center animate-in scale-in duration-300">
-            <CheckCircle2 className="h-20 w-20 animate-bounce text-emerald-500" />
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6 text-center animate-in scale-in duration-300">
+            <CheckCircle2 className="h-16 w-16 sm:h-20 sm:w-20 animate-bounce text-emerald-500" />
             <div>
               <h1 className="text-xl font-bold tracking-tight text-on-surface sm:text-2xl lg:text-3xl">
                 Thành công!
               </h1>
-              <p className="mt-3 max-w-sm text-sm text-on-surface-variant sm:text-base">
+              <p className="mt-1 max-w-sm text-sm text-on-surface-variant sm:text-base">
                 Mật khẩu của bạn đã được cập nhật thành công. Vui lòng đăng nhập
                 lại với mật khẩu mới.
               </p>
@@ -619,73 +618,13 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
   }
 
   return (
-    <div className="custom-scroll flex min-h-screen flex-col overflow-y-auto lg:flex-row">
-      {isJobSeeker ? (
-        <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
-          <JobSeekerShowcase />
-        </div>
-      ) : (
-        <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
-          <RecruiterShowcase />
-        </div>
-      )}
-
-      <div className="flex w-full flex-1 lg:w-1/2">
-        <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 xl:px-12 xl:py-8 2xl:px-16">
-          <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:min-h-[72px]">
-            <Link
-              className="flex min-w-0 items-center gap-2 sm:gap-3"
-              href={ROUTES.HOME}
-            >
-              <Image
-                alt="FUSE"
-                className="h-8 w-8 shrink-0 sm:h-[42px] sm:w-[42px]"
-                height={42}
-                src="/logo.png"
-                width={42}
-              />
-              <span className="truncate text-base font-extrabold uppercase tracking-tight text-primary sm:text-xl">
-                {INFOMATION_WEB.COMPANY_NAME}
-              </span>
-            </Link>
-
-            <div className="flex w-full items-center justify-end gap-3 sm:w-auto sm:flex-nowrap sm:gap-4">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-on-surface">
-                {getStepLabel(step)}
-              </p>
-
-              <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-200 sm:w-32">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: getStepProgress(step) }}
-                />
-              </div>
-
-              <Link
-                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary"
-                href={`tel:${INFOMATION_WEB.PHONE}`}
-              >
-                <span>Hỗ trợ</span>
-                <CircleQuestionMark className="h-4 w-4 translate-y-px" />
-              </Link>
-            </div>
-          </header>
-
-          <main className="flex flex-1 items-center justify-center py-4 md:py-6">
-            <div className="w-full max-w-lg xl:max-w-xl">
-              {renderFormContent()}
-            </div>
-          </main>
-
-          <footer className="text-center text-sm text-slate-400">
-            <span className="uppercase">
-              © {INFOMATION_WEB.COPYRIGHT_YEAR} {INFOMATION_WEB.COMPANY_NAME}
-              .{" "}
-            </span>
-            Kiến tạo sự nghiệp bền vững.
-          </footer>
-        </div>
-      </div>
-    </div>
+    <AuthLayout
+      role={role}
+      showProgress={true}
+      stepLabel={getStepLabel(step)}
+      stepProgress={getStepProgress(step)}
+    >
+      {renderFormContent()}
+    </AuthLayout>
   );
 }

@@ -6,14 +6,14 @@ import { fetchJobBySlug } from "@/shared/services/job.service";
 
 interface JobApplyRouteProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
 export async function generateMetadata({
   params,
 }: JobApplyRouteProps): Promise<Metadata> {
-  const { id: slug } = await params;
+  const { slug } = await params;
 
   try {
     const job = await fetchJobBySlug(slug);
@@ -31,7 +31,7 @@ export async function generateMetadata({
 export default async function JobApplyRoute({
   params,
 }: JobApplyRouteProps) {
-  const { id: slug } = await params;
+  const { slug } = await params;
 
   try {
     const job = await fetchJobBySlug(slug);

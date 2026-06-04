@@ -5,7 +5,7 @@ import { Eye, EyeOff, KeyRound, Lock, X } from "lucide-react";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { cn } from "@/shared/lib/utils/cn";
-import { useChangePassword } from "@/shared/hooks/data/useChangePassword";
+import { useChangePassword } from "@/shared/hooks/forms/useChangePassword";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;

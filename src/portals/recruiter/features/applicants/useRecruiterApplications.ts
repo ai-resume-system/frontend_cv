@@ -9,11 +9,11 @@ import {
   updateJobApplicationStatus,
 } from "@/shared/services/recruiter-job-application.service";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
-import { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 
 interface UseRecruiterApplicationsOptions {
   jobId?: string;
-  status?: EApplicationStatus;
+  status?: EJobApplicationStatus;
 }
 
 export function useRecruiterApplications({
@@ -28,13 +28,13 @@ export function useRecruiterApplications({
     setLoading(true);
     setError(null);
     try {
-      const params: { page?: number; limit?: number; status?: EApplicationStatus } = {
+      const params: { page?: number; limit?: number; status?: EJobApplicationStatus } = {
         page: 1,
         limit: 100,
       };
       if (status) params.status = status;
 
-      if (status === EApplicationStatus.INTERVIEW) {
+      if (status === EJobApplicationStatus.INTERVIEW) {
         const result = await fetchRecruiterInterviews({ ...params, jobId });
         setApplications(result.applications);
       } else if (jobId) {
@@ -57,10 +57,10 @@ export function useRecruiterApplications({
 
   async function handleAccept(id: string) {
     try {
-      await updateJobApplicationStatus(id, { status: EApplicationStatus.REVIEWING });
+      await updateJobApplicationStatus(id, { status: EJobApplicationStatus.REVIEWING });
       setApplications((prev) =>
         prev.map((app) =>
-          app.id === id ? { ...app, status: EApplicationStatus.REVIEWING } : app,
+          app.id === id ? { ...app, status: EJobApplicationStatus.REVIEWING } : app,
         ),
       );
     } catch (err) {
@@ -70,10 +70,10 @@ export function useRecruiterApplications({
 
   async function handleReject(id: string) {
     try {
-      await updateJobApplicationStatus(id, { status: EApplicationStatus.REJECTED });
+      await updateJobApplicationStatus(id, { status: EJobApplicationStatus.REJECTED });
       setApplications((prev) =>
         prev.map((app) =>
-          app.id === id ? { ...app, status: EApplicationStatus.REJECTED } : app,
+          app.id === id ? { ...app, status: EJobApplicationStatus.REJECTED } : app,
         ),
       );
     } catch (err) {

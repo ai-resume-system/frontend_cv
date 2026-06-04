@@ -33,6 +33,8 @@ function getJobStatusLabel(status: EJobStatus): string {
       return "Bị từ chối";
     case EJobStatus.EXPIRED:
       return "Hết hạn";
+    case EJobStatus.DRAFT:
+      return "Bản nháp";
   }
 }
 

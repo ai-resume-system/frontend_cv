@@ -61,10 +61,10 @@ async function getCroppedFile(
           reject(new Error("Canvas toBlob failed"));
           return;
         }
-        resolve(new File([blob], "avatar.png", { type: "image/png" }));
+        resolve(new File([blob], "avatar.jpg", { type: "image/jpeg" }));
       },
-      "image/png",
-      1,
+      "image/jpeg",
+      0.85,
     );
   });
 }
@@ -255,8 +255,6 @@ export function AvatarUploadModal({
 
   if (!isOpen) return null;
 
-  // Xác định xem nút "Xong" có được kích hoạt hay không
-  // Kích hoạt khi: Đang ở bước crop có ảnh HOẶC đang ở bước pick nhưng có hành động ấn xóa ảnh
   const isConfirmDisabled =
     !(step === "crop" && croppedAreaPixels) &&
     !(step === "pick" && isDeletedAvatarAction);
@@ -325,8 +323,8 @@ export function AvatarUploadModal({
                 </p>
               </div>
 
-              {/* Khu vực hiển thị ảnh hiện tại và nút xóa bên phải - Chiếm 2 phần */}
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface-container-low p-6 md:col-span-2">
+              {/* Khu vực hiển thị ảnh hiện tại */}
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface-container-high p-6 md:col-span-2">
                 <p className="mb-3 text-sm font-semibold text-on-surface-variant">
                   Ảnh hiện tại
                 </p>
@@ -342,7 +340,7 @@ export function AvatarUploadModal({
                   />
                 </div>
 
-                {/* Nút chỉ hiển thị khi tài khoản có ảnh sẵn và chưa bấm nút xóa tạm thời trên UI */}
+                {/* Nút chỉ hiển thị khi tài khoản có ảnh */}
                 {hasExistingAvatar && !isDeletedAvatarAction && (
                   <BaseButton
                     variant="danger"
@@ -357,9 +355,8 @@ export function AvatarUploadModal({
               </div>
             </div>
           ) : (
-            /* ===== STEP 2: Crop ===== */
             <div className="grid gap-6 md:grid-cols-5">
-              {/* Vùng ảnh gốc bên trái */}
+              {/* Vùng ảnh gốc */}
               <div className="flex flex-col md:col-span-3">
                 <p className="mb-2 text-center text-sm font-semibold text-on-surface-variant">
                   Ảnh gốc
@@ -380,7 +377,6 @@ export function AvatarUploadModal({
                   )}
                 </div>
 
-                {/* Slider Zoom */}
                 <div className="mt-4 flex items-center gap-3">
                   <ZoomOut className="h-4 w-4 text-on-surface-variant" />
                   <input
@@ -396,7 +392,7 @@ export function AvatarUploadModal({
                 </div>
               </div>
 
-              {/* Vùng ảnh Preview bên phải */}
+              {/* Vùng ảnh Preview */}
               <div className="flex flex-col items-center md:col-span-2">
                 <p className="mb-2 text-sm font-semibold text-on-surface-variant">
                   Ảnh hiển thị
@@ -415,7 +411,7 @@ export function AvatarUploadModal({
                   )}
                 </div>
 
-                {/* Thông tin File info */}
+                {/*Thông tin file */}
                 <div className="mt-4 w-full rounded-xl bg-surface-container-low px-3 py-2">
                   <p className="truncate text-xs font-medium text-on-surface text-center">
                     {fileName}
@@ -456,7 +452,6 @@ export function AvatarUploadModal({
           />
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-center gap-3 border-t border-border px-6 py-5 sm:px-8">
           <BaseButton
             type="button"

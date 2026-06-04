@@ -33,6 +33,8 @@ function getJobStatusClass(status: EJobStatus): string {
       return "bg-error/10 text-error";
     case EJobStatus.EXPIRED:
       return "bg-outline/10 text-on-surface-variant";
+    case EJobStatus.DRAFT:
+      return "bg-outline/20 text-on-surface-variant";
   }
 }
 
@@ -48,6 +50,8 @@ function getJobStatusLabel(status: EJobStatus): string {
       return "Bị từ chối";
     case EJobStatus.EXPIRED:
       return "Hết hạn";
+    case EJobStatus.DRAFT:
+      return "Bản nháp";
   }
 }
 
@@ -150,7 +154,7 @@ export function RecruiterJobListPage() {
                             <Eye className="h-4 w-4" />
                           </Link>
                           <Link
-                            href={RECRUITER_ROUTES.JOB_EDIT(job.id)}
+                            href={RECRUITER_ROUTES.JOB_EDIT(job.slug ?? job.id)}
                             className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
                             title="Chỉnh sửa"
                           >
@@ -160,12 +164,16 @@ export function RecruiterJobListPage() {
                             <button
                               type="button"
                               onClick={async () => {
-                                if (window.confirm("Đóng tin tuyển dụng này?")) {
-                                  try {
-                                    await handleClose(job.id);
-                                  } catch {
-                                    alert("Không thể đóng tin.");
-                                  }
+                                const reason = window.prompt("Nhập lý do đóng tin tuyển dụng:");
+                                if (reason === null) return;
+                                if (!reason.trim()) {
+                                  alert("Lý do đóng tin là bắt buộc.");
+                                  return;
+                                }
+                                try {
+                                  await handleClose(job.id, reason.trim());
+                                } catch {
+                                  alert("Không thể đóng tin.");
                                 }
                               }}
                               className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-warning/10 hover:text-warning"

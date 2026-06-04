@@ -41,11 +41,11 @@ export function useRecruiterJobList() {
     }
   }
 
-  async function handleClose(id: string) {
+  async function handleClose(id: string, closeReason: string) {
     try {
-      await closeRecruiterJob(id);
+      await closeRecruiterJob(id, closeReason);
       setJobs((prev) =>
-        prev.map((j) => (j.id === id ? { ...j, status: EJobStatus.CLOSED } : j)),
+        prev.map((j) => (j.id === id ? { ...j, status: EJobStatus.CLOSED, closeReason } : j)),
       );
     } catch (err) {
       throw err;

@@ -22,6 +22,8 @@ export interface FetchJobsParams {
   companySlug?: string;
   status?: string;
   jobType?: string;
+  educationLevel?: string;
+  workArrangement?: string;
   skillIds?: string | string[];
   skillSlugs?: string | string[];
   sortBy?: string;
@@ -52,6 +54,8 @@ function buildJobsPath({
   companySlug,
   status,
   jobType,
+  educationLevel,
+  workArrangement,
   skillIds,
   skillSlugs,
   sortBy,
@@ -117,6 +121,14 @@ function buildJobsPath({
 
   if (jobType) {
     searchParams.set("jobType", jobType);
+  }
+
+  if (educationLevel) {
+    searchParams.set("educationLevel", educationLevel);
+  }
+
+  if (workArrangement) {
+    searchParams.set("workArrangement", workArrangement);
   }
 
   if (skillIds) {
@@ -195,7 +207,10 @@ export function mapJobApiItemToJob(job: JobApiItem): Job {
     experienceYears: toOptionalNumber(job.experienceYears),
     expiredAt: toOptionalDate(job.expiredAt),
     jobType: job.jobType,
+    educationLevel: job.educationLevel ?? undefined,
+    workArrangement: job.workArrangement ?? undefined,
     rejectReason: toOptionalString(job.rejectReason),
+    closeReason: toOptionalString(job.closeReason),
     status: job.status,
     skills: job.skills ?? undefined,
     isFavourited: job.isFavourited ?? undefined,

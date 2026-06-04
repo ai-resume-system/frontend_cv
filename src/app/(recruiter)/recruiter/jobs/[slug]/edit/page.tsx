@@ -3,8 +3,8 @@ import { RecruiterJobEditPage } from "@/portals/recruiter/features/jobs/Recruite
 export default async function JobEditPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  return <RecruiterJobEditPage jobId={id} />;
+  const { slug } = await params;
+  return <RecruiterJobEditPage jobSlug={slug} />;
 }

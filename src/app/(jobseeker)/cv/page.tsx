@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { CvPage } from "@/portals/jobseeker/features/cv/CvPage";
 
 export const metadata: Metadata = {
-  title: "CV AI",
+  title: "Quản lý hồ sơ",
 };
 
 export default function JobSeekerCvPage() {

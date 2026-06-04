@@ -1,4 +1,4 @@
-import type { EJobStatus, EJobType } from "@/shared/constants/enums/job.enum";
+import type { EJobStatus, EJobType, EJobEducationLevel, EJobWorkArrangement, EJobAction } from "@/shared/constants/enums/job.enum";
 import type { IResponseApiList } from "@/shared/types/api";
 
 export interface JobApiCareerCategory {
@@ -43,7 +43,10 @@ export interface JobApiItem {
   experienceYears: number | null;
   expiredAt: string | null;
   jobType: EJobType;
+  educationLevel: EJobEducationLevel | null;
+  workArrangement: EJobWorkArrangement | null;
   rejectReason?: string | null;
+  closeReason?: string | null;
   status: EJobStatus;
   createdAt: string;
   updatedAt: string;
@@ -66,7 +69,10 @@ export interface Job {
   experienceYears?: number;
   expiredAt?: Date;
   jobType: EJobType;
+  educationLevel?: EJobEducationLevel;
+  workArrangement?: EJobWorkArrangement;
   rejectReason?: string;
+  closeReason?: string;
   status: EJobStatus;
   skills?: JobSkill[];
   isFavourited?: boolean;
@@ -89,6 +95,9 @@ export interface CreateJobPayload {
   careerCategoryId?: string;
   expiredAt?: string;
   jobType?: EJobType;
+  educationLevel?: EJobEducationLevel;
+  workArrangement?: EJobWorkArrangement;
+  action?: EJobAction;
   skills?: { skillId: string; weight?: number }[];
 }
 

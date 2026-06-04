@@ -108,12 +108,14 @@ export async function deleteCv(id: string): Promise<void> {
   await apiService.delete<void>(API_ROUTES.CV.DETAIL(id), { auth: true });
 }
 
-export async function setDefaultCv(id: string): Promise<CvItem> {
-  const response = await apiService.patch<IResponseApiItem<CvItem>>(
-    API_ROUTES.CV.DEFAULT(id),
-    undefined,
-    { auth: true },
-  );
+export async function setDefaultCv(
+  id: string,
+  payload: { isDefault: boolean },
+): Promise<CvItem> {
+  const response = await apiService.patch<
+    IResponseApiItem<CvItem>,
+    { isDefault: boolean }
+  >(API_ROUTES.CV.DEFAULT(id), payload, { auth: true });
 
   return response.data;
 }

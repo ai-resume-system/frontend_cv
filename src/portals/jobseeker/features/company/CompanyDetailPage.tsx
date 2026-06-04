@@ -15,7 +15,7 @@ import { useState } from "react";
 
 import { JobCard } from "@/shared/components/layouts/JobCard";
 import { BaseField } from "@/shared/components/ui/BaseField";
-import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
+import { JobCardSkeleton } from "@/shared/components/layouts/CardSkelton";
 import { useCompanyJobs } from "@/shared/hooks/data/useCompanyJobs";
 import { resolveMediaUrl } from "@/shared/lib/utils/resolveMediaUrl";
 import type { CompanyDto } from "@/shared/types/company";

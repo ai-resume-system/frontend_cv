@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
-import type { EApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import type { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import { apiService } from "@/shared/services/api-service";
 import type {
   RecruiterApplicationApiItem,
@@ -12,7 +12,7 @@ import type { CvItem } from "@/shared/types/cv";
 export interface FetchRecruiterJobApplicationsParams {
   page?: number;
   limit?: number;
-  status?: EApplicationStatus;
+  status?: EJobApplicationStatus;
   sortBy?: "createdAt" | "matchingScore";
   sortOrder?: "ASC" | "DESC";
 }
@@ -25,7 +25,7 @@ export interface FetchRecruiterJobApplicationsResult {
 export interface FetchAllRecruiterJobApplicationsParams {
   page?: number;
   limit?: number;
-  status?: EApplicationStatus;
+  status?: EJobApplicationStatus;
   jobId?: string;
   q?: string;
   sortBy?: "createdAt" | "matchingScore";

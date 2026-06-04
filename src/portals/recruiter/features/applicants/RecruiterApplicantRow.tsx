@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import {
-  EApplicationStatus,
+  EJobApplicationStatus,
 } from "@/shared/constants/enums/job-application.enum";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 
@@ -20,38 +20,38 @@ interface RecruiterApplicantRowProps {
   showJobColumn?: boolean;
 }
 
-function getStatusLabel(status: EApplicationStatus): string {
+function getStatusLabel(status: EJobApplicationStatus): string {
   switch (status) {
-    case EApplicationStatus.APPLIED:
+    case EJobApplicationStatus.APPLIED:
       return "Mới ứng tuyển";
-    case EApplicationStatus.REVIEWING:
+    case EJobApplicationStatus.REVIEWING:
       return "Đang xem";
-    case EApplicationStatus.INTERVIEW:
+    case EJobApplicationStatus.INTERVIEW:
       return "Phỏng vấn";
-    case EApplicationStatus.REJECTED:
+    case EJobApplicationStatus.REJECTED:
       return "Từ chối";
-    case EApplicationStatus.OFFERED:
+    case EJobApplicationStatus.OFFERED:
       return "Đã gửi offer";
-    case EApplicationStatus.ACCEPTED:
+    case EJobApplicationStatus.ACCEPTED:
       return "Đã nhận việc";
-    case EApplicationStatus.WITHDRAWN:
+    case EJobApplicationStatus.WITHDRAWN:
       return "Đã rút";
   }
 }
 
-function getStatusClass(status: EApplicationStatus): string {
+function getStatusClass(status: EJobApplicationStatus): string {
   switch (status) {
-    case EApplicationStatus.APPLIED:
-    case EApplicationStatus.REVIEWING:
+    case EJobApplicationStatus.APPLIED:
+    case EJobApplicationStatus.REVIEWING:
       return "bg-warning/10 text-warning";
-    case EApplicationStatus.INTERVIEW:
+    case EJobApplicationStatus.INTERVIEW:
       return "bg-primary-soft text-primary";
-    case EApplicationStatus.REJECTED:
+    case EJobApplicationStatus.REJECTED:
       return "bg-error/10 text-error";
-    case EApplicationStatus.OFFERED:
-    case EApplicationStatus.ACCEPTED:
+    case EJobApplicationStatus.OFFERED:
+    case EJobApplicationStatus.ACCEPTED:
       return "bg-tertiary-fixed/20 text-tertiary";
-    case EApplicationStatus.WITHDRAWN:
+    case EJobApplicationStatus.WITHDRAWN:
       return "bg-outline/10 text-on-surface-variant";
   }
 }
@@ -141,8 +141,8 @@ export function RecruiterApplicantRow({
           >
             <Eye className="h-4 w-4" />
           </button>
-          {application.status === EApplicationStatus.APPLIED ||
-          application.status === EApplicationStatus.REVIEWING ? (
+          {application.status === EJobApplicationStatus.APPLIED ||
+          application.status === EJobApplicationStatus.REVIEWING ? (
             <>
               <button
                 type="button"
