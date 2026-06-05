@@ -4,22 +4,23 @@ import {
   ArrowUpDown,
   Check,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   ChevronUp,
   Funnel,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { JobCard } from "@/shared/components/layouts/JobCard";
 import { TopSearchBar } from "@/shared/components/layouts/TopSearchBar";
+import { BasePagination } from "@/shared/components/ui/BasePagination";
+import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import {
   buildCategoryFilterOptions,
+  JOB_EDUCATION_LEVEL_OPTIONS,
   JOB_EXPERIENCE_OPTIONS,
   JOB_SALARY_OPTIONS,
   JOB_SORT_OPTIONS,
   JOB_TYPE_OPTIONS,
-  JOB_EDUCATION_LEVEL_OPTIONS,
   JOB_WORK_ARRANGEMENT_OPTIONS,
   type JobFilterSortValue,
 } from "@/shared/constants/constants/filter.constants";
@@ -27,8 +28,6 @@ import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
 import Image from "next/image";
-import { JobCardSkeleton } from "@/shared/components/layouts/CardSkelton";
-import { JobCard } from "@/shared/components/layouts/JobCard";
 
 function formatDate(value?: Date): string {
   if (!value) return "Đang cập nhật";
@@ -56,7 +55,7 @@ export function JobListPage() {
     router,
     searchParams,
     baseQuery: {
-      limit: 10,
+      limit: 20,
       sortBy: "createdAt",
       sortOrder: "DESC",
       status: "open",
@@ -316,12 +315,15 @@ export function JobListPage() {
                     </span>{" "}
                     việc làm
                     <span className="text-sm font-normal text-slate-600">
-                      [Update {formatDate(new Date())}]
+                      [Cập nhật {formatDate(new Date())}]
                     </span>
                   </h1>
                 </div>
 
-                <div ref={sortDropdownRef} className="relative flex shrink-0 items-center gap-2 self-start sm:self-auto">
+                <div
+                  ref={sortDropdownRef}
+                  className="relative flex shrink-0 items-center gap-2 self-start sm:self-auto"
+                >
                   <span className="flex items-center gap-1 text-sm font-semibold text-slate-600">
                     <ArrowUpDown className="h-4 w-4 text-slate-400" /> Sắp xếp
                     theo:
@@ -410,44 +412,16 @@ export function JobListPage() {
                 </div>
               )}
 
-              {totalPages > 1 ? (
-                <div className="mt-8 flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    disabled={page <= 1}
-                    onClick={() => applyFilters(page - 1)}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, index) => index + 1)
-                    .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
-                    .map((pageNumber) => (
-                      <button
-                        key={pageNumber}
-                        type="button"
-                        onClick={() => applyFilters(pageNumber)}
-                        className={
-                          pageNumber === page
-                            ? "inline-flex h-11 min-w-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-sm"
-                            : "inline-flex h-11 min-w-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                        }
-                      >
-                        {pageNumber}
-                      </button>
-                    ))}
-
-                  <button
-                    type="button"
-                    disabled={page >= totalPages}
-                    onClick={() => applyFilters(page + 1)}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+              {totalPages > 1 && (
+                <div className="mt-8">
+                  <BasePagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(pageNumber) => applyFilters(pageNumber)}
+                    variant="text"
+                  />
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         </div>

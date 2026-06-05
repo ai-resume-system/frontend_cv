@@ -22,6 +22,7 @@ export interface ApplicationJobCompanyRef {
 
 export interface ApplicationJobRef {
   id: string;
+  slug?: string | null;
   title: string;
   address?: string | null;
   company?: ApplicationJobCompanyRef | null;

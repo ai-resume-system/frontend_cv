@@ -17,6 +17,10 @@ import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import type { CvItem } from "@/shared/types/cv";
+import Image from "next/image";
+import { Badge } from "@/shared/components/ui/Badge";
+import { PROCESSING_STATUS_CONFIG } from "@/shared/constants/enums/cv.enum";
+import { formatDateTime } from "@/portals/jobseeker/components/cv/CvCard";
 
 const ACCEPTED_TYPES = [
   "application/pdf",
@@ -24,16 +28,6 @@ const ACCEPTED_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 const MAX_FILE_SIZE_MB = 10;
-
-function formatUploadDate(dateStr: string): string {
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "Hôm nay";
-  if (diffDays === 1) return "Hôm qua";
-  if (diffDays < 30) return `${diffDays} ngày trước`;
-  const diffMonths = Math.floor(diffDays / 30);
-  return `${diffMonths} tháng trước`;
-}
 
 export function CvSelectAnalysisPage() {
   const router = useRouter();
@@ -77,8 +71,6 @@ export function CvSelectAnalysisPage() {
     }
   }, [sortedCvs, selectedCvId]);
 
-  if (!isLoggedIn) return null;
-
   function validateFile(file: File): boolean {
     setFileError(null);
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -112,6 +104,8 @@ export function CvSelectAnalysisPage() {
     }
   }, []);
 
+  if (!isLoggedIn) return null;
+
   const handleConfirmUpload = async () => {
     if (!selectedUploadFile) return;
     try {
@@ -138,17 +132,17 @@ export function CvSelectAnalysisPage() {
   const activeSelectedCv = sortedCvs.find((cv) => cv.id === selectedCvId);
 
   return (
-    <div className="mx-auto w-full max-w-7xl">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8 md:flex-row md:items-stretch justify-center">
         {/* LEFT CONTAINER */}
         <div className="flex-1 flex flex-col justify-between space-y-6">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-              Chọn CV để phân tích
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              Chọn hồ sơ để phân tích
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 leading-normal">
-              Hệ thống AI sẽ quét CV của bạn và đưa ra đánh giá chi tiết về kỹ
-              năng, kinh nghiệm và gợi ý cải thiện.
+            <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Hệ thống AI chuyên sâu sẽ quét CV của bạn, tự động trích xuất các
+              kỹ năng, kinh nghiệm và đưa ra những gợi ý cải thiện phù hợp.
             </p>
           </div>
 
@@ -156,10 +150,10 @@ export function CvSelectAnalysisPage() {
             {!selectedUploadFile ? (
               <div
                 className={cn(
-                  "relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition-all text-center bg-white",
+                  "relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition-all text-center bg-white shadow-xs hover:shadow-md",
                   isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-slate-300 bg-slate-50/30 hover:border-primary hover:bg-slate-50/70",
+                    ? "border-primary bg-primary/0.02"
+                    : "border-slate-300 bg-slate-50/30 hover:border-primary hover:bg-slate-50/60",
                   isUploading && "pointer-events-none opacity-70",
                 )}
                 onClick={() => fileInputRef.current?.click()}
@@ -177,17 +171,19 @@ export function CvSelectAnalysisPage() {
                   }
                 }}
               >
-                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
-                  <CloudUpload className="h-5.5 w-5.5 text-primary" />
+                <div className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 transition-transform duration-300 hover:scale-105">
+                  <CloudUpload className="h-6 w-6 text-primary" />
                 </div>
-                <p className="mb-0.5 text-sm font-semibold text-slate-800">
-                  Kéo và thả CV của bạn vào đây
+                <p className="mb-1 text-sm font-bold text-slate-800">
+                  Chọn hồ sơ từ máy tính của bạn, hoặc kéo và thả CV của bạn vào
+                  đây
                 </p>
-                <p className="mb-4 text-[11px] text-slate-400">
-                  PDF, DOCX (Tối đa {MAX_FILE_SIZE_MB}MB)
+                <p className="mb-4 text-xs text-slate-400">
+                  Hỗ trợ định dạng PDF, DOCX (Dung lượng tối đa{" "}
+                  {MAX_FILE_SIZE_MB}MB)
                 </p>
                 <button
-                  className="rounded-xl bg-primary px-5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-primary-hover active:scale-95 disabled:opacity-60"
+                  className="rounded-xl bg-primary px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-primary-hover active:scale-95 disabled:opacity-60 cursor-pointer"
                   disabled={isUploading}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -206,21 +202,21 @@ export function CvSelectAnalysisPage() {
                 />
               </div>
             ) : (
-              /* Selected File State (Ảnh 2) */
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary bg-primary/5 p-5 text-center">
-                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <FileText className="h-5.5 w-5.5 text-primary" />
+              /* Selected File State */
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary/50 bg-primary/0.02 p-6 text-center shadow-xs transition-all duration-300">
+                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+                  <FileText className="h-6 w-6 text-primary" />
                 </div>
-                <p className="font-bold text-primary text-sm line-clamp-1 mb-0.5">
+                <p className="font-bold text-primary text-sm line-clamp-1 mb-1">
                   {selectedUploadFile.name}
                 </p>
-                <p className="text-[11px] text-slate-400 mb-3.5">
+                <p className="text-xs text-slate-400 mb-4">
                   {(selectedUploadFile.size / (1024 * 1024)).toFixed(2)} MB
                 </p>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setSelectedUploadFile(null)}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-700 hover:underline transition"
+                    className="text-xs font-bold text-slate-500 hover:text-slate-700 hover:underline transition cursor-pointer"
                     disabled={isUploading}
                     type="button"
                   >
@@ -229,7 +225,7 @@ export function CvSelectAnalysisPage() {
                   <button
                     onClick={handleConfirmUpload}
                     disabled={isUploading}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover active:scale-95 disabled:opacity-50"
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary px-5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover active:scale-95 disabled:opacity-50 cursor-pointer"
                     type="button"
                   >
                     {isUploading && (
@@ -242,19 +238,19 @@ export function CvSelectAnalysisPage() {
             )}
 
             {(fileError ?? uploadError) && (
-              <p className="text-xs text-error font-medium text-center">
+              <p className="text-xs text-error font-semibold text-center mt-2">
                 {fileError ?? uploadError}
               </p>
             )}
           </div>
 
           {/* Library list section */}
-          <div className="flex-1 flex flex-col justify-end pt-2">
-            <div className="mb-3.5 flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 uppercase tracking-wide">
+          <div className="flex-1 flex flex-col justify-end pt-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
                 Chọn từ thư viện của bạn
               </h2>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-500">
+              <span className="rounded-full bg-slate-100 px-3 py-0.5 text-xs font-bold text-slate-500">
                 {cvList.length} hồ sơ
               </span>
             </div>
@@ -264,102 +260,132 @@ export function CvSelectAnalysisPage() {
               <div className="space-y-3">
                 {[1, 2, 3].map((item) => (
                   <div
-                    className="h-16 animate-pulse rounded-2xl bg-slate-100"
+                    className="h-20 animate-pulse rounded-2xl bg-slate-100"
                     key={item}
                   />
                 ))}
               </div>
             ) : sortedCvs.length > 0 ? (
-              /* Scrollable list containing max 3 CVs at once */
-              <div className="max-h-[265px] overflow-y-auto pr-1 space-y-2.5 scrollbar-thin">
-                {sortedCvs.map((cv) => {
-                  const isSelected = cv.id === selectedCvId;
-                  return (
-                    <div
-                      onClick={() => setSelectedCvId(cv.id)}
-                      className={cn(
-                        "flex items-center justify-between rounded-2xl border p-3.5 cursor-pointer transition-all duration-200 select-none",
-                        isSelected
-                          ? "border-primary bg-primary/5 shadow-xs"
-                          : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs",
-                      )}
-                      key={cv.id}
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <div
-                          className={cn(
-                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition",
-                            isSelected
-                              ? "bg-primary/20 text-primary"
-                              : "bg-slate-100 text-slate-400",
-                          )}
-                        >
-                          <FileText className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1 pr-2">
-                          <div className="flex items-center gap-2">
-                            <h3
-                              className={cn(
-                                "font-bold text-sm truncate",
-                                isSelected ? "text-primary" : "text-slate-800",
-                              )}
-                              title={cv.title || ""}
-                            >
-                              {cv.title ?? "CV không tên"}
-                            </h3>
-                            {isSelected && (
-                              /* Checkmark icon inside title row (ảnh 4 style) */
-                              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-xs">
-                                <Check className="h-2.5 w-2.5 stroke-[3]" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            Cập nhật: {formatUploadDate(cv.updatedAt)}
-                            {cv.isDefault && " • Mặc định"}
-                          </p>
-                        </div>
-                      </div>
+              /* Scrollable list containing CVs */
+              <div className="space-y-4">
+                <div className="max-h-[300px] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+                  {sortedCvs.map((cv) => {
+                    const isSelected = cv.id === selectedCvId;
+                    const fileExt = (
+                      cv.fileExtension?.replace(".", "") || "PDF"
+                    ).toUpperCase();
+                    const isDoc = fileExt === "DOC" || fileExt === "DOCX";
+                    const processingStatus = cv.processingStatus ?? "pending";
+                    const statusConfig =
+                      PROCESSING_STATUS_CONFIG[processingStatus] ??
+                      PROCESSING_STATUS_CONFIG.pending;
 
-                      {/* Action Button: Analyze if selected, Select if not */}
-                      <div className="shrink-0 pl-2">
-                        {isSelected ? (
-                          <button
-                            className="inline-flex h-8 items-center justify-center rounded-full bg-primary px-4.5 text-xs font-bold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStartAnalysis(cv);
-                            }}
-                            type="button"
-                          >
-                            Phân tích
-                          </button>
-                        ) : (
-                          <button
-                            className="inline-flex h-8 items-center justify-center rounded-full bg-slate-100 px-4.5 text-xs font-bold text-slate-600 transition hover:bg-slate-200 active:scale-95"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCvId(cv.id);
-                            }}
-                            type="button"
-                          >
-                            Chọn
-                          </button>
+                    return (
+                      <div
+                        onClick={() => setSelectedCvId(cv.id)}
+                        className={cn(
+                          "flex items-center justify-between rounded-2xl border p-4 cursor-pointer transition-all duration-300 select-none",
+                          isSelected
+                            ? "border-primary bg-primary/0.03 shadow-[0_4px_12px_rgba(var(--color-primary-rgb),0.08)]"
+                            : "border-slate-200 bg-white hover:translate-x-0.5 hover:border-primary/50 hover:shadow-xs",
                         )}
+                        key={cv.id}
+                      >
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          {/* File Icon & Badge Extension (Giống CvRow) */}
+                          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 transition-colors">
+                            <FileText className="h-10 w-10 text-slate-400" />
+                            <div
+                              className={cn(
+                                "absolute bottom-1.5 flex items-center justify-center rounded-md px-2 py-0.5 text-[8px] font-bold text-white uppercase transition-colors",
+                                isDoc ? "bg-blue-500" : "bg-orange-500",
+                              )}
+                            >
+                              {fileExt}
+                            </div>
+                          </div>
+
+                          {/* Thông tin chi tiết */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3
+                                className={cn(
+                                  "font-bold text-sm sm:text-base truncate max-w-[180px] sm:max-w-xs",
+                                  isSelected
+                                    ? "text-primary"
+                                    : "text-slate-800",
+                                )}
+                                title={cv.title || ""}
+                              >
+                                {cv.title ?? "CV không tên"}
+                              </h3>
+                              {cv.isDefault && (
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                                  Mặc định
+                                </span>
+                              )}
+                              {isSelected && (
+                                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-xs">
+                                  <Check className="h-2.5 w-2.5 stroke-3" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                              <span>
+                                Cập nhật: {formatDateTime(cv.updatedAt)}
+                              </span>
+                              <Badge
+                                className={cn(
+                                  "bg-transparent border px-1.5 py-0.5 text-[10px] font-bold uppercase rounded-md!",
+                                  statusConfig.className,
+                                )}
+                              >
+                                {statusConfig.label}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* Nút hành động phân tích tập trung */}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => {
+                      if (activeSelectedCv) {
+                        handleStartAnalysis(activeSelectedCv);
+                      }
+                    }}
+                    disabled={!selectedCvId}
+                    className={cn(
+                      "flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-primary-hover active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-primary cursor-pointer",
+                      selectedCvId &&
+                        "shadow-[0_4px_16px_rgba(var(--color-primary-rgb),0.25)] hover:shadow-[0_6px_20px_rgba(var(--color-primary-rgb),0.35)]",
+                    )}
+                    type="button"
+                  >
+                    <Sparkles
+                      className={cn(
+                        "h-4.5 w-4.5 text-amber-300 fill-amber-300",
+                        selectedCvId && "animate-pulse",
+                      )}
+                    />
+                    <span>Phân tích hồ sơ đã chọn</span>
+                  </button>
+                </div>
               </div>
             ) : (
               /* Library empty */
-              <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center bg-slate-50/30">
-                <FileText className="mx-auto mb-2.5 h-8 w-8 text-slate-400/55" />
-                <p className="text-xs font-semibold text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center bg-slate-50/20">
+                <FileText className="mx-auto mb-3 h-9 w-9 text-slate-400/50" />
+                <p className="text-sm font-bold text-slate-600">
                   Bạn chưa có hồ sơ nào trong thư viện
                 </p>
-                <p className="mt-0.5 text-[11px] text-slate-400">
-                  Kéo thả hoặc click chọn tệp ở trên để tải hồ sơ lên.
+                <p className="mt-1 text-xs text-slate-400">
+                  Hãy kéo thả hoặc click chọn tệp ở trên để tải hồ sơ lên.
                 </p>
               </div>
             )}
@@ -368,10 +394,17 @@ export function CvSelectAnalysisPage() {
 
         {/* RIGHT CONTAINER */}
         <div className="hidden md:flex md:w-[360px] lg:w-[400px] shrink-0">
-          <div className="w-full rounded-[28px] overflow-hidden shadow-lg relative bg-linear-to-br from-primary/95 to-primary flex flex-col justify-between p-8 text-white">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
+          <div className="w-full rounded-[28px] overflow-hidden shadow-xl relative flex flex-col justify-end p-8 text-white bg-slate-900 border border-slate-800">
+            <img
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              src="/favourite_background.png"
+              alt="background-img"
+            />
 
-            <div className="relative z-10 flex flex-col h-full justify-end">
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-900/40 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_60%)] z-10 pointer-events-none" />
+
+            <div className="relative z-20 flex flex-col">
               <div className="mb-4 flex items-center gap-2">
                 <Sparkles className="h-4.5 w-4.5 text-amber-300 fill-amber-300 animate-pulse" />
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/90">
@@ -384,9 +417,9 @@ export function CvSelectAnalysisPage() {
               </h2>
 
               <p className="text-xs lg:text-sm leading-relaxed text-white/80">
-                AI sẽ quét CV của bạn, nhận diện chuẩn xác các kỹ năng, số năm
-                kinh nghiệm và đưa ra các gợi ý tối ưu để hồ sơ của bạn lọt qua
-                các bộ lọc ATS khó tính nhất.
+                AI sẽ phân tích CV của bạn, nhận diện chuẩn xác các kỹ năng, số
+                năm kinh nghiệm và đưa ra các gợi ý tối ưu giúp hồ sơ của bạn
+                nổi bật hơn với nhà tuyển dụng.
               </p>
             </div>
           </div>

@@ -156,6 +156,7 @@ export function BaseField(props: BaseFieldProps) {
           aria-invalid={Boolean(error)}
           className={cn(fieldBaseClass, className)}
           {...(textareaProps as NativeTextareaProps)}
+          value={props.value ?? ""}
         />
       );
     }
@@ -197,6 +198,7 @@ export function BaseField(props: BaseFieldProps) {
         aria-invalid={Boolean(error)}
         className={cn(fieldBaseClass, className)}
         {...(inputProps as NativeInputProps)}
+        value={props.type === "file" ? undefined : (props.value ?? "")}
       />
     );
   };

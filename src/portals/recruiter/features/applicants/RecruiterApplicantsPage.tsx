@@ -4,7 +4,7 @@ import { useState } from "react";
 import { UsersRound } from "lucide-react";
 import Link from "next/link";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { RecruiterApplicantRow } from "@/portals/recruiter/features/applicants/RecruiterApplicantRow";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
@@ -12,11 +12,20 @@ import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 
 export function RecruiterApplicantsPage() {
-  const [selectedJobId, setSelectedJobId] = useState<string | undefined>(undefined);
+  const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
+    undefined,
+  );
 
   const { jobs } = useRecruiterJobList();
-  const { applications, loading, error, reload, handleAccept, handleReject, handleViewCv } =
-    useRecruiterApplications({ jobId: selectedJobId });
+  const {
+    applications,
+    loading,
+    error,
+    reload,
+    handleAccept,
+    handleReject,
+    handleViewCv,
+  } = useRecruiterApplications({ jobId: selectedJobId });
 
   return (
     <RecruiterWorkspaceShell

@@ -13,6 +13,7 @@ import { cn } from "@/shared/lib/utils/cn";
 import { Badge } from "@/shared/components/ui/Badge";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import type { Job } from "@/shared/types/job";
+import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 
 interface JobCardProps {
   job: Job;
@@ -28,43 +29,6 @@ function formatExperience(years?: number | null): string {
     return "Không yêu cầu";
   }
   return `${years} năm`;
-}
-
-function toSalaryMillion(value?: number): number | undefined {
-  if (typeof value !== "number") return undefined;
-  return value / 1000000;
-}
-
-function formatMillionValue(value: number): string {
-  return Number.isInteger(value)
-    ? value.toLocaleString("vi-VN")
-    : value.toLocaleString("vi-VN", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 1,
-      });
-}
-
-function formatSalary(job: Job): string {
-  const salaryMin = toSalaryMillion(job.salaryMin);
-  const salaryMax = toSalaryMillion(job.salaryMax);
-
-  if ((!salaryMin && !salaryMax) || (salaryMin === 0 && salaryMax === 0)) {
-    return "Thỏa thuận";
-  }
-
-  if (typeof salaryMin === "number" && typeof salaryMax === "number") {
-    return `${formatMillionValue(salaryMin)} - ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  if (typeof salaryMin === "number") {
-    return `Từ ${formatMillionValue(salaryMin)} triệu`;
-  }
-
-  if (typeof salaryMax === "number") {
-    return `Đến ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  return "Thỏa thuận";
 }
 
 function formatRelativeTime(value?: Date | string | null): string {
@@ -95,7 +59,8 @@ function buildJobHref(slug: string): string {
 export function JobCard({ job, showSkills = false }: JobCardProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavourite, isFavouritePending, toggleFavourite } = useFavouriteJobs();
+  const { isFavourite, isFavouritePending, toggleFavourite } =
+    useFavouriteJobs();
 
   async function handleApply(slug: string) {
     if (!isLoggedIn) {
@@ -130,7 +95,7 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
               <CheckCircle2 className="h-4 w-4 shrink-0 fill-green-100 text-[#00b14f]" />
             </div>
             <span className="shrink-0 text-base font-bold text-primary/70">
-              {formatSalary(job)}
+              {formatSalary(job.salaryMin, job.salaryMax)}
             </span>
           </div>
 

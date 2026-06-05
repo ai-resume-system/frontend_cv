@@ -18,6 +18,8 @@ import {
   RecruiterTrendPoint,
 } from "@/shared/types/dashboard";
 import type { Job } from "@/shared/types/job";
+import { EJobStatus } from "@/shared/constants/enums/job.enum";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 
 interface RecruiterDashboardState {
   applications: RecruiterApplicationSummary[];
@@ -34,7 +36,7 @@ const INITIAL_METRICS: RecruiterDashboardMetrics = {
   totalJobs: 0,
   openJobs: 0,
   totalApplications: 0,
-  averageMatchingScore: null,
+  interviewApplications: 0,
 };
 
 const EMPTY_TREND: RecruiterTrendPoint[] = Array.from(
@@ -118,12 +120,13 @@ export function useRecruiterDashboard() {
 
     async function loadDashboard() {
       try {
-        const [recruiter, jobsResult, allAppsResult, newApplicants] = await Promise.all([
-          fetchCurrentUser(),
-          fetchRecruiterJobs({ page: 1, limit: 12 }),
-          fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
-          fetchRecruiterNewApplicants({ limit: 6 }),
-        ]);
+        const [recruiter, jobsResult, allAppsResult, newApplicants] =
+          await Promise.all([
+            fetchCurrentUser(),
+            fetchRecruiterJobs({ page: 1, limit: 12 }),
+            fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
+            fetchRecruiterNewApplicants({ limit: 6 }),
+          ]);
 
         const sortedJobs = [...jobsResult.jobs].sort(
           (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
@@ -148,11 +151,9 @@ export function useRecruiterDashboard() {
         }
 
         const applications = newApplicants.map(mapApplicationSummary);
-        const allApplications = allAppsResult.applications.map(mapApplicationSummary);
-
-        const matchingScores = allApplications
-          .map((application) => application.matchingScore)
-          .filter((score): score is number => typeof score === "number");
+        const allApplications = allAppsResult.applications.map(
+          mapApplicationSummary,
+        );
 
         const jobOverviews = applicationSnapshots.map((snapshot) => {
           const scores = snapshot.applications
@@ -181,12 +182,14 @@ export function useRecruiterDashboard() {
           loading: false,
           metrics: {
             totalJobs: sortedJobs.length,
-            openJobs: sortedJobs.filter((job) => job.status === "open").length,
-            totalApplications: allAppsResult.pagination?.totalItems || allApplications.length,
-            averageMatchingScore: matchingScores.length
-              ? matchingScores.reduce((total, score) => total + score, 0) /
-                matchingScores.length
-              : null,
+            openJobs: sortedJobs.filter((job) => job.status === EJobStatus.OPEN)
+              .length,
+            totalApplications:
+              allAppsResult.pagination?.totalItems || allApplications.length,
+            interviewApplications: allApplications.filter(
+              (application) =>
+                application.status === EJobApplicationStatus.INTERVIEW,
+            ).length,
           },
           recruiter,
           trend: allApplications.length

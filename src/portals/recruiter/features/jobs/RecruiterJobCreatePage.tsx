@@ -9,7 +9,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterJobPostingForm } from "@/portals/recruiter/features/jobs/useRecruiterJobPostingForm";
 import { EJobType } from "@/shared/constants/enums/job.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";

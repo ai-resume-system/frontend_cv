@@ -1,3 +1,4 @@
+// Trang dùng để định tuyến ??
 "use client";
 
 import type { ReactNode } from "react";

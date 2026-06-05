@@ -21,6 +21,8 @@ export const API_ERROR_MESSAGES = {
   "CV analysis already in progress":
     "CV đang được phân tích. Vui lòng chờ hoàn tất.",
   "CV file is missing": "Không tìm thấy tệp CV để phân tích.",
+  "CV already used elsewhere":
+    "CV này đang được sử dụng để ứng tuyển không thể xóa.",
   "CV not found": "Không tìm thấy CV.",
   "Email already exists": "Email này đã được sử dụng.",
   "Expired date must be future":

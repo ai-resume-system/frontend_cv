@@ -1,7 +1,6 @@
 "use client";
 
-import type { ReadonlyURLSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   INITIAL_JOB_FILTER_STATE,
@@ -13,6 +12,7 @@ import {
   omitEmptyFilterValues,
 } from "@/shared/constants/constants/filter.constants";
 import type { FetchJobsParams } from "@/shared/services/job.service";
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 interface JobFilterRouter {
   push: (href: string) => void;
@@ -65,6 +65,15 @@ export function useJobFilters({
   router,
   searchParams,
 }: UseJobFiltersOptions) {
+  const paramAliasesRef = useRef(paramAliases);
+  paramAliasesRef.current = paramAliases;
+
+  const emptyValuesRef = useRef(emptyValues);
+  emptyValuesRef.current = emptyValues;
+
+  const baseQueryRef = useRef(baseQuery);
+  baseQueryRef.current = baseQuery;
+
   const mergedInitialState = useMemo<JobFilterState>(
     () => ({
       ...INITIAL_JOB_FILTER_STATE,
@@ -73,15 +82,18 @@ export function useJobFilters({
     [initialState],
   );
 
+  const mergedInitialStateRef = useRef(mergedInitialState);
+  mergedInitialStateRef.current = mergedInitialState;
+
   const readFromSearchParams = useCallback((): JobFilterState => {
     const normalizedSearchParams = normalizeSearchParams(searchParams);
 
     if (!normalizedSearchParams) {
-      return mergedInitialState;
+      return mergedInitialStateRef.current;
     }
 
     const nextState: JobFilterState = {
-      ...mergedInitialState,
+      ...mergedInitialStateRef.current,
     };
 
     for (const key of Object.keys(
@@ -89,7 +101,7 @@ export function useJobFilters({
     ) as JobFilterKey[]) {
       const keysToRead = [
         JOB_FILTER_SEARCH_PARAM_KEYS[key],
-        ...(paramAliases?.[key] ?? []),
+        ...(paramAliasesRef.current?.[key] ?? []),
       ];
 
       const value = keysToRead
@@ -112,7 +124,7 @@ export function useJobFilters({
     }
 
     return nextState;
-  }, [mergedInitialState, paramAliases, searchParams]);
+  }, [searchParams]);
 
   const readPageFromSearchParams = useCallback(() => {
     const normalizedSearchParams = normalizeSearchParams(searchParams);
@@ -132,6 +144,13 @@ export function useJobFilters({
   const [page, setPage] = useState<number>(() =>
     mode === "url" ? readPageFromSearchParams() : defaultPage,
   );
+
+  useEffect(() => {
+    if (mode === "url") {
+      setFiltersState(readFromSearchParams());
+      setPage(readPageFromSearchParams());
+    }
+  }, [searchParams, mode, readFromSearchParams, readPageFromSearchParams]);
 
   const setFilters = useCallback(
     (updater: JobFilterStateUpdater) => {
@@ -160,21 +179,23 @@ export function useJobFilters({
   );
 
   const resetFilters = useCallback(() => {
-    setFiltersState(mergedInitialState);
+    setFiltersState(mergedInitialStateRef.current);
     setPage(defaultPage);
 
     if (mode === "url" && pathname && router) {
       router.push(pathname);
     }
-  }, [defaultPage, mergedInitialState, mode, pathname, router]);
+  }, [defaultPage, mode, pathname, router]);
 
   const buildQueryOptions = useCallback((): FetchJobsParams => {
     const queryOptions: FetchJobsParams = {
-      ...baseQuery,
+      ...baseQueryRef.current,
       page,
     };
 
-    for (const key of Object.keys(JOB_FILTER_QUERY_BUILDERS) as JobFilterKey[]) {
+    for (const key of Object.keys(
+      JOB_FILTER_QUERY_BUILDERS,
+    ) as JobFilterKey[]) {
       const value = filters[key];
 
       if (!value && key !== "sort") {
@@ -183,19 +204,22 @@ export function useJobFilters({
 
       const isDefaultValue =
         value ===
-        (emptyValues[key] ??
-          (mergedInitialState[key] as string | undefined) ??
+        (emptyValuesRef.current[key] ??
+          (mergedInitialStateRef.current[key] as string | undefined) ??
           INITIAL_JOB_FILTER_STATE[key]);
 
       if (isDefaultValue && key !== "sort") {
         continue;
       }
 
-      Object.assign(queryOptions, JOB_FILTER_QUERY_BUILDERS[key](value, filters));
+      Object.assign(
+        queryOptions,
+        JOB_FILTER_QUERY_BUILDERS[key](value, filters),
+      );
     }
 
     return queryOptions;
-  }, [baseQuery, emptyValues, filters, mergedInitialState, page]);
+  }, [filters, page]);
 
   const applyFilters = useCallback(
     (nextPage = defaultPage) => {
@@ -210,8 +234,8 @@ export function useJobFilters({
 
       const nextSearchParams = new URLSearchParams();
       const activeFilters = omitEmptyFilterValues(filters, {
-        ...mergedInitialState,
-        ...emptyValues,
+        ...mergedInitialStateRef.current,
+        ...emptyValuesRef.current,
       });
 
       for (const key of Object.keys(activeFilters) as JobFilterKey[]) {
@@ -233,9 +257,7 @@ export function useJobFilters({
     },
     [
       defaultPage,
-      emptyValues,
       filters,
-      mergedInitialState,
       mode,
       pageParamName,
       pathname,
@@ -257,10 +279,10 @@ export function useJobFilters({
   const isDefaultValue = useCallback(
     (key: JobFilterKey, value: string) =>
       value ===
-      (emptyValues[key] ??
-        (mergedInitialState[key] as string | undefined) ??
+      (emptyValuesRef.current[key] ??
+        (mergedInitialStateRef.current[key] as string | undefined) ??
         INITIAL_JOB_FILTER_STATE[key]),
-    [emptyValues, mergedInitialState],
+    [],
   );
 
   return {

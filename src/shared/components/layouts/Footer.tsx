@@ -78,9 +78,9 @@ export function Footer() {
         {/* Các cột navigation tự động rớt dòng xếp hàng dọc rất đẹp trên mobile */}
         <FooterNav
           links={[
-            { href: "#", label: "Giới thiệu" },
-            { href: "#", label: "Chính sách bảo mật" },
-            { href: "#", label: "Điều khoản sử dụng" },
+            { href: ROUTES.JOB_SEEKER_ABOUT, label: "Giới thiệu" },
+            { href: ROUTES.JOB_SEEKER_PRIVACY, label: "Chính sách bảo mật" },
+            { href: ROUTES.JOB_SEEKER_TERMS, label: "Điều khoản sử dụng" },
           ]}
           title="Về chúng tôi"
         />

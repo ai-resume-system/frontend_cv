@@ -1,16 +1,9 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import {
-  Building2,
-  Globe,
-  Image,
-  Info,
-  MapPin,
-  Upload,
-} from "lucide-react";
+import { Building2, Globe, Image, Info, MapPin, Upload } from "lucide-react";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterCompanyProfile } from "@/portals/recruiter/features/profile/useRecruiterCompanyProfile";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
@@ -167,7 +160,12 @@ export function RecruiterCompanyProfilePage() {
                     label="Tên công ty"
                     placeholder="VD: Công ty TNHH FUSE"
                     value={form.name}
-                    onChange={(event) => updateField("name", (event.target as HTMLInputElement).value)}
+                    onChange={(event) =>
+                      updateField(
+                        "name",
+                        (event.target as HTMLInputElement).value,
+                      )
+                    }
                   />
                 </div>
 
@@ -177,7 +175,10 @@ export function RecruiterCompanyProfilePage() {
                   label="Lĩnh vực hoạt động"
                   value={form.careerCategoryId}
                   onChange={(event) =>
-                    updateField("careerCategoryId", (event.target as HTMLSelectElement).value)
+                    updateField(
+                      "careerCategoryId",
+                      (event.target as HTMLSelectElement).value,
+                    )
                   }
                   options={
                     categories.length
@@ -194,7 +195,12 @@ export function RecruiterCompanyProfilePage() {
                   label="Mã số thuế"
                   placeholder="VD: 0123456789"
                   value={form.taxCode}
-                  onChange={(event) => updateField("taxCode", (event.target as HTMLInputElement).value)}
+                  onChange={(event) =>
+                    updateField(
+                      "taxCode",
+                      (event.target as HTMLInputElement).value,
+                    )
+                  }
                 />
 
                 <div className="md:col-span-2">
@@ -203,7 +209,12 @@ export function RecruiterCompanyProfilePage() {
                     label="Địa chỉ công ty"
                     placeholder="VD: Số 1, Đường ABC, Quận 1, TP.HCM"
                     value={form.address}
-                    onChange={(event) => updateField("address", (event.target as HTMLInputElement).value)}
+                    onChange={(event) =>
+                      updateField(
+                        "address",
+                        (event.target as HTMLInputElement).value,
+                      )
+                    }
                   />
                 </div>
 
@@ -214,7 +225,12 @@ export function RecruiterCompanyProfilePage() {
                   step="any"
                   placeholder="VD: 10.802192"
                   value={form.latitude}
-                  onChange={(event) => updateField("latitude", (event.target as HTMLInputElement).value)}
+                  onChange={(event) =>
+                    updateField(
+                      "latitude",
+                      (event.target as HTMLInputElement).value,
+                    )
+                  }
                 />
 
                 <BaseField
@@ -224,7 +240,12 @@ export function RecruiterCompanyProfilePage() {
                   step="any"
                   placeholder="VD: 106.677087"
                   value={form.longitude}
-                  onChange={(event) => updateField("longitude", (event.target as HTMLInputElement).value)}
+                  onChange={(event) =>
+                    updateField(
+                      "longitude",
+                      (event.target as HTMLInputElement).value,
+                    )
+                  }
                 />
               </div>
             </div>
@@ -248,7 +269,12 @@ export function RecruiterCompanyProfilePage() {
                 label="Website"
                 placeholder="https://company.com"
                 value={form.websiteUrl}
-                onChange={(event) => updateField("websiteUrl", (event.target as HTMLInputElement).value)}
+                onChange={(event) =>
+                  updateField(
+                    "websiteUrl",
+                    (event.target as HTMLInputElement).value,
+                  )
+                }
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -258,7 +284,12 @@ export function RecruiterCompanyProfilePage() {
                   type="number"
                   placeholder="10"
                   value={form.employeeMin}
-                  onChange={(event) => updateField("employeeMin", (event.target as HTMLInputElement).value)}
+                  onChange={(event) =>
+                    updateField(
+                      "employeeMin",
+                      (event.target as HTMLInputElement).value,
+                    )
+                  }
                 />
                 <BaseField
                   id="employeeMax"
@@ -266,7 +297,12 @@ export function RecruiterCompanyProfilePage() {
                   type="number"
                   placeholder="100"
                   value={form.employeeMax}
-                  onChange={(event) => updateField("employeeMax", (event.target as HTMLInputElement).value)}
+                  onChange={(event) =>
+                    updateField(
+                      "employeeMax",
+                      (event.target as HTMLInputElement).value,
+                    )
+                  }
                 />
               </div>
 
@@ -278,7 +314,10 @@ export function RecruiterCompanyProfilePage() {
                   placeholder="Giới thiệu về công ty, lĩnh vực hoạt động, văn hóa làm việc..."
                   value={form.description}
                   onChange={(event) =>
-                    updateField("description", (event.target as HTMLTextAreaElement).value)
+                    updateField(
+                      "description",
+                      (event.target as HTMLTextAreaElement).value,
+                    )
                   }
                   inputClassName="min-h-40 resize-y"
                 />
@@ -294,9 +333,7 @@ export function RecruiterCompanyProfilePage() {
                 <MapPin className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-lg font-bold text-on-surface">
-                  Bản đồ
-                </h2>
+                <h2 className="text-lg font-bold text-on-surface">Bản đồ</h2>
                 <p className="text-sm text-on-surface-variant">
                   Vị trí công ty trên bản đồ.
                 </p>

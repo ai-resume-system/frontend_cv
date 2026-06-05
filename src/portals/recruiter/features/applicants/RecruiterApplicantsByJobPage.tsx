@@ -3,7 +3,7 @@
 import { ArrowLeft, UsersRound } from "lucide-react";
 import Link from "next/link";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { RecruiterApplicantRow } from "@/portals/recruiter/features/applicants/RecruiterApplicantRow";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
@@ -14,11 +14,20 @@ interface RecruiterApplicantsByJobPageProps {
   jobId: string;
 }
 
-export function RecruiterApplicantsByJobPage({ jobId }: RecruiterApplicantsByJobPageProps) {
+export function RecruiterApplicantsByJobPage({
+  jobId,
+}: RecruiterApplicantsByJobPageProps) {
   const { jobs } = useRecruiterJobList();
   const job = jobs.find((j) => j.id === jobId);
-  const { applications, loading, error, reload, handleAccept, handleReject, handleViewCv } =
-    useRecruiterApplications({ jobId });
+  const {
+    applications,
+    loading,
+    error,
+    reload,
+    handleAccept,
+    handleReject,
+    handleViewCv,
+  } = useRecruiterApplications({ jobId });
 
   return (
     <RecruiterWorkspaceShell
@@ -30,7 +39,11 @@ export function RecruiterApplicantsByJobPage({ jobId }: RecruiterApplicantsByJob
       }
       action={
         <Link href={RECRUITER_ROUTES.APPLICANTS}>
-          <BaseButton variant="secondary" startIcon={<ArrowLeft className="h-4 w-4" />} size="sm">
+          <BaseButton
+            variant="secondary"
+            startIcon={<ArrowLeft className="h-4 w-4" />}
+            size="sm"
+          >
             Tất cả ứng viên
           </BaseButton>
         </Link>

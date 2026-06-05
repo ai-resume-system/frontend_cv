@@ -10,7 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { EJobStatus } from "@/shared/constants/enums/job.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
@@ -90,7 +90,10 @@ export function RecruiterJobListPage() {
                 Chưa có tin tuyển dụng nào.
               </p>
               <Link href={RECRUITER_ROUTES.JOB_CREATE}>
-                <BaseButton variant="secondary" startIcon={<Plus className="h-4 w-4" />}>
+                <BaseButton
+                  variant="secondary"
+                  startIcon={<Plus className="h-4 w-4" />}
+                >
                   Tạo tin đầu tiên
                 </BaseButton>
               </Link>
@@ -115,7 +118,9 @@ export function RecruiterJobListPage() {
                       className="border-b border-outline-variant/10 transition hover:bg-surface-container-low/40"
                     >
                       <td className="px-6 py-4">
-                        <p className="font-semibold text-on-surface">{job.title}</p>
+                        <p className="font-semibold text-on-surface">
+                          {job.title}
+                        </p>
                         {job.careerCategory?.name ? (
                           <p className="mt-0.5 text-xs text-on-surface-variant">
                             {job.careerCategory.name}
@@ -164,7 +169,9 @@ export function RecruiterJobListPage() {
                             <button
                               type="button"
                               onClick={async () => {
-                                const reason = window.prompt("Nhập lý do đóng tin tuyển dụng:");
+                                const reason = window.prompt(
+                                  "Nhập lý do đóng tin tuyển dụng:",
+                                );
                                 if (reason === null) return;
                                 if (!reason.trim()) {
                                   alert("Lý do đóng tin là bắt buộc.");

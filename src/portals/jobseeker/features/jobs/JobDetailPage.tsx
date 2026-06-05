@@ -39,6 +39,7 @@ import type { Job } from "@/shared/types/job";
 import { FAVOURITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favourite-job";
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { JobCard } from "@/shared/components/layouts/JobCard";
+import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 
 interface JobDetailPageProps {
   job: Job;
@@ -51,19 +52,6 @@ function getCompanyLabel(job: Job): string {
 
 function getAddress(job: Job): string {
   return job.address ?? job.company?.address ?? "Đang cập nhật";
-}
-
-function formatSalary(job: Job): string {
-  if (typeof job.salaryMin === "number" && typeof job.salaryMax === "number") {
-    return `${job.salaryMin.toLocaleString("vi-VN")} - ${job.salaryMax.toLocaleString("vi-VN")} VND`;
-  }
-  if (typeof job.salaryMin === "number") {
-    return `Từ ${job.salaryMin.toLocaleString("vi-VN")} VND`;
-  }
-  if (typeof job.salaryMax === "number") {
-    return `Đến ${job.salaryMax.toLocaleString("vi-VN")} VND`;
-  }
-  return "Thỏa thuận";
 }
 
 function formatDate(value?: Date): string {
@@ -145,7 +133,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                     {
                       icon: Coins,
                       label: "Mức lương",
-                      value: formatSalary(job),
+                      value: formatSalary(job.salaryMin, job.salaryMax),
                     },
                     { icon: MapPin, label: "Địa điểm", value: getAddress(job) },
                     {

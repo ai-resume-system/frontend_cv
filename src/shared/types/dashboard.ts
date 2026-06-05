@@ -18,7 +18,7 @@ export interface RecruiterDashboardMetrics {
   totalJobs: number;
   openJobs: number;
   totalApplications: number;
-  averageMatchingScore: number | null;
+  interviewApplications: number;
 }
 
 export interface RecruiterJobOverview {

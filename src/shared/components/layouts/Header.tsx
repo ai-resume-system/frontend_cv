@@ -245,7 +245,7 @@ export function Header() {
       <div
         aria-hidden={activeDrawer === null}
         className={cn(
-          "fixed inset-0 z-[60] bg-foreground/30 transition-opacity duration-300 md:hidden",
+          "fixed inset-0 z-60 bg-foreground/30 transition-opacity duration-300 md:hidden",
           activeDrawer
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0",
@@ -256,7 +256,7 @@ export function Header() {
       <aside
         aria-hidden={activeDrawer !== "menu"}
         className={cn(
-          "fixed inset-y-0 left-0 z-[70] flex flex-col border-r border-border bg-surface shadow-2xl transition-transform duration-300 md:hidden",
+          "fixed inset-y-0 left-0 z-70 flex flex-col border-r border-border bg-surface shadow-2xl transition-transform duration-300 md:hidden",
           activeDrawer === "menu" ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -333,7 +333,7 @@ export function Header() {
                       <div
                         className={cn(
                           "overflow-hidden transition-[max-height] duration-300",
-                          isExpanded ? "max-h-[40rem]" : "max-h-0",
+                          isExpanded ? "max-h-160" : "max-h-0",
                         )}
                       >
                         <div className="border-t border-border/80 pb-2 pt-1">
@@ -408,7 +408,7 @@ export function Header() {
         <aside
           aria-hidden={activeDrawer !== "user"}
           className={cn(
-            "fixed inset-y-0 right-0 z-[70] flex w-[min(88vw,360px)] flex-col border-l border-border bg-surface shadow-2xl transition-transform duration-300 md:hidden",
+            "fixed inset-y-0 right-0 z-70 flex w-[min(88vw,360px)] flex-col border-l border-border bg-surface shadow-2xl transition-transform duration-300 md:hidden",
             activeDrawer === "user" ? "translate-x-0" : "translate-x-full",
           )}
         >

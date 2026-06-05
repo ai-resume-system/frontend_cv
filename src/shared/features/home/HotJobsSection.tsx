@@ -12,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { HotJobSkeleton } from "@/shared/components/layouts/CardSkelton";
+import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
 import {
@@ -32,6 +32,7 @@ import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 
 import { JobCardLink } from "./JobCardSection";
+import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp đang cập nhật";
@@ -39,42 +40,6 @@ function getCompanyLabel(job: Job): string {
 
 function getAddress(job: Job): string {
   return job.address ?? job.company?.address ?? "Địa điểm đang cập nhật";
-}
-
-function toSalaryMillion(value?: number): number | undefined {
-  if (typeof value !== "number") {
-    return undefined;
-  }
-
-  return value / 1000000;
-}
-
-function formatMillionValue(value: number): string {
-  return Number.isInteger(value)
-    ? value.toLocaleString("vi-VN")
-    : value.toLocaleString("vi-VN", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 1,
-      });
-}
-
-function formatSalary(job: Job): string | undefined {
-  const salaryMin = toSalaryMillion(job.salaryMin);
-  const salaryMax = toSalaryMillion(job.salaryMax);
-
-  if (typeof salaryMin === "number" && typeof salaryMax === "number") {
-    return `${formatMillionValue(salaryMin)} - ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  if (typeof salaryMin === "number") {
-    return `Từ ${formatMillionValue(salaryMin)} triệu`;
-  }
-
-  if (typeof salaryMax === "number") {
-    return `Đến ${formatMillionValue(salaryMax)} triệu`;
-  }
-
-  return undefined;
 }
 
 function getFilterOptions(
@@ -140,6 +105,7 @@ export function HotJobsSection() {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [addressInput, setAddressInput] = useState("");
   const chipScrollRef = useRef<HTMLDivElement | null>(null);
+  const filterMenuRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{
     isDragging: boolean;
     pointerId: number | null;
@@ -159,6 +125,19 @@ export function HotJobsSection() {
 
     return () => window.clearTimeout(timer);
   }, [addressInput, setFilter]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        filterMenuRef.current &&
+        !filterMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filterOptions = useMemo(
     () => getFilterOptions(activeFilterKey, categories),
@@ -265,7 +244,7 @@ export function HotJobsSection() {
         </div>
 
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="relative shrink-0">
+          <div className="relative shrink-0" ref={filterMenuRef}>
             <button
               aria-expanded={isFilterMenuOpen}
               aria-haspopup="menu"
@@ -436,7 +415,7 @@ export function HotJobsSection() {
                       jobData={job}
                       jobId={job.id}
                       address={getAddress(job)}
-                      salary={formatSalary(job)}
+                      salary={formatSalary(job.salaryMin, job.salaryMax)}
                       title={job.title}
                     />
                   </div>

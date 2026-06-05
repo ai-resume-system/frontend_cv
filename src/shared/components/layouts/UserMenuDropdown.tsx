@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
-import { HOME_MESSAGES } from "@/shared/constants/constants/messages";
+import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
 import { cn } from "@/shared/lib/utils/cn";
 import type { AuthUser } from "@/shared/types/account";
-import { ChevronDown } from "lucide-react";
-import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
+import { ChevronDown, LogOut } from "lucide-react";
 
 interface UserMenuItem {
   href: string;
@@ -69,10 +69,10 @@ export function getUserMenuSections(): UserMenuSection[] {
           href: ROUTES.JOB_SEEKER_CV,
           label: t.myCv,
         },
-        {
-          href: ROUTES.RECRUITER_CV_ANALYSIS,
-          label: t.recruiterReview,
-        },
+        // {
+        //   href: ROUTES.RECRUITER_CV_ANALYSIS,
+        //   label: t.recruiterReview,
+        // },
       ],
     },
     {
@@ -124,10 +124,11 @@ export function UserMenuContent({
 
       <div className="border-t border-border py-1">
         <button
-          className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-error transition-colors hover:bg-error-soft"
+          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-left text-sm font-semibold text-error transition-colors hover:bg-error-soft"
           onClick={onLogout}
           type="button"
         >
+          <LogOut className="w-4 h-4" />
           {t.logout}
         </button>
       </div>

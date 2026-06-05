@@ -9,7 +9,7 @@ import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
 import { useCompanies } from "@/shared/hooks/data/useCompanies";
 import Image from "next/image";
-import { CompanyCardSkeleton } from "@/shared/components/layouts/CardSkelton";
+import { CompanyCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import { cn } from "@/shared/lib/utils/cn";
 
 interface CompanyListFilterState {
@@ -40,7 +40,7 @@ export function CompanyListPage() {
 
   const { companies, pagination, loading, error } = useCompanies({
     page,
-    limit: 30,
+    limit: 20,
     q: filters.q.trim() || undefined,
     sortBy: "createdAt",
     sortOrder: "DESC",

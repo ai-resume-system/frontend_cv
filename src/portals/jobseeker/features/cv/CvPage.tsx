@@ -3,21 +3,11 @@
 import {
   Check,
   ChevronDown,
-  Copy,
-  Download,
-  Edit2,
-  Eye,
   FileText,
   LayoutGrid,
   List,
-  Loader2,
-  MoreVertical,
   Plus,
   Search,
-  Share2,
-  Sparkles,
-  Star,
-  Trash2,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -35,416 +25,10 @@ import {
 } from "@/shared/lib/ui/alert";
 import { cn } from "@/shared/lib/utils/cn";
 import { fetchCvPreview } from "@/shared/services/cv.service";
-import type { CvItem } from "@/shared/types/cv";
+import { CvCard } from "../../components/cv/CvCard";
+import { CvRow } from "../../components/cv/CvRow";
 import { RenameModal } from "../../components/cv/RenameModal";
 import { UploadModal } from "../../components/cv/UploadModal";
-
-const PROCESSING_STATUS_CONFIG = {
-  pending: {
-    label: "Chưa phân tích",
-    className: "bg-slate-100 text-slate-600",
-  },
-  processing: {
-    label: "Đang xử lý...",
-    className: "bg-blue-50 text-blue-600 animate-pulse",
-  },
-  completed: {
-    label: "Đã xử lý",
-    className: "bg-emerald-50 text-emerald-600",
-  },
-  failed: {
-    label: "Lỗi phân tích",
-    className: "bg-rose-50 text-rose-600",
-  },
-} as const;
-
-function formatDateTime(value?: Date | string | null): string {
-  if (!value) return "Đang cập nhật";
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "Đang cập nhật";
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-// ==================== COMPONENT: CV CARD (GRID) ====================
-interface CvCardProps {
-  cv: CvItem;
-  isPreviewing: boolean;
-  isDownloading: boolean;
-  isMenuOpen: boolean;
-  onMenuToggle: (e: React.MouseEvent) => void;
-  onCloseMenu: () => void;
-  onPreview: (id: string) => void;
-  onDownload: (id: string) => void;
-  onDelete: (id: string) => void;
-  onSetDefault: (id: string, isDefault: boolean) => void;
-  onRenameOpen: (id: string, currentTitle: string) => void;
-  onCopyLink: (id: string) => void;
-  onShareFacebook: (id: string) => void;
-  onNavigateToAnalysis: (id: string, status: string) => void;
-}
-
-function CvCard({
-  cv,
-  isPreviewing,
-  isDownloading,
-  isMenuOpen,
-  onMenuToggle,
-  onCloseMenu,
-  onPreview,
-  onDownload,
-  onDelete,
-  onSetDefault,
-  onRenameOpen,
-  onCopyLink,
-  onShareFacebook,
-  onNavigateToAnalysis,
-}: CvCardProps) {
-  const processingStatus = cv.processingStatus ?? "pending";
-  const statusConfig =
-    PROCESSING_STATUS_CONFIG[processingStatus] ??
-    PROCESSING_STATUS_CONFIG.pending;
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleOutsideClick = () => onCloseMenu();
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
-  }, [isMenuOpen, onCloseMenu]);
-
-  return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
-      {/* Thumbnail Area */}
-      <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-slate-100/70 flex items-center justify-center border border-slate-100">
-        {/* Document Icon & Folder Visual */}
-        <div className="flex flex-col items-center gap-1.5 transition-transform duration-300 group-hover:scale-105">
-          <div className="relative flex h-16 w-20 items-center justify-center rounded-xl bg-primary/10 border-2 border-primary/20 shadow-xs">
-            <FileText className="h-9 w-9 text-primary" />
-            <div className="absolute -bottom-1 -right-1 flex items-center justify-center rounded-md bg-primary px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm uppercase">
-              {cv.fileExtension?.replace(".", "") || "PDF"}
-            </div>
-          </div>
-          <span className="text-[11px] font-extrabold tracking-wider text-primary/80 uppercase mt-1">
-            HỒ SƠ XIN VIỆC
-          </span>
-        </div>
-
-        {/* Ngôi sao gán mặc định (Góc trên bên phải) */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSetDefault(cv.id, !cv.isDefault);
-          }}
-          className={cn(
-            "absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-xs transition hover:scale-110 active:scale-95",
-            cv.isDefault
-              ? "text-amber-400"
-              : "text-slate-400 hover:text-slate-600",
-          )}
-          title={cv.isDefault ? "Hồ sơ mặc định" : "Đặt làm mặc định"}
-          type="button"
-        >
-          <Star className={cn("h-6 w-6", cv.isDefault && "fill-amber-400")} />
-        </button>
-
-        {/* Nút hành động đè lên dưới thumbnail */}
-        <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2.5 px-3">
-          <button
-            onClick={() => onPreview(cv.id)}
-            disabled={isPreviewing}
-            className="flex-1 flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60 active:scale-97"
-            type="button"
-          >
-            {isPreviewing ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Eye className="h-3.5 w-3.5 text-slate-500" />
-            )}
-            <span>Xem trước</span>
-          </button>
-
-          <button
-            onClick={() => onDownload(cv.id)}
-            disabled={isDownloading}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60 active:scale-95"
-            title="Tải về"
-            type="button"
-          >
-            {isDownloading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Download className="h-3.5 w-3.5 text-slate-500" />
-            )}
-          </button>
-
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onMenuToggle(e);
-              }}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95"
-              title="Thao tác khác"
-              type="button"
-            >
-              <MoreVertical className="h-3.5 w-3.5 text-slate-500" />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isMenuOpen && (
-              <div className="absolute right-0 bottom-11 z-20 w-44 rounded-xl border border-slate-100 bg-white py-1 shadow-lg">
-                <button
-                  onClick={() => onCopyLink(cv.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  type="button"
-                >
-                  <Copy className="h-3.5 w-3.5 text-slate-400" />
-                  Sao chép liên kết
-                </button>
-                <button
-                  onClick={() => onShareFacebook(cv.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  type="button"
-                >
-                  <Share2 className="h-3.5 w-3.5 text-slate-400" />
-                  Chia sẻ trên Facebook
-                </button>
-                <button
-                  onClick={() => onRenameOpen(cv.id, cv.title || "")}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  type="button"
-                >
-                  <Edit2 className="h-3.5 w-3.5 text-slate-400" />
-                  Đổi tên
-                </button>
-                <hr className="my-1 border-slate-100" />
-                <button
-                  onClick={() => onDelete(cv.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-error hover:bg-error-container/20"
-                  type="button"
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-error" />
-                  Xóa hồ sơ
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Info Area */}
-      <div className="mt-4 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <h4
-            className="font-bold leading-tight text-slate-800 line-clamp-1 flex-1"
-            title={cv.title || ""}
-          >
-            {cv.title ?? "Hồ sơ không tên"}
-          </h4>
-
-          <button
-            onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
-            disabled={processingStatus === "processing"}
-            className="shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-primary bg-primary/10 hover:bg-primary/20 transition disabled:opacity-50"
-            title="Xem kết quả phân tích AI"
-            type="button"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
-          <span className="text-[11px] text-slate-400">
-            Cập nhật: {formatDateTime(cv.updatedAt)}
-          </span>
-          <span
-            className={cn(
-              "rounded-md px-2 py-0.5 text-[9px] font-bold uppercase",
-              statusConfig.className,
-            )}
-          >
-            {statusConfig.label}
-          </span>
-        </div>
-
-        {/* Toggle Switch: Cho phép NTD tìm kiếm */}
-        <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-[12px] font-semibold text-slate-500">
-            Cho phép NTD tìm kiếm
-          </span>
-          <label className="relative inline-flex cursor-pointer items-center">
-            <input
-              type="checkbox"
-              checked={cv.isDefault ?? false}
-              onChange={() => onSetDefault(cv.id, !cv.isDefault)}
-              className="peer sr-only"
-            />
-            <div className="peer h-5 w-9 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:outline-none" />
-          </label>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-// ==================== COMPONENT: CV ROW (LIST) ====================
-interface CvRowProps {
-  cv: CvItem;
-  isPreviewing: boolean;
-  isDownloading: boolean;
-  onPreview: (id: string) => void;
-  onDownload: (id: string) => void;
-  onDelete: (id: string) => void;
-  onSetDefault: (id: string, isDefault: boolean) => void;
-  onRenameOpen: (id: string, currentTitle: string) => void;
-  onNavigateToAnalysis: (id: string, status: string) => void;
-}
-
-function CvRow({
-  cv,
-  isPreviewing,
-  isDownloading,
-  onPreview,
-  onDownload,
-  onDelete,
-  onSetDefault,
-  onRenameOpen,
-  onNavigateToAnalysis,
-}: CvRowProps) {
-  const processingStatus = cv.processingStatus ?? "pending";
-  const statusConfig =
-    PROCESSING_STATUS_CONFIG[processingStatus] ??
-    PROCESSING_STATUS_CONFIG.pending;
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all duration-300 hover:translate-x-0.5 hover:border-primary/20 hover:shadow-[0_8px_16px_rgba(15,23,42,0.05)]">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-            <FileText className="h-5.5 w-5.5 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h4
-                className="font-bold text-slate-800 truncate"
-                title={cv.title || ""}
-              >
-                {cv.title ?? "Hồ sơ không tên"}
-              </h4>
-              {cv.isDefault && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                  Mặc định
-                </span>
-              )}
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              <span>Cập nhật: {formatDateTime(cv.updatedAt)}</span>
-              <span
-                className={cn(
-                  "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase",
-                  statusConfig.className,
-                )}
-              >
-                {statusConfig.label}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-50 pt-3 sm:border-t-0 sm:pt-0 sm:justify-end shrink-0">
-          {/* Toggle Switch */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-              NTD tìm kiếm
-            </span>
-            <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
-                checked={cv.isDefault ?? false}
-                onChange={() => onSetDefault(cv.id, !cv.isDefault)}
-                className="peer sr-only"
-              />
-              <div className="peer h-5 w-9 rounded-full bg-slate-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:outline-none" />
-            </label>
-          </div>
-
-          <div className="flex items-center gap-1 border-l border-slate-100 pl-3">
-            <button
-              onClick={() => onPreview(cv.id)}
-              disabled={isPreviewing}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95 disabled:opacity-50"
-              title="Xem CV"
-              type="button"
-            >
-              {isPreviewing ? (
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
-              ) : (
-                <Eye className="h-4.5 w-4.5" />
-              )}
-            </button>
-
-            <button
-              onClick={() => onDownload(cv.id)}
-              disabled={isDownloading}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95 disabled:opacity-50"
-              title="Tải xuống"
-              type="button"
-            >
-              {isDownloading ? (
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
-              ) : (
-                <Download className="h-4.5 w-4.5" />
-              )}
-            </button>
-
-            <button
-              onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
-              disabled={processingStatus === "processing"}
-              className="rounded-lg p-2 text-primary transition-colors hover:bg-primary/10 active:scale-95 disabled:opacity-50"
-              title="Phân tích CV bằng AI"
-              type="button"
-            >
-              <Sparkles className="h-4.5 w-4.5" />
-            </button>
-
-            <button
-              onClick={() => onRenameOpen(cv.id, cv.title || "")}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95"
-              title="Đổi tên"
-              type="button"
-            >
-              <Edit2 className="h-4.5 w-4.5" />
-            </button>
-
-            <button
-              onClick={async () => {
-                setIsDeleting(true);
-                await onDelete(cv.id);
-                setIsDeleting(false);
-              }}
-              disabled={isDeleting}
-              className="rounded-lg p-2 text-error transition-colors hover:bg-error-container/20 active:scale-95 disabled:opacity-50"
-              title="Xóa"
-              type="button"
-            >
-              {isDeleting ? (
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
-              ) : (
-                <Trash2 className="h-4.5 w-4.5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ==================== MAIN PAGE COMPONENT ====================
 const CV_SORT_OPTIONS = [
@@ -466,7 +50,7 @@ export function CvPage() {
     loadError,
     uploadError,
     actionError,
-    refresh,
+
     handleUpload,
     handleDelete,
     handlePreview,
@@ -523,19 +107,6 @@ export function CvPage() {
       });
     } catch {
       await showErrorAlert("Không thể lấy liên kết xem CV.");
-    }
-  };
-
-  const handleShareFacebook = async (id: string) => {
-    try {
-      const { previewUrl } = await fetchCvPreview(id);
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(previewUrl)}`,
-        "_blank",
-        "noopener,noreferrer",
-      );
-    } catch {
-      await showErrorAlert("Không thể chia sẻ CV này.");
     }
   };
 
@@ -610,24 +181,6 @@ export function CvPage() {
           ? error.message
           : "Cập nhật trạng thái mặc định thất bại.",
       );
-    }
-  };
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setPage(1);
-    if (value === "newest") {
-      setSortBy("createdAt");
-      setSortOrder("DESC");
-    } else if (value === "oldest") {
-      setSortBy("createdAt");
-      setSortOrder("ASC");
-    } else if (value === "updated_new") {
-      setSortBy("updatedAt");
-      setSortOrder("DESC");
-    } else if (value === "updated_old") {
-      setSortBy("updatedAt");
-      setSortOrder("ASC");
     }
   };
 
@@ -874,7 +427,6 @@ export function CvPage() {
                     onSetDefault={onSetDefaultCv}
                     onRenameOpen={(id, title) => setRenameData({ id, title })}
                     onCopyLink={handleCopyLink}
-                    onShareFacebook={handleShareFacebook}
                     onNavigateToAnalysis={handleNavigateToAnalysis}
                   />
                 ) : (

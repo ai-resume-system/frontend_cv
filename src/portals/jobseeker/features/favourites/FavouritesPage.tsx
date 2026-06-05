@@ -14,6 +14,7 @@ import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 import Link from "next/link";
+import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp";
@@ -21,22 +22,6 @@ function getCompanyLabel(job: Job): string {
 
 function getAddress(job: Job): string {
   return job.address ?? job.company?.address ?? "Đang cập nhật";
-}
-
-function formatSalary(job: Job): string | undefined {
-  if (typeof job.salaryMin === "number" && typeof job.salaryMax === "number") {
-    return `${job.salaryMin.toLocaleString("vi-VN")} - ${job.salaryMax.toLocaleString("vi-VN")} VND`;
-  }
-
-  if (typeof job.salaryMin === "number") {
-    return `Từ ${job.salaryMin.toLocaleString("vi-VN")} VND`;
-  }
-
-  if (typeof job.salaryMax === "number") {
-    return `Đến ${job.salaryMax.toLocaleString("vi-VN")} VND`;
-  }
-
-  return undefined;
 }
 
 function formatSavedDate(job: Job): string {
@@ -74,7 +59,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
   const { isLoggedIn } = useAuth();
   const { isFavouritePending, toggleFavourite } = useFavouriteJobs();
   const isPending = isFavouritePending(job.id);
-  const salary = formatSalary(job);
+  const salary = formatSalary(job.salaryMin, job.salaryMax);
   const company = getCompanyLabel(job);
   const address = getAddress(job);
   const experience = formatExperience(job);
@@ -128,7 +113,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
 
           {/* Hàng chứa các Badges */}
           <div className="mt-3.5 flex flex-wrap items-center gap-2">
-            <Badge className="inline-flex items-center rounded-lg bg-slate-50 border border-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-none">
+            <Badge className="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-1 text-sm font-medium text-slate-600 shadow-none">
               <MapPin
                 aria-hidden="true"
                 className="mr-1 h-3.5 w-3.5 text-slate-400"
@@ -136,7 +121,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
               {address}
             </Badge>
             {experience ? (
-              <Badge className="inline-flex items-center rounded-lg bg-slate-50 border border-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-none">
+              <Badge className="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-1 text-sm font-medium text-slate-600 shadow-none">
                 <Briefcase
                   aria-hidden="true"
                   className="mr-1 h-3.5 w-3.5 text-slate-400"
@@ -149,7 +134,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
           <hr className="my-4 border-slate-100" />
 
           <div className="flex items-center justify-between gap-4">
-            <p className="text-xs font-medium text-slate-400">
+            <p className="text-sm font-medium text-slate-400">
               {formatSavedDate(job)}
             </p>
 
@@ -212,15 +197,15 @@ export function FavouritesPage() {
   }
 
   return (
-    <section className="bg-slate-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8 lg:py-12">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-2 border-b border-slate-100 pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <section className="mx-auto max-w-7xl grid grid-cols-1 gap-6 bg-slate-50/50 px-4 py-8 text-slate-900 sm:px-6 lg:grid-cols-[1fr_300px] items-start lg:px-8 lg:py-12">
+      <div>
+        <div className="mb-8 flex flex-col gap-2 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Danh sách việc làm đã lưu
           </h1>
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:text-sm">
+          <Badge className="inline-flex items-center rounded-full w-fit bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:text-sm">
             Hiện có {favouriteJobs.length} công việc
-          </span>
+          </Badge>
         </div>
 
         {isLoading && !isLoaded ? (
@@ -259,13 +244,11 @@ export function FavouritesPage() {
           </div>
         )}
       </div>
-      <div>
-        <Image
+      <div className="hidden lg:block sticky top-6">
+        <img
           alt="Logo"
-          height={1000}
-          priority
+          className="w-full h-full rounded-xl object-cover"
           src="/favourite_background.png"
-          width={300}
         />
       </div>
     </section>

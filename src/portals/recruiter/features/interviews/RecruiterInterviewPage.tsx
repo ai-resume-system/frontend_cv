@@ -2,7 +2,7 @@
 
 import { CalendarCheck, ExternalLink, MapPin } from "lucide-react";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
 import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 

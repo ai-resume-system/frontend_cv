@@ -11,7 +11,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { RecruiterJobPreviewModal } from "@/portals/recruiter/features/jobs/RecruiterJobPreviewModal";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { EJobType, EJobStatus } from "@/shared/constants/enums/job.enum";
@@ -34,8 +34,11 @@ interface RecruiterJobEditPageProps {
 }
 
 export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
-  const { categories, error: categoriesError, loading: categoriesLoading } =
-    useCareerCategories({ page: 1, limit: 50 });
+  const {
+    categories,
+    error: categoriesError,
+    loading: categoriesLoading,
+  } = useCareerCategories({ page: 1, limit: 50 });
 
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +70,8 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
           careerCategoryId: data.careerCategory?.id ?? "",
           jobType: data.jobType,
           address: data.address ?? "",
-          experienceYears: data.experienceYears != null ? String(data.experienceYears) : "",
+          experienceYears:
+            data.experienceYears != null ? String(data.experienceYears) : "",
           shortDescription: data.shortDescription ?? "",
           description: data.description ?? "",
           salaryMin: data.salaryMin != null ? String(data.salaryMin) : "",
@@ -77,7 +81,9 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
             : "",
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể tải thông tin job.");
+        setError(
+          err instanceof Error ? err.message : "Không thể tải thông tin job.",
+        );
       } finally {
         setLoading(false);
       }
@@ -101,13 +107,17 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
     try {
       const payload: UpdateJobPayload = {};
       if (form.title.trim()) payload.title = form.title.trim();
-      if (form.shortDescription.trim()) payload.shortDescription = form.shortDescription.trim();
-      if (form.description.trim()) payload.description = form.description.trim();
+      if (form.shortDescription.trim())
+        payload.shortDescription = form.shortDescription.trim();
+      if (form.description.trim())
+        payload.description = form.description.trim();
       if (form.address.trim()) payload.address = form.address.trim();
-      if (form.careerCategoryId) payload.careerCategoryId = form.careerCategoryId;
+      if (form.careerCategoryId)
+        payload.careerCategoryId = form.careerCategoryId;
       if (form.expiredAt) payload.expiredAt = form.expiredAt;
       payload.jobType = form.jobType;
-      if (form.experienceYears) payload.experienceYears = Number(form.experienceYears);
+      if (form.experienceYears)
+        payload.experienceYears = Number(form.experienceYears);
       if (form.salaryMin) payload.salaryMin = Number(form.salaryMin);
       if (form.salaryMax) payload.salaryMax = Number(form.salaryMax);
       await updateRecruiterJob(job.id, payload);
@@ -120,7 +130,16 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
   }
 
   const previewJob: Job | null = job
-    ? { ...job, ...form, salaryMin: form.salaryMin ? Number(form.salaryMin) : undefined, salaryMax: form.salaryMax ? Number(form.salaryMax) : undefined, experienceYears: form.experienceYears ? Number(form.experienceYears) : undefined, expiredAt: form.expiredAt ? new Date(form.expiredAt) : undefined }
+    ? {
+        ...job,
+        ...form,
+        salaryMin: form.salaryMin ? Number(form.salaryMin) : undefined,
+        salaryMax: form.salaryMax ? Number(form.salaryMax) : undefined,
+        experienceYears: form.experienceYears
+          ? Number(form.experienceYears)
+          : undefined,
+        expiredAt: form.expiredAt ? new Date(form.expiredAt) : undefined,
+      }
     : null;
 
   if (loading) {
@@ -198,7 +217,9 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
                 placeholder="VD: Senior Frontend Engineer"
                 required
                 value={form.title}
-                onChange={(event) => updateField("title", (event.target as HTMLInputElement).value)}
+                onChange={(event) =>
+                  updateField("title", (event.target as HTMLInputElement).value)
+                }
               />
             </div>
 
@@ -208,7 +229,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               label="Lĩnh vực"
               value={form.careerCategoryId}
               onChange={(event) =>
-                updateField("careerCategoryId", (event.target as HTMLSelectElement).value)
+                updateField(
+                  "careerCategoryId",
+                  (event.target as HTMLSelectElement).value,
+                )
               }
               options={
                 categories.length
@@ -238,7 +262,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               label="Hình thức làm việc"
               value={form.jobType}
               onChange={(event) =>
-                updateField("jobType", (event.target as HTMLSelectElement).value as EJobType)
+                updateField(
+                  "jobType",
+                  (event.target as HTMLSelectElement).value as EJobType,
+                )
               }
               options={JOB_TYPE_OPTIONS.map((option) => ({
                 label: option.label,
@@ -251,7 +278,9 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               label="Địa điểm làm việc"
               placeholder="Hà Nội, TP.HCM hoặc Remote"
               value={form.address}
-              onChange={(event) => updateField("address", (event.target as HTMLInputElement).value)}
+              onChange={(event) =>
+                updateField("address", (event.target as HTMLInputElement).value)
+              }
             />
 
             <BaseField
@@ -260,7 +289,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               placeholder="Ví dụ: 3"
               value={form.experienceYears}
               onChange={(event) =>
-                updateField("experienceYears", (event.target as HTMLInputElement).value)
+                updateField(
+                  "experienceYears",
+                  (event.target as HTMLInputElement).value,
+                )
               }
             />
 
@@ -272,7 +304,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
                 placeholder="Tóm tắt vai trò, mục tiêu chính."
                 value={form.shortDescription}
                 onChange={(event) =>
-                  updateField("shortDescription", (event.target as HTMLTextAreaElement).value)
+                  updateField(
+                    "shortDescription",
+                    (event.target as HTMLTextAreaElement).value,
+                  )
                 }
                 inputClassName="min-h-24 resize-none"
               />
@@ -299,7 +334,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               placeholder="Mô tả trách nhiệm, yêu cầu, quy trình làm việc."
               value={form.description}
               onChange={(event) =>
-                updateField("description", (event.target as HTMLTextAreaElement).value)
+                updateField(
+                  "description",
+                  (event.target as HTMLTextAreaElement).value,
+                )
               }
               inputClassName="min-h-56 resize-y"
             />
@@ -325,7 +363,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               placeholder="15000000"
               value={form.salaryMin}
               onChange={(event) =>
-                updateField("salaryMin", (event.target as HTMLInputElement).value)
+                updateField(
+                  "salaryMin",
+                  (event.target as HTMLInputElement).value,
+                )
               }
             />
             <BaseField
@@ -335,7 +376,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               placeholder="30000000"
               value={form.salaryMax}
               onChange={(event) =>
-                updateField("salaryMax", (event.target as HTMLInputElement).value)
+                updateField(
+                  "salaryMax",
+                  (event.target as HTMLInputElement).value,
+                )
               }
             />
             <BaseField
@@ -344,7 +388,10 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
               type="date"
               value={form.expiredAt}
               onChange={(event) =>
-                updateField("expiredAt", (event.target as HTMLInputElement).value)
+                updateField(
+                  "expiredAt",
+                  (event.target as HTMLInputElement).value,
+                )
               }
             />
           </div>

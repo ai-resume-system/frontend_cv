@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { JobseekerRouteShell } from "./JobseekerRouteShell";
+import { JobseekerRouteShell } from "../../portals/JobseekerRouteShell";
 
 export default function JobseekerLayout({
   children,

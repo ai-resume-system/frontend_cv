@@ -1,68 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import {
   ArrowRight,
   BriefcaseBusiness,
+  CalendarCheck,
   Clock3,
   FileSearch,
   Sparkles,
   UsersRound,
 } from "lucide-react";
+import Link from "next/link";
 
-import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/layouts/RecruiterWorkspaceShell";
+import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterDashboard } from "@/portals/recruiter/features/dashboard/useRecruiterDashboard";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat("vi-VN").format(value);
-}
-
-function formatDate(value: Date): string {
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(value);
-}
-
-function getApplicationStatusLabel(status: string): string {
-  switch (status) {
-    case "APPLIED":
-      return "Mới ứng tuyển";
-    case "REVIEWING":
-      return "Đang xem";
-    case "INTERVIEW":
-      return "Phỏng vấn";
-    case "REJECTED":
-      return "Từ chối";
-    case "OFFERED":
-      return "Đã gửi offer";
-    case "ACCEPTED":
-      return "Đã nhận việc";
-    case "WITHDRAWN":
-      return "Đã rút hồ sơ";
-    default:
-      return status;
-  }
-}
-
-function getJobStatusLabel(status: string): string {
-  switch (status) {
-    case "open":
-      return "Đang mở";
-    case "pending":
-      return "Chờ duyệt";
-    case "closed":
-      return "Đã đóng";
-    case "rejected":
-      return "Bị từ chối";
-    case "expired":
-      return "Hết hạn";
-    default:
-      return status;
-  }
-}
+import { EJobApplicationStatusLabels } from "@/shared/constants/enums/job-application.enum";
+import { EJobStatusLabels } from "@/shared/constants/enums/job.enum";
+import { formatDate } from "@/shared/lib/helpers/formatDate.helper";
 
 export function RecruiterDashboardPage() {
   const {
@@ -84,21 +38,7 @@ export function RecruiterDashboardPage() {
   const trendMax = Math.max(...trend.map((item) => item.value), 1);
 
   return (
-    <RecruiterWorkspaceShell
-      heading="Dashboard tuyển dụng"
-      subheading={`Theo dõi tiến độ tuyển dụng của ${
-        recruiter?.company?.name ?? "doanh nghiệp"
-      } từ dữ liệu tin đăng và hồ sơ hiện có.`}
-      action={
-        <Link
-          href={RECRUITER_ROUTES.JOB_CREATE}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-on-primary shadow-lg shadow-primary/15 transition hover:bg-primary-hover"
-        >
-          <BriefcaseBusiness className="h-4 w-4" />
-          <span>Đăng tin mới</span>
-        </Link>
-      }
-    >
+    <RecruiterWorkspaceShell>
       <div className="space-y-8">
         {error ? (
           <div className="rounded-3xl border border-error/15 bg-error-container px-5 py-4 text-sm text-on-error-container">
@@ -120,7 +60,7 @@ export function RecruiterDashboardPage() {
               Tổng tin tuyển dụng
             </p>
             <p className="mt-2 text-3xl font-bold text-on-surface">
-              {loading ? "..." : formatNumber(metrics.totalJobs)}
+              {loading ? "..." : metrics.totalJobs}
             </p>
           </div>
 
@@ -135,7 +75,7 @@ export function RecruiterDashboardPage() {
             </div>
             <p className="mt-5 text-sm text-on-surface-variant">Tin đang mở</p>
             <p className="mt-2 text-3xl font-bold text-on-surface">
-              {loading ? "..." : formatNumber(metrics.openJobs)}
+              {loading ? "..." : metrics.openJobs}
             </p>
           </div>
 
@@ -152,28 +92,24 @@ export function RecruiterDashboardPage() {
               Hồ sơ đã nhận
             </p>
             <p className="mt-2 text-3xl font-bold text-on-surface">
-              {loading ? "..." : formatNumber(metrics.totalApplications)}
+              {loading ? "..." : metrics.totalApplications}
             </p>
           </div>
 
-          <div className="rounded-3xl bg-[linear-gradient(135deg,#00288e_0%,#1e40af_100%)] p-6 text-on-primary shadow-lg shadow-primary/15">
+          <div className="rounded-3xl border border-white/80 bg-white/85 p-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="rounded-2xl bg-white/15 p-3">
-                <Sparkles className="h-5 w-5" />
+              <span className="rounded-2xl bg-tertiary-fixed/30 p-3 text-tertiary">
+                <CalendarCheck className="h-5 w-5" />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
-                AI Match
+              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-tertiary/70">
+                Tuần này
               </span>
             </div>
-            <p className="mt-5 text-sm text-white/80">
-              Điểm matching trung bình
+            <p className="mt-5 text-sm text-on-surface-variant">
+              Lịch phỏng vấn
             </p>
-            <p className="mt-2 text-3xl font-bold">
-              {loading
-                ? "..."
-                : metrics.averageMatchingScore === null
-                  ? "N/A"
-                  : `${Math.round(metrics.averageMatchingScore)}%`}
+            <p className="mt-2 text-3xl font-bold text-on-surface">
+              {loading ? "..." : metrics.interviewApplications}
             </p>
           </div>
         </section>
@@ -321,7 +257,7 @@ export function RecruiterDashboardPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                          {getJobStatusLabel(job.status)}
+                          {EJobStatusLabels[job.status]}
                         </span>
                         <span className="rounded-full bg-secondary-soft px-3 py-1 text-xs font-semibold text-secondary">
                           {job.applicationCount} hồ sơ
@@ -375,7 +311,7 @@ export function RecruiterDashboardPage() {
                       </div>
                       <div className="space-y-2 text-right">
                         <span className="block rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                          {getApplicationStatusLabel(application.status)}
+                          {EJobApplicationStatusLabels[application.status]}
                         </span>
                         <span className="block text-xs font-semibold text-tertiary">
                           {typeof application.matchingScore === "number"
