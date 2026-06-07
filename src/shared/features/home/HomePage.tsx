@@ -1,7 +1,7 @@
 import { BriefcaseBusiness, Phone } from "lucide-react";
 import Link from "next/link";
 
-import { HomeSlideshow } from "@/shared/components/layouts/HomeSlideshow";
+import { HomeSlideshow } from "@/portals/jobseeker/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { fetchTopCareerCategories } from "@/shared/services/category.service";
 import { fetchCompanies } from "@/shared/services/company.service";

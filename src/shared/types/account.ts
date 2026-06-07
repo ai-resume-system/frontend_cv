@@ -2,7 +2,12 @@ import type {
   EUserRole,
   EUserStatus,
 } from "@/shared/constants/enums/user.enum";
-import type { CareerCategory } from "@/shared/types/career-category";
+
+export interface CareerCategoryResponse {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export interface AuthUserProfile {
   fullName?: string | null;
@@ -13,8 +18,7 @@ export interface AuthUserProfile {
 export interface AuthCompanyProfile {
   id?: string;
   slug?: string | null;
-  careerCategoryId?: string | null;
-  careerCategory?: CareerCategory | null;
+  careerCategory?: CareerCategoryResponse;
   name?: string | null;
   logoUrl?: string | null;
   bannerUrl?: string | null;

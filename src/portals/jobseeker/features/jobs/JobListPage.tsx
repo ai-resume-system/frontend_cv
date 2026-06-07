@@ -11,7 +11,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { JobCard } from "@/shared/components/layouts/JobCard";
-import { TopSearchBar } from "@/shared/components/layouts/TopSearchBar";
+import { TopSearchBar } from "@/portals/jobseeker/components/layouts/TopSearchBar";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
 import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import {

@@ -1,7 +1,6 @@
 "use client";
 
 import { Heart, MapPin } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -37,7 +36,8 @@ interface FavoriteButtonProps {
 function FavoriteButton({ jobData, jobId }: FavoriteButtonProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const { isFavourite, isFavouritePending, toggleFavourite } = useFavouriteJobs();
+  const { isFavourite, isFavouritePending, toggleFavourite } =
+    useFavouriteJobs();
   const saved = isFavourite(jobId);
   const isSubmitting = isFavouritePending(jobId);
 

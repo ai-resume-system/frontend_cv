@@ -125,12 +125,17 @@ export function BaseField(props: BaseFieldProps) {
     );
   }
 
+  const isReadOnly = "readOnly" in props && props.readOnly;
+  const isDisabled = "disabled" in props && props.disabled;
+
   const fieldBaseClass = cn(
     "w-full rounded-2xl border bg-surface-container-low px-4 text-[15px] text-on-surface outline-none transition placeholder:text-outline/75",
     "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-    error
-      ? "border-error focus:border-error focus:ring-2 focus:ring-error/10"
-      : "border-primary/30 focus:border-primary/20 focus:bg-white focus:ring-2 focus:ring-primary/10",
+    isReadOnly || isDisabled
+      ? "border-outline-variant/35 bg-slate-50/50 text-on-surface-variant/80 cursor-not-allowed select-none"
+      : error
+        ? "border-error focus:border-error focus:ring-2 focus:ring-error/10"
+        : "border-primary/30 focus:border-primary/20 focus:bg-white focus:ring-2 focus:ring-primary/10",
     Boolean(leadingIcon) && "pl-12",
     Boolean(trailingIcon) && "pr-12",
     "as" in props && props.as === "textarea" ? "min-h-28 py-3" : "h-14",
@@ -175,6 +180,7 @@ export function BaseField(props: BaseFieldProps) {
           aria-describedby={describedBy}
           aria-invalid={Boolean(error)}
           className={cn(fieldBaseClass, className)}
+          disabled={isReadOnly || props.disabled}
           {...(selectProps as NativeSelectProps)}
         >
           {options.map((option) => (

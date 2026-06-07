@@ -2,6 +2,7 @@ import {
   API_ERROR_MESSAGES,
   API_STATUS_FALLBACK_MESSAGES,
   UNKNOWN_API_ERROR_MESSAGE,
+  normalizeApiErrorMessage,
 } from "@/shared/constants/constants/api-error-messages";
 import type { AppApiError } from "@/shared/types/api";
 
@@ -21,12 +22,25 @@ function getStatusFallbackMessage(status?: number): string | undefined {
   return API_STATUS_FALLBACK_MESSAGES[status];
 }
 
+function containsNonAsciiCharacter(value: string): boolean {
+  return /[^\x00-\x7F]/.test(value);
+}
+
 export function resolveApiDisplayMessage(
   message?: string,
   status?: number,
 ): string {
-  if (message && message in API_ERROR_MESSAGES) {
-    return API_ERROR_MESSAGES[message as keyof typeof API_ERROR_MESSAGES];
+  if (message) {
+    const normalizedMessage = normalizeApiErrorMessage(message);
+    const mappedMessage = API_ERROR_MESSAGES[normalizedMessage];
+
+    if (mappedMessage) {
+      return mappedMessage;
+    }
+
+    if (containsNonAsciiCharacter(message)) {
+      return message.trim();
+    }
   }
 
   return getStatusFallbackMessage(status) ?? message ?? UNKNOWN_API_ERROR_MESSAGE;

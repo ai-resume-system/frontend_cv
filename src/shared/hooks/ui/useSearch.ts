@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
+import { getErrorDisplayMessage } from "@/shared/lib/errors/getErrorDisplayMessage";
 import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { fetchSkills } from "@/shared/services/skill.service";
 import type { SkillApiItem } from "@/shared/types/skill";
@@ -19,7 +20,40 @@ interface SkillNode extends SkillApiItem {
   children: SkillApiItem[];
 }
 
+interface SearchSuggestion {
+  type: "category" | "skill-parent" | "skill-child";
+  id: string;
+  name: string;
+  slug?: string;
+  parentName?: string;
+  categoryName?: string;
+  categorySlug?: string;
+}
+
+interface CategoryOption {
+  id: string;
+  slug: string;
+}
+
 const EMPTY_SKILL_SLUGS: string[] = [];
+
+function removeVietnameseTones(str: string): string {
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+  str = str.replace(/Ì|Í|Ị|R|Ĩ/g, "I");
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
 
 export function useSearch({
   initialKeyword = "",
@@ -43,6 +77,7 @@ export function useSearch({
   const [skillSlugs, setSkillSlugs] = useState<string[]>(initialSkillSlugs);
   const [allSkills, setAllSkills] = useState<SkillApiItem[]>([]);
   const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skillsError, setSkillsError] = useState("");
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [draftCategory, setDraftCategory] = useState(initialCategory);
@@ -77,6 +112,7 @@ export function useSearch({
     async function loadSkills() {
       try {
         setSkillsLoading(true);
+        setSkillsError("");
         const { skills } = await fetchSkills({
           page: 1,
           limit: 500,
@@ -84,6 +120,16 @@ export function useSearch({
 
         if (!cancelled) {
           setAllSkills(skills);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setAllSkills([]);
+          setSkillsError(
+            getErrorDisplayMessage(
+              error,
+              "Không thể tải danh sách nghề và kỹ năng. Vui lòng thử lại sau.",
+            ),
+          );
         }
       } finally {
         if (!cancelled) {
@@ -130,6 +176,7 @@ export function useSearch({
   }, [closeCategoryPanel, isCategoryOpen]);
 
   const searchLowercase = searchTerm.trim().toLowerCase();
+  const searchNormalized = removeVietnameseTones(searchTerm.trim());
 
   const categoryBySlug = useMemo(
     () => new Map(categories.map((item) => [item.slug, item])),
@@ -140,23 +187,37 @@ export function useSearch({
     const groupedSkills = new Map<string, SkillNode[]>();
 
     for (const skill of allSkills) {
-      if (!skill.careerCategoryId || skill.parentId) {
+      if (!skill.careerCategoryId) {
         continue;
       }
 
       const categorySkills = groupedSkills.get(skill.careerCategoryId) ?? [];
-      const children = allSkills.filter(
-        (childSkill) => childSkill.parentId === skill.id,
-      );
 
       categorySkills.push({
         ...skill,
-        children,
+        children: skill.children ?? [],
       });
       groupedSkills.set(skill.careerCategoryId, categorySkills);
     }
 
     return groupedSkills;
+  }, [allSkills]);
+
+  const flatSkills = useMemo(() => {
+    const flattenedSkills: SkillApiItem[] = [];
+
+    for (const parentSkill of allSkills) {
+      flattenedSkills.push({
+        ...parentSkill,
+        children: undefined,
+      });
+
+      for (const childSkill of parentSkill.children ?? []) {
+        flattenedSkills.push(childSkill);
+      }
+    }
+
+    return flattenedSkills;
   }, [allSkills]);
 
   const filteredCategories = useMemo(() => {
@@ -165,9 +226,9 @@ export function useSearch({
     }
 
     return categories.filter((item) =>
-      item.name.toLowerCase().includes(searchLowercase),
+      removeVietnameseTones(item.name).includes(searchNormalized),
     );
-  }, [categories, searchLowercase]);
+  }, [categories, searchLowercase, searchNormalized]);
 
   useEffect(() => {
     if (!filteredCategories.length) {
@@ -220,14 +281,16 @@ export function useSearch({
     }
 
     return activeSkills.filter((item) => {
-      const parentMatch = item.name.toLowerCase().includes(searchLowercase);
+      const parentMatch = removeVietnameseTones(item.name).includes(
+        searchNormalized,
+      );
       const childMatch = item.children.some((childSkill) =>
-        childSkill.name.toLowerCase().includes(searchLowercase),
+        removeVietnameseTones(childSkill.name).includes(searchNormalized),
       );
 
       return parentMatch || childMatch;
     });
-  }, [activeSkills, searchLowercase]);
+  }, [activeSkills, searchLowercase, searchNormalized]);
 
   const visibleChildSkills = useMemo(() => {
     if (!activeParentSkill) {
@@ -239,17 +302,17 @@ export function useSearch({
     }
 
     return activeParentSkill.children.filter((item) =>
-      item.name.toLowerCase().includes(searchLowercase),
+      removeVietnameseTones(item.name).includes(searchNormalized),
     );
-  }, [activeParentSkill, searchLowercase]);
+  }, [activeParentSkill, searchLowercase, searchNormalized]);
 
   const selectedSkillItems = useMemo(() => {
     const selectedSlugs = new Set(skillSlugs);
 
-    return allSkills.filter(
+    return flatSkills.filter(
       (item) => item.slug && selectedSlugs.has(item.slug),
     );
-  }, [allSkills, skillSlugs]);
+  }, [flatSkills, skillSlugs]);
 
   const categoryDisplayLabel = useMemo(() => {
     const parts: string[] = [];
@@ -265,9 +328,114 @@ export function useSearch({
     return parts.length ? parts.join(", ") : "Danh mục nghề";
   }, [category, categoryBySlug, selectedSkillItems]);
 
-  const selectedFilterCount = Number(Boolean(category)) + skillSlugs.length;
-  const selectedDraftCount =
-    Number(Boolean(draftCategory)) + draftSkillSlugs.length;
+  const getDescendantSkillSlugs = useCallback((skill: SkillNode): string[] => {
+    const nextSlugs = new Set<string>();
+
+    if (skill.slug) {
+      nextSlugs.add(skill.slug);
+    }
+
+    for (const childSkill of skill.children) {
+      if (childSkill.slug) {
+        nextSlugs.add(childSkill.slug);
+      }
+    }
+
+    return Array.from(nextSlugs);
+  }, []);
+
+  const getCategorySkillSlugs = useCallback(
+    (categoryId: string): string[] => {
+      const nextSlugs = new Set<string>();
+      const categorySkills = skillsByCategory.get(categoryId) ?? [];
+
+      for (const skill of categorySkills) {
+        for (const slug of getDescendantSkillSlugs(skill)) {
+          nextSlugs.add(slug);
+        }
+      }
+
+      return Array.from(nextSlugs);
+    },
+    [getDescendantSkillSlugs, skillsByCategory],
+  );
+
+  const areAllSlugsSelected = useCallback(
+    (requiredSlugs: string[], selectedSlugs: string[]) =>
+      requiredSlugs.length > 0 &&
+      requiredSlugs.every((slug) => selectedSlugs.includes(slug)),
+    [],
+  );
+
+  const isCategoryFullySelected = useCallback(
+    (categoryId: string, selectedSlugs: string[]) =>
+      areAllSlugsSelected(getCategorySkillSlugs(categoryId), selectedSlugs),
+    [areAllSlugsSelected, getCategorySkillSlugs],
+  );
+
+  const isParentSkillFullySelected = useCallback(
+    (skill: SkillNode, selectedSlugs: string[]) =>
+      areAllSlugsSelected(getDescendantSkillSlugs(skill), selectedSlugs),
+    [areAllSlugsSelected, getDescendantSkillSlugs],
+  );
+
+  const selectedDraftCategoryCount = useMemo(() => {
+    if (!draftCategory) {
+      return 0;
+    }
+
+    const draftCategoryItem = categories.find((item) => item.slug === draftCategory);
+
+    if (!draftCategoryItem) {
+      return 0;
+    }
+
+    return isCategoryFullySelected(draftCategoryItem.id, draftSkillSlugs) ? 1 : 0;
+  }, [categories, draftCategory, draftSkillSlugs, isCategoryFullySelected]);
+
+  const selectedFilterCategoryCount = useMemo(() => {
+    if (!category) {
+      return 0;
+    }
+
+    const categoryItem = categories.find((item) => item.slug === category);
+
+    if (!categoryItem) {
+      return 0;
+    }
+
+    return isCategoryFullySelected(categoryItem.id, skillSlugs) ? 1 : 0;
+  }, [categories, category, isCategoryFullySelected, skillSlugs]);
+
+  const selectedFilterCount = selectedFilterCategoryCount + skillSlugs.length;
+  const selectedDraftCount = selectedDraftCategoryCount + draftSkillSlugs.length;
+
+  const toggleDraftCategory = useCallback(
+    (nextCategory: CategoryOption) => {
+      const categorySkillSlugs = getCategorySkillSlugs(nextCategory.id);
+
+      setDraftCategory((currentCategory) => {
+        const isSameCategory = currentCategory === nextCategory.slug;
+
+        setDraftSkillSlugs((currentSkillSlugs) => {
+          const hasAllCategorySlugs = categorySkillSlugs.every((slug) =>
+            currentSkillSlugs.includes(slug),
+          );
+
+          if (isSameCategory && hasAllCategorySlugs) {
+            return [];
+          }
+
+          return categorySkillSlugs;
+        });
+
+        return isSameCategory ? "" : nextCategory.slug;
+      });
+
+      setActiveCategoryId(nextCategory.id);
+    },
+    [getCategorySkillSlugs],
+  );
 
   const toggleDraftSkill = useCallback((slug: string) => {
     setDraftSkillSlugs((currentState) =>
@@ -295,6 +463,171 @@ export function useSearch({
     setDraftSkillSlugs(skillSlugs);
     setIsCategoryOpen((currentState) => !currentState);
   }, [category, skillSlugs]);
+
+  const toggleDraftParentSkill = useCallback(
+    (skill: SkillNode) => {
+      const relatedSlugs = getDescendantSkillSlugs(skill);
+
+      setDraftSkillSlugs((currentSkillSlugs) => {
+        const hasAllRelatedSlugs = relatedSlugs.every((slug) =>
+          currentSkillSlugs.includes(slug),
+        );
+
+        if (hasAllRelatedSlugs) {
+          return currentSkillSlugs.filter((slug) => !relatedSlugs.includes(slug));
+        }
+
+        return Array.from(new Set([...currentSkillSlugs, ...relatedSlugs]));
+      });
+
+      if (activeCategory?.slug) {
+        setDraftCategory(activeCategory.slug);
+      }
+      setActiveParentSkillId(skill.id);
+    },
+    [activeCategory?.slug, getDescendantSkillSlugs],
+  );
+
+  const searchSuggestions = useMemo(() => {
+    if (!searchLowercase) {
+      return [];
+    }
+
+    const suggestions: SearchSuggestion[] = [];
+
+    // 1. Tìm các category khớp
+    for (const cat of categories) {
+      const catNormalized = removeVietnameseTones(cat.name);
+      if (catNormalized.includes(searchNormalized)) {
+        suggestions.push({
+          type: "category",
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug ?? undefined,
+        });
+      }
+    }
+
+    const catMap = new Map(
+      categories.map((item) => [item.id, { name: item.name, slug: item.slug }]),
+    );
+
+    // 2. Tìm các kĩ năng khớp
+    for (const parentSkill of allSkills) {
+      const categoryInfo = parentSkill.careerCategoryId
+        ? catMap.get(parentSkill.careerCategoryId)
+        : undefined;
+      const parentNormalized = removeVietnameseTones(parentSkill.name);
+
+      if (parentNormalized.includes(searchNormalized)) {
+        suggestions.push({
+          type: "skill-parent",
+          id: parentSkill.id,
+          name: parentSkill.name,
+          slug: parentSkill.slug ?? undefined,
+          categoryName: categoryInfo?.name ?? undefined,
+          categorySlug: categoryInfo?.slug ?? undefined,
+        });
+      }
+
+      for (const childSkill of parentSkill.children ?? []) {
+        const childNormalized = removeVietnameseTones(childSkill.name);
+
+        if (childNormalized.includes(searchNormalized)) {
+          suggestions.push({
+            type: "skill-child",
+            id: childSkill.id,
+            name: childSkill.name,
+            slug: childSkill.slug ?? undefined,
+            parentName: parentSkill.name,
+            categoryName: categoryInfo?.name ?? undefined,
+            categorySlug: categoryInfo?.slug ?? undefined,
+          });
+        }
+      }
+    }
+
+    return suggestions.slice(0, 15);
+  }, [allSkills, categories, searchLowercase, searchNormalized]);
+
+  const handleSelectSuggestion = useCallback((suggestion: SearchSuggestion) => {
+    let finalCategory = category;
+    let finalSkillSlugs = [...skillSlugs];
+
+    if (suggestion.type === "category") {
+      finalCategory = suggestion.slug ?? "";
+      setCategory(finalCategory);
+      setDraftCategory(finalCategory);
+      const nextCategory = categories.find((item) => item.slug === finalCategory);
+      finalSkillSlugs = nextCategory
+        ? getCategorySkillSlugs(nextCategory.id)
+        : [];
+      setSkillSlugs(finalSkillSlugs);
+      setDraftSkillSlugs(finalSkillSlugs);
+    } else if (suggestion.type === "skill-parent") {
+      finalCategory = suggestion.categorySlug ?? "";
+      setCategory(finalCategory);
+      setDraftCategory(finalCategory);
+      const parentSkill = allSkills.find((item) => item.id === suggestion.id);
+
+      if (parentSkill) {
+        finalSkillSlugs = getDescendantSkillSlugs({
+          ...parentSkill,
+          children: parentSkill.children ?? [],
+        });
+        setSkillSlugs(finalSkillSlugs);
+        setDraftSkillSlugs(finalSkillSlugs);
+      }
+    } else if (suggestion.type === "skill-child") {
+      finalCategory = suggestion.categorySlug ?? "";
+      setCategory(finalCategory);
+      setDraftCategory(finalCategory);
+
+      if (suggestion.slug) {
+        if (!finalSkillSlugs.includes(suggestion.slug)) {
+          finalSkillSlugs.push(suggestion.slug);
+        }
+        setSkillSlugs(finalSkillSlugs);
+        setDraftSkillSlugs(finalSkillSlugs);
+      }
+    }
+
+    setSearchTerm("");
+    setIsCategoryOpen(false); // Đóng panel luôn
+
+    // Tự động kích hoạt hành vi search lên URL (Click ăn ngay)
+    const searchParams = new URLSearchParams(searchParamsHook?.toString() ?? "");
+    if (keyword.trim()) {
+      searchParams.set("q", keyword.trim());
+    } else {
+      searchParams.delete("q");
+    }
+
+    if (address.trim()) {
+      searchParams.set("address", address.trim());
+    } else {
+      searchParams.delete("address");
+    }
+
+    if (finalCategory) {
+      searchParams.set("careerCategorySlug", finalCategory);
+      searchParams.set("category", finalCategory);
+    } else {
+      searchParams.delete("careerCategorySlug");
+      searchParams.delete("category");
+    }
+
+    if (finalSkillSlugs.length) {
+      searchParams.set("skillSlugs", finalSkillSlugs.join(","));
+    } else {
+      searchParams.delete("skillSlugs");
+    }
+
+    searchParams.delete("page");
+
+    const query = searchParams.toString();
+    router.push(query ? `${ROUTES.JOBS}?${query}` : ROUTES.JOBS);
+  }, [address, allSkills, categories, category, getCategorySkillSlugs, getDescendantSkillSlugs, keyword, router, searchParamsHook, skillSlugs]);
 
   const handleSearch = useCallback(
     (event: React.FormEvent) => {
@@ -354,13 +687,18 @@ export function useSearch({
     searchTerm,
     selectedDraftCount,
     selectedFilterCount,
+    isCategoryFullySelected,
+    isParentSkillFullySelected,
     setActiveCategoryId,
     setActiveParentSkillId,
     setAddress,
+    toggleDraftCategory,
+    toggleDraftParentSkill,
     setDraftCategory,
     setKeyword,
     setSearchTerm,
     skillsLoading,
+    skillsError,
     skillSlugs,
     triggerRef,
     toggleDraftSkill,
@@ -371,5 +709,8 @@ export function useSearch({
     resetDraftSelection,
     visibleChildSkills,
     visibleParentSkills,
+    searchSuggestions,
+    handleSelectSuggestion,
+    allSkills: flatSkills,
   };
 }

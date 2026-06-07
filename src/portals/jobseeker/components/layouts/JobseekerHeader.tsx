@@ -23,8 +23,8 @@ import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
 import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import { cn } from "@/shared/lib/utils/cn";
 
-import { CategoriesDropdown } from "./CategoriesDropdown";
-import { UserMenuContent, UserMenuDropdown } from "./UserMenuDropdown";
+import { CategoriesDropdown } from "@/portals/jobseeker/components/layouts/CategoriesDropdown";
+import { UserMenuDropdown } from "@/shared/components/layouts/UserMenuDropdown";
 import { useAvatarRefreshOnError } from "@/shared/hooks/ui/useAvatarRefreshOnError";
 
 type DrawerState = "menu" | "user" | null;
@@ -42,7 +42,7 @@ interface MobileNavItem {
   label: string;
 }
 
-export function Header() {
+export function JobseekerHeader() {
   const { isLoggedIn } = useAuth();
   const { user, logout, refreshUser } = useCurrentUser();
   const { categories, error, loading } = useCareerCategories({ limit: 10 });
@@ -84,6 +84,47 @@ export function Header() {
     ],
     [categories, mainNavItems],
   );
+
+  const jobseekerSections = useMemo(() => {
+    const u = t.userMenu;
+    return [
+      {
+        title: u.jobManagement,
+        items: [
+          {
+            href: ROUTES.JOB_SEEKER_FAVOURITES,
+            label: u.savedJobs,
+          },
+          {
+            href: ROUTES.JOB_SEEKER_APPLICATIONS,
+            label: u.appliedJobs,
+          },
+        ],
+      },
+      {
+        title: u.cvManagement,
+        items: [
+          {
+            href: ROUTES.JOB_SEEKER_CV,
+            label: u.myCv,
+          },
+        ],
+      },
+      {
+        title: u.accountSecurity,
+        items: [
+          {
+            href: ROUTES.JOB_SEEKER_PROFILE,
+            label: u.profileSettings,
+          },
+          {
+            href: ROUTES.JOB_SEEKER_PROFILE_CHANGE_PASSWORD,
+            label: u.changePassword,
+          },
+        ],
+      },
+    ];
+  }, [t]);
 
   const avatarUrl = user?.profile?.avatarUrl || "/user-default.png";
 
@@ -201,7 +242,7 @@ export function Header() {
             {isLoggedIn ? (
               <>
                 <div className="hidden md:block">
-                  <UserMenuDropdown />
+                  <UserMenuDropdown sections={jobseekerSections} />
                 </div>
                 <button
                   className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-surface px-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden"
@@ -403,52 +444,6 @@ export function Header() {
           </div>
         </div>
       </aside>
-
-      {isLoggedIn ? (
-        <aside
-          aria-hidden={activeDrawer !== "user"}
-          className={cn(
-            "fixed inset-y-0 right-0 z-70 flex w-[min(88vw,360px)] flex-col border-l border-border bg-surface shadow-2xl transition-transform duration-300 md:hidden",
-            activeDrawer === "user" ? "translate-x-0" : "translate-x-full",
-          )}
-        >
-          <div className="flex items-center justify-between border-b border-border px-4 py-4">
-            <div className="flex items-center gap-3">
-              <img
-                alt="Avatar"
-                className="relative h-13 w-13 rounded-full border border-gray-300 object-cover"
-                onError={handleAvatarError}
-                src={avatarUrl}
-              />
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-foreground">
-                  {user?.profile?.fullName || t.userMenu.guestName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              onClick={closeDrawer}
-              type="button"
-            >
-              <X aria-hidden="true" className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto pb-4">
-            <div className="border-b border-border px-4 py-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                {t.userMenu.accountTitle}
-              </p>
-            </div>
-            <UserMenuContent onLogout={handleLogout} onNavigate={navigateTo} />
-          </div>
-        </aside>
-      ) : null}
     </>
   );
 }

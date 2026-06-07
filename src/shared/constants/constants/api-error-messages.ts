@@ -1,112 +1,119 @@
-export const API_ERROR_MESSAGES = {
-  "Account already verified": "Tài khoản này đã được xác thực trước đó.",
-  "Account is inactive": "Tài khoản của bạn hiện không hoạt động.",
-  "Account is unverified": "Tài khoản của bạn chưa được xác thực.",
-  "Account locked due OTP failures":
+export const API_ERROR_MESSAGES: Record<string, string> = {
+  "email already exists": "Email này đã tồn tại trong hệ thống.",
+  "invalid phone number": "Số điện thoại không hợp lệ.",
+  "password too weak": "Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn.",
+  "registration failed": "Đăng ký tài khoản thất bại.",
+  "invalid otp type": "Loại mã OTP không hợp lệ.",
+  "invalid or expired otp": "Mã OTP không hợp lệ hoặc đã hết hạn.",
+  "otp has expired": "Mã OTP đã hết hạn.",
+  "account not found": "Không tìm thấy tài khoản.",
+  "account locked due otp failures":
     "Tài khoản đã bị khóa do nhập sai OTP quá nhiều lần.",
-  "Account locked, contact support":
+  "too many requests": "Bạn đang thao tác quá nhanh. Vui lòng thử lại sau.",
+  "please wait 60 seconds": "Vui lòng chờ 60 giây rồi thử lại.",
+  "account is unverified": "Tài khoản của bạn chưa được xác minh.",
+  "account already verified": "Tài khoản đã được xác minh trước đó.",
+  "invalid or expired key": "Khóa xác thực không hợp lệ hoặc đã hết hạn.",
+  "role does not match": "Vai trò tài khoản không phù hợp.",
+  "account locked, contact support":
     "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.",
-  "Already applied for this job": "Bạn đã ứng tuyển công việc này trước đó.",
-  "Application not found": "Không tìm thấy hồ sơ ứng tuyển.",
-  "Application period expired": "Đã hết thời hạn ứng tuyển công việc này.",
-  "Cannot determine permissions":
-    "Không thể xác định quyền truy cập. Vui lòng thử lại sau.",
-  "Cannot withdraw application now": "Hiện không thể rút hồ sơ ứng tuyển này.",
-  "Career category already exists": "Danh mục nghề nghiệp này đã tồn tại.",
-  "Career category not found": "Không tìm thấy danh mục nghề nghiệp.",
-  "Category in use, cannot delete":
-    "Danh mục đang được sử dụng nên không thể xóa.",
-  "Company not found": "Không tìm thấy công ty.",
-  "CV already exists": "CV này đã tồn tại.",
-  "CV analysis already in progress":
-    "CV đang được phân tích. Vui lòng chờ hoàn tất.",
-  "CV file is missing": "Không tìm thấy tệp CV để phân tích.",
-  "CV already used elsewhere":
-    "CV này đang được sử dụng để ứng tuyển không thể xóa.",
-  "CV not found": "Không tìm thấy CV.",
-  "Email already exists": "Email này đã được sử dụng.",
-  "Expired date must be future":
+  "incorrect email or password": "Tên đăng nhập hoặc mật khẩu không chính xác.",
+  "account is inactive": "Tài khoản hiện đang bị vô hiệu hóa.",
+  "login failed": "Đăng nhập thất bại.",
+  "too many failures, try in 10m":
+    "Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.",
+  "invalid or expired token": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.",
+  "invalid or expired access token":
+    "Access token không hợp lệ hoặc đã hết hạn.",
+  "invalid or expired refresh token":
+    "Refresh token không hợp lệ hoặc đã hết hạn.",
+  "password change failed": "Đổi mật khẩu thất bại.",
+  "old password is incorrect": "Mật khẩu hiện tại không chính xác.",
+  "new password same as old":
+    "Mật khẩu mới không được trùng với mật khẩu hiện tại.",
+  "user not found": "Không tìm thấy người dùng.",
+  "user already exists": "Người dùng đã tồn tại.",
+  "company not found": "Không tìm thấy công ty.",
+  "invalid employee range": "Khoảng số lượng nhân sự không hợp lệ.",
+  "job not found": "Không tìm thấy tin tuyển dụng.",
+  "job already exists": "Tin tuyển dụng đã tồn tại.",
+  "failed to create job": "Tạo tin tuyển dụng thất bại.",
+  "failed to update job": "Cập nhật tin tuyển dụng thất bại.",
+  "failed to delete job": "Xóa tin tuyển dụng thất bại.",
+  "invalid job status transition":
+    "Không thể chuyển trạng thái tin tuyển dụng theo cách này.",
+  "expired date must be future":
     "Ngày hết hạn phải lớn hơn thời điểm hiện tại.",
-  "Failed to add favourite":
-    "Không thể thêm công việc vào danh sách yêu thích.",
-  "Failed to apply": "Không thể ứng tuyển công việc. Vui lòng thử lại.",
-  "Failed to create career category":
-    "Không thể tạo danh mục nghề nghiệp. Vui lòng thử lại.",
-  "Failed to create CV": "Không thể tạo CV. Vui lòng thử lại.",
-  "Failed to create job": "Không thể tạo tin tuyển dụng. Vui lòng thử lại.",
-  "Failed to create skill": "Không thể tạo kỹ năng. Vui lòng thử lại.",
-  "Failed to delete career category":
-    "Không thể xóa danh mục nghề nghiệp. Vui lòng thử lại.",
-  "Failed to delete CV": "Không thể xóa CV. Vui lòng thử lại.",
-  "Failed to delete job": "Không thể xóa tin tuyển dụng. Vui lòng thử lại.",
-  "Failed to delete skill": "Không thể xóa kỹ năng. Vui lòng thử lại.",
-  "Failed to remove favourite":
-    "Không thể xóa công việc khỏi danh sách yêu thích.",
-  "Failed to start CV analysis":
-    "Không thể bắt đầu phân tích CV. Vui lòng thử lại.",
-  "Failed to update application":
-    "Không thể cập nhật hồ sơ ứng tuyển. Vui lòng thử lại.",
-  "Failed to update career category":
-    "Không thể cập nhật danh mục nghề nghiệp. Vui lòng thử lại.",
-  "Failed to update job":
-    "Không thể cập nhật tin tuyển dụng. Vui lòng thử lại.",
-  "Failed to update skill": "Không thể cập nhật kỹ năng. Vui lòng thử lại.",
-  "Failed to withdraw application":
-    "Không thể rút hồ sơ ứng tuyển. Vui lòng thử lại.",
-  "File cannot be empty": "Tệp tải lên không được để trống.",
-  "File too large (max 5MB)": "Tệp tải lên vượt quá 5MB.",
-  "File too large (max 10MB)": "Tệp tải lên vượt quá 10MB.",
-  "Incorrect email or password": "Email hoặc mật khẩu không chính xác.",
-  "Insufficient permissions": "Bạn không có quyền thực hiện thao tác này.",
-  "Internal server error": "Hệ thống đang gặp sự cố. Vui lòng thử lại sau.",
-  "Interview schedule required": "Vui lòng cung cấp lịch phỏng vấn hợp lệ.",
-  "Invalid employee range": "Quy mô nhân sự không hợp lệ.",
-  "Invalid file type": "Định dạng tệp không hợp lệ.",
-  "Invalid file type (PDF/DOCX/DOC)":
-    "Định dạng tệp không hợp lệ. Chỉ hỗ trợ PDF, DOCX hoặc DOC.",
-  "Invalid input data": "Dữ liệu nhập vào không hợp lệ.",
-  "Invalid job status transition":
-    "Không thể chuyển trạng thái công việc theo cách này.",
-  "Invalid media type": "Loại tệp truyền lên không hợp lệ.",
-  "Invalid or expired access token":
-    "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-  "Invalid or expired key": "Liên kết xác thực đã hết hạn hoặc không hợp lệ.",
-  "Invalid or expired OTP": "Mã OTP không đúng hoặc đã hết hạn.",
-  "Invalid or expired refresh token":
-    "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-  "Invalid or expired token": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.",
-  "Invalid OTP type": "Loại OTP không hợp lệ.",
-  "Invalid phone number": "Số điện thoại không hợp lệ.",
-  "Invalid salary range": "Khoảng lương không hợp lệ.",
-  "Invalid status transition":
-    "Không thể chuyển trạng thái hồ sơ theo cách này.",
-  "Invalid UUID": "Mã định danh không hợp lệ.",
-  "Job already exists": "Tin tuyển dụng này đã tồn tại.",
-  "Job already in favourites": "Công việc này đã có trong danh sách yêu thích.",
-  "Job is not open": "Công việc này hiện không mở ứng tuyển.",
-  "Job not found": "Không tìm thấy công việc.",
-  "Login failed": "Đăng nhập thất bại. Vui lòng thử lại.",
-  "New password same as old": "Mật khẩu mới không được trùng với mật khẩu cũ.",
-  "Old password is incorrect": "Mật khẩu hiện tại không chính xác.",
-  "OTP has expired": "Mã OTP đã hết hạn.",
-  "Password change failed": "Không thể đổi mật khẩu. Vui lòng thử lại.",
-  "Password too weak": "Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn.",
-  "Please wait 60 seconds": "Vui lòng chờ 60 giây trước khi thực hiện lại.",
-  "Rate limit exceeded":
-    "Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.",
-  "Registration failed": "Đăng ký thất bại. Vui lòng thử lại.",
-  "Role does not match": "Tài khoản không phù hợp với cổng đăng nhập này.",
-  "Skill already exists": "Kỹ năng này đã tồn tại.",
-  "Skill in use, cannot delete": "Kỹ năng đang được sử dụng nên không thể xóa.",
-  "Skill not found": "Không tìm thấy kỹ năng.",
-  "System busy, try again later": "Hệ thống đang bận. Vui lòng thử lại sau.",
-  "Too many failures, try in 10m":
-    "Bạn nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.",
-  "Too many requests": "Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.",
-  "Upload failed": "Tải tệp lên thất bại. Vui lòng thử lại.",
-  "User already exists": "Người dùng này đã tồn tại.",
-  "User not found": "Không tìm thấy người dùng.",
-} as const;
+  "invalid salary range": "Khoảng lương không hợp lệ.",
+  "cv not found": "Không tìm thấy CV.",
+  "cv already exists": "CV đã tồn tại.",
+  "failed to create cv": "Tạo CV thất bại.",
+  "failed to update cv": "Cập nhật CV thất bại.",
+  "failed to delete cv": "Xóa CV thất bại.",
+  "file too large (max 10mb)": "Dung lượng tệp quá lớn (tối đa 10MB).",
+  "invalid file type (pdf/docx/doc)":
+    "Định dạng tệp không hợp lệ. Chỉ chấp nhận PDF, DOCX hoặc DOC.",
+  "access denied to cv": "Bạn không có quyền truy cập CV này.",
+  "rate limit exceeded":
+    "Bạn đã vượt quá giới hạn thao tác. Vui lòng thử lại sau.",
+  "cv analysis already in progress":
+    "CV đang được phân tích. Vui lòng chờ hoàn tất.",
+  "cv file is missing": "Thiếu tệp CV để phân tích.",
+  "failed to start cv analysis": "Không thể bắt đầu phân tích CV.",
+  "career category not found": "Không tìm thấy danh mục ngành nghề.",
+  "career category already exists": "Danh mục ngành nghề đã tồn tại.",
+  "failed to create career category": "Tạo danh mục ngành nghề thất bại.",
+  "failed to update career category": "Cập nhật danh mục ngành nghề thất bại.",
+  "failed to delete career category": "Xóa danh mục ngành nghề thất bại.",
+  "career category is not deleted":
+    "Danh mục ngành nghề này chưa ở trạng thái đã xóa.",
+  "category in use, cannot delete":
+    "Danh mục đang được sử dụng nên không thể xóa.",
+  "failed to restore career category":
+    "Khôi phục danh mục ngành nghề thất bại.",
+  "skill not found": "Không tìm thấy kỹ năng.",
+  "skill already exists": "Kỹ năng đã tồn tại.",
+  "failed to create skill": "Tạo kỹ năng thất bại.",
+  "failed to update skill": "Cập nhật kỹ năng thất bại.",
+  "failed to delete skill": "Xóa kỹ năng thất bại.",
+  "skill is not deleted": "Kỹ năng này chưa ở trạng thái đã xóa.",
+  "skill in use, cannot delete": "Kỹ năng đang được sử dụng nên không thể xóa.",
+  "career category of this skill is deleted":
+    "Danh mục ngành nghề của kỹ năng này đang ở trạng thái đã xóa.",
+  "failed to restore skill": "Khôi phục kỹ năng thất bại.",
+  "favourite job not found": "Không tìm thấy tin tuyển dụng đã lưu.",
+  "job already in favourites": "Tin tuyển dụng này đã có trong danh sách lưu.",
+  "failed to add favourite": "Thêm vào danh sách lưu thất bại.",
+  "failed to remove favourite": "Xóa khỏi danh sách lưu thất bại.",
+  "application not found": "Không tìm thấy hồ sơ ứng tuyển.",
+  "already applied for this job": "Bạn đã ứng tuyển tin này trước đó.",
+  "failed to apply": "Ứng tuyển thất bại.",
+  "failed to update application": "Cập nhật hồ sơ ứng tuyển thất bại.",
+  "failed to withdraw application": "Thu hồi hồ sơ ứng tuyển thất bại.",
+  "job is not open": "Tin tuyển dụng hiện không mở nhận hồ sơ.",
+  "application period expired": "Thời gian ứng tuyển đã hết hạn.",
+  "cv already used elsewhere": "CV này đang được sử dụng ở nơi khác.",
+  "cannot withdraw application now":
+    "Hiện tại chưa thể thu hồi hồ sơ ứng tuyển.",
+  "access denied to application":
+    "Bạn không có quyền truy cập hồ sơ ứng tuyển này.",
+  "invalid status transition": "Không thể chuyển trạng thái theo cách này.",
+  "interview schedule required": "Vui lòng cung cấp lịch phỏng vấn.",
+  "file cannot be empty": "Tệp tải lên không được để trống.",
+  "file too large (max 5mb)": "Dung lượng tệp quá lớn (tối đa 5MB).",
+  "invalid file type": "Định dạng tệp không hợp lệ.",
+  "invalid media type": "Loại tệp media không hợp lệ.",
+  "upload failed": "Tải tệp lên thất bại.",
+  "cannot determine permissions":
+    "Không thể xác định quyền truy cập của tài khoản.",
+  "insufficient permissions":
+    "Bạn không có đủ quyền để thực hiện thao tác này.",
+  "invalid uuid": "Mã định danh không hợp lệ.",
+  "ip address not found": "Không tìm thấy địa chỉ IP.",
+  "internal server error": "Hệ thống đang gặp sự cố nội bộ.",
+  "invalid input data": "Dữ liệu nhập vào không hợp lệ.",
+  "system busy, try again later": "Hệ thống đang bận. Vui lòng thử lại sau.",
+};
 
 export const API_STATUS_FALLBACK_MESSAGES: Record<number, string> = {
   400: "Yêu cầu không hợp lệ. Vui lòng kiểm tra lại dữ liệu.",
@@ -124,3 +131,10 @@ export const API_STATUS_FALLBACK_MESSAGES: Record<number, string> = {
 
 export const UNKNOWN_API_ERROR_MESSAGE =
   "Đã có lỗi xảy ra. Vui lòng thử lại sau.";
+
+export const NETWORK_ERROR_MESSAGE =
+  "Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng và thử lại.";
+
+export function normalizeApiErrorMessage(message: string): string {
+  return message.trim().replace(/\s+/g, " ").toLowerCase();
+}

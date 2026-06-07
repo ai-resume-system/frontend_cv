@@ -3,11 +3,19 @@
 import { useEffect, useState } from "react";
 
 import { EUploadType } from "@/shared/constants/enums/upload.enum";
-import { fetchCurrentUser, updateMyCompany } from "@/shared/services/account.service";
+import {
+  fetchCurrentUser,
+  getCachedUser,
+  setCachedUser,
+  updateMyCompany,
+} from "@/shared/services/account.service";
 import { uploadFile } from "@/shared/services/upload.service";
-import type { AuthCompanyProfile, UpdateMyCompanyPayload } from "@/shared/types/account";
+import type { AuthUser, UpdateMyCompanyPayload } from "@/shared/types/account";
 
-interface CompanyFormValues {
+export interface CompanyFormValues {
+  phone: string;
+  email: string;
+  slug: string;
   name: string;
   address: string;
   websiteUrl: string;
@@ -17,10 +25,16 @@ interface CompanyFormValues {
   employeeMax: string;
   latitude: string;
   longitude: string;
-  careerCategoryId: string;
+  careerCategory: {
+    id: string;
+    name: string;
+  };
 }
 
 const EMPTY_FORM: CompanyFormValues = {
+  phone: "",
+  email: "",
+  slug: "",
   name: "",
   address: "",
   websiteUrl: "",
@@ -30,22 +44,76 @@ const EMPTY_FORM: CompanyFormValues = {
   employeeMax: "",
   latitude: "",
   longitude: "",
-  careerCategoryId: "",
+  careerCategory: {
+    id: "",
+    name: "",
+  },
 };
 
-function mapCompanyToForm(company: AuthCompanyProfile | null): CompanyFormValues {
-  if (!company) return { ...EMPTY_FORM };
+function mapCompanyToForm(user: AuthUser | null): CompanyFormValues {
+  if (!user) return { ...EMPTY_FORM };
+  const company = user.company;
   return {
-    name: company.name ?? "",
-    address: company.address ?? "",
-    websiteUrl: company.websiteUrl ?? "",
-    description: company.description ?? "",
-    taxCode: company.taxCode ?? "",
-    employeeMin: company.employeeMin != null ? String(company.employeeMin) : "",
-    employeeMax: company.employeeMax != null ? String(company.employeeMax) : "",
-    latitude: company.latitude != null ? String(company.latitude) : "",
-    longitude: company.longitude != null ? String(company.longitude) : "",
-    careerCategoryId: company.careerCategoryId ?? "",
+    phone: user.phone ?? "",
+    email: user.email ?? "",
+    slug: company?.slug ?? "",
+    name: company?.name ?? "",
+    address: company?.address ?? "",
+    websiteUrl: company?.websiteUrl ?? "",
+    description: company?.description ?? "",
+    taxCode: company?.taxCode ?? "",
+    employeeMin:
+      company?.employeeMin != null ? String(company.employeeMin) : "",
+    employeeMax:
+      company?.employeeMax != null ? String(company.employeeMax) : "",
+    latitude: company?.latitude != null ? String(company.latitude) : "",
+    longitude: company?.longitude != null ? String(company.longitude) : "",
+    careerCategory: {
+      id: company?.careerCategory?.id ?? "",
+      name: company?.careerCategory?.name ?? "",
+    },
+  };
+}
+
+function syncCachedUserWithForm(
+  currentUser: AuthUser | null,
+  form: CompanyFormValues,
+  logoUrl: string | null,
+  bannerUrl: string | null,
+): AuthUser | null {
+  if (!currentUser) {
+    return null;
+  }
+
+  return {
+    ...currentUser,
+    phone: form.phone.trim() || currentUser.phone,
+    company: currentUser.company
+      ? {
+          ...currentUser.company,
+          slug: form.slug.trim() || currentUser.company.slug,
+          name: form.name.trim() || currentUser.company.name,
+          address: form.address.trim() || currentUser.company.address,
+          websiteUrl:
+            form.websiteUrl.trim() || currentUser.company.websiteUrl,
+          description:
+            form.description.trim() || currentUser.company.description,
+          taxCode: form.taxCode.trim() || currentUser.company.taxCode,
+          employeeMin: form.employeeMin ? Number(form.employeeMin) : null,
+          employeeMax: form.employeeMax ? Number(form.employeeMax) : null,
+          latitude: form.latitude ? Number(form.latitude) : null,
+          longitude: form.longitude ? Number(form.longitude) : null,
+          logoUrl: logoUrl ?? currentUser.company.logoUrl,
+          bannerUrl: bannerUrl ?? currentUser.company.bannerUrl,
+          careerCategory: form.careerCategory.id
+            ? {
+                id: form.careerCategory.id,
+                name: form.careerCategory.name,
+                slug: currentUser.company.careerCategory?.slug ?? "",
+              }
+            : currentUser.company.careerCategory,
+        }
+      : currentUser.company,
   };
 }
 
@@ -60,24 +128,29 @@ export function useRecruiterCompanyProfile() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const user = await fetchCurrentUser();
-        const company = user.company;
-        setForm(mapCompanyToForm(company));
-        setLogoUrl(company?.logoUrl ?? null);
-        setBannerUrl(company?.bannerUrl ?? null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể tải thông tin công ty.");
-      } finally {
-        setLoading(false);
-      }
+  async function loadCompanyProfile() {
+    try {
+      const user = await fetchCurrentUser();
+      setForm(mapCompanyToForm(user));
+      setLogoUrl(user.company?.logoUrl ?? null);
+      setBannerUrl(user.company?.bannerUrl ?? null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Không thể tải thông tin công ty.",
+      );
+    } finally {
+      setLoading(false);
     }
-    void load();
+  }
+
+  useEffect(() => {
+    void loadCompanyProfile();
   }, []);
 
-  function updateField<K extends keyof CompanyFormValues>(key: K, value: CompanyFormValues[K]) {
+  function updateField<K extends keyof CompanyFormValues>(
+    key: K,
+    value: CompanyFormValues[K],
+  ) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setSuccess(false);
   }
@@ -113,14 +186,38 @@ export function useRecruiterCompanyProfile() {
       if (form.name.trim()) payload.name = form.name.trim();
       if (form.address.trim()) payload.address = form.address.trim();
       if (form.websiteUrl.trim()) payload.websiteUrl = form.websiteUrl.trim();
-      if (form.description.trim()) payload.description = form.description.trim();
+      if (form.description.trim())
+        payload.description = form.description.trim();
       if (form.taxCode.trim()) payload.taxCode = form.taxCode.trim();
-      if (form.careerCategoryId) payload.careerCategoryId = form.careerCategoryId;
+      if (form.careerCategory.id)
+        payload.careerCategoryId = form.careerCategory.id;
       if (form.employeeMin) payload.employeeMin = Number(form.employeeMin);
       if (form.employeeMax) payload.employeeMax = Number(form.employeeMax);
       if (form.latitude) payload.latitude = Number(form.latitude);
       if (form.longitude) payload.longitude = Number(form.longitude);
+      if (form.phone.trim()) payload.phone = form.phone.trim();
+
       await updateMyCompany(payload);
+      const nextCachedUser = syncCachedUserWithForm(
+        getCachedUser(),
+        form,
+        logoUrl,
+        bannerUrl,
+      );
+
+      if (nextCachedUser) {
+        setCachedUser(nextCachedUser);
+      }
+
+      setForm((currentForm) => ({
+        ...currentForm,
+        phone: form.phone.trim(),
+        name: form.name.trim(),
+        address: form.address.trim(),
+        websiteUrl: form.websiteUrl.trim(),
+        description: form.description.trim(),
+        taxCode: form.taxCode.trim(),
+      }));
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lưu thất bại.");
@@ -144,5 +241,6 @@ export function useRecruiterCompanyProfile() {
     handleBannerUpload,
     handleSave,
     setSuccess,
+    reload: loadCompanyProfile,
   };
 }

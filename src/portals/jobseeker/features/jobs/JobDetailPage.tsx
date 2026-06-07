@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { TopSearchBar } from "@/shared/components/layouts/TopSearchBar";
+import { TopSearchBar } from "@/portals/jobseeker/components/layouts/TopSearchBar";
 
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";

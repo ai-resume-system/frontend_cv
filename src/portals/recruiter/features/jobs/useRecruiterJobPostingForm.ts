@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
-import { EJobType } from "@/shared/constants/enums/job.enum";
+import { useCurrentUser } from "@/shared/hooks/data/useCurrentUser";
+import {
+  EJobType,
+  EJobEducationLevel,
+  EJobWorkArrangement,
+  EJobAction,
+} from "@/shared/constants/enums/job.enum";
 import { createRecruiterJob } from "@/shared/services/recruiter-job.service";
 import type { CreateJobPayload } from "@/shared/types/job";
 
-interface SkillDraft {
-  id: string;
+export interface SkillDraft {
+  id: string; // Đây sẽ là skillId thực tế từ backend
   name: string;
-  weight: number;
+  weight: number; // Trọng số từ 1 đến 5
 }
 
 interface RecruiterJobPostingFormValues {
@@ -24,6 +28,10 @@ interface RecruiterJobPostingFormValues {
   salaryMin: string;
   shortDescription: string;
   title: string;
+  vacancyCount: string;
+  educationLevel: EJobEducationLevel;
+  workArrangement: EJobWorkArrangement;
+  action: EJobAction;
 }
 
 interface RecruiterJobPostingFieldErrors {
@@ -33,6 +41,7 @@ interface RecruiterJobPostingFieldErrors {
   salaryMax?: string;
   salaryMin?: string;
   title?: string;
+  vacancyCount?: string;
 }
 
 const INITIAL_FORM: RecruiterJobPostingFormValues = {
@@ -46,6 +55,10 @@ const INITIAL_FORM: RecruiterJobPostingFormValues = {
   salaryMin: "",
   shortDescription: "",
   title: "",
+  vacancyCount: "1",
+  educationLevel: EJobEducationLevel.NONE,
+  workArrangement: EJobWorkArrangement.ONSITE,
+  action: EJobAction.SUBMIT,
 };
 
 function toOptionalNumber(value: string): number | undefined {
@@ -67,14 +80,15 @@ function validateForm(
   }
 
   if (!values.careerCategoryId) {
-    errors.careerCategoryId = "Vui lòng chọn lĩnh vực.";
+    errors.careerCategoryId = "Vui lòng cấu hình lĩnh vực cho công ty trước.";
   }
 
   if (!values.description.trim()) {
     errors.description = "Vui lòng nhập mô tả công việc.";
   }
 
-  if (!values.expiredAt) {
+  // Nếu là gửi đăng tin tuyển dụng thì bắt buộc nhập hạn chót
+  if (values.action === EJobAction.SUBMIT && !values.expiredAt) {
     errors.expiredAt = "Vui lòng chọn hạn chót ứng tuyển.";
   }
 
@@ -97,11 +111,20 @@ function validateForm(
     errors.salaryMax = "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.";
   }
 
+  const vacancyCount = toOptionalNumber(values.vacancyCount);
+  if (
+    values.vacancyCount.trim() &&
+    (vacancyCount === undefined || vacancyCount < 1)
+  ) {
+    errors.vacancyCount = "Số lượng cần tuyển phải lớn hơn hoặc bằng 1.";
+  }
+
   return errors;
 }
 
 function buildPayload(
   values: RecruiterJobPostingFormValues,
+  skills: SkillDraft[],
 ): CreateJobPayload {
   return {
     title: values.title.trim(),
@@ -111,41 +134,47 @@ function buildPayload(
     salaryMin: toOptionalNumber(values.salaryMin),
     salaryMax: toOptionalNumber(values.salaryMax),
     experienceYears: toOptionalNumber(values.experienceYears),
+    vacancyCount: toOptionalNumber(values.vacancyCount) ?? 1,
     careerCategoryId: values.careerCategoryId,
     expiredAt: values.expiredAt || undefined,
     jobType: values.jobType,
-  };
-}
-
-function createLocalSkill(name: string): SkillDraft {
-  return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    name,
-    weight: 70,
+    educationLevel: values.educationLevel,
+    workArrangement: values.workArrangement,
+    action: values.action,
+    skills: skills.map((s) => ({ skillId: s.id, weight: s.weight })),
   };
 }
 
 export function useRecruiterJobPostingForm() {
-  const { categories, error: categoriesError, loading: categoriesLoading } =
-    useCareerCategories({ page: 1, limit: 50 });
+  const { user } = useCurrentUser();
   const [form, setForm] = useState<RecruiterJobPostingFormValues>(INITIAL_FORM);
-  const [fieldErrors, setFieldErrors] = useState<RecruiterJobPostingFieldErrors>(
-    {},
-  );
+  const [fieldErrors, setFieldErrors] =
+    useState<RecruiterJobPostingFieldErrors>({});
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<SkillDraft[]>([]);
+  const [useCompanyAddress, setUseCompanyAddress] = useState(false);
 
+  // Tự động gán careerCategoryId từ thông tin công ty của nhà tuyển dụng
   useEffect(() => {
-    if (!form.careerCategoryId && categories.length) {
+    if (user?.company?.careerCategory?.id) {
       setForm((currentForm) => ({
         ...currentForm,
-        careerCategoryId: categories[0]?.id ?? "",
+        careerCategoryId: user.company?.careerCategory?.id ?? "",
       }));
     }
-  }, [categories, form.careerCategoryId]);
+  }, [user]);
+
+  // Xử lý Checkbox sử dụng địa chỉ công ty
+  useEffect(() => {
+    if (useCompanyAddress && user?.company?.address) {
+      setForm((currentForm) => ({
+        ...currentForm,
+        address: user.company?.address ?? "",
+      }));
+    }
+  }, [useCompanyAddress, user]);
 
   function updateField<K extends keyof RecruiterJobPostingFormValues>(
     key: K,
@@ -162,15 +191,18 @@ export function useRecruiterJobPostingForm() {
     }));
   }
 
-  function addSkill() {
-    const normalizedSkill = skillInput.trim();
-
-    if (!normalizedSkill) {
-      return;
-    }
-
-    setSkills((currentSkills) => [...currentSkills, createLocalSkill(normalizedSkill)]);
-    setSkillInput("");
+  // Tích hợp chọn kỹ năng từ Modal
+  function handleSelectSkills(selectedSkills: { id: string; name: string }[]) {
+    setSkills((currentSkills) => {
+      return selectedSkills.map((s) => {
+        const existing = currentSkills.find((item) => item.id === s.id);
+        return {
+          id: s.id,
+          name: s.name,
+          weight: existing ? existing.weight : 1, // Trọng số mặc định là 1
+        };
+      });
+    });
   }
 
   function removeSkill(id: string) {
@@ -192,10 +224,16 @@ export function useRecruiterJobPostingForm() {
     );
   }
 
-  async function submitForm(event: React.FormEvent<HTMLFormElement>) {
+  async function submitForm(
+    event: React.FormEvent<HTMLFormElement>,
+    overrideAction?: EJobAction,
+  ) {
     event.preventDefault();
 
-    const nextErrors = validateForm(form);
+    const currentAction = overrideAction || form.action;
+    const formWithAction = { ...form, action: currentAction };
+
+    const nextErrors = validateForm(formWithAction);
     setFieldErrors(nextErrors);
     setGlobalMessage(null);
     setIsSuccess(false);
@@ -207,12 +245,16 @@ export function useRecruiterJobPostingForm() {
     setIsSubmitting(true);
 
     try {
-      await createRecruiterJob(buildPayload(form));
+      await createRecruiterJob(buildPayload(formWithAction, skills));
       setForm(INITIAL_FORM);
       setSkills([]);
-      setSkillInput("");
+      setUseCompanyAddress(false);
       setIsSuccess(true);
-      setGlobalMessage("Đăng tin tuyển dụng thành công.");
+      setGlobalMessage(
+        currentAction === EJobAction.DRAFT
+          ? "Lưu bản nháp tin tuyển dụng thành công."
+          : "Đăng tin tuyển dụng thành công.",
+      );
     } catch (error) {
       setGlobalMessage(
         error instanceof Error
@@ -226,21 +268,20 @@ export function useRecruiterJobPostingForm() {
   }
 
   return {
-    addSkill,
-    categories,
-    categoriesError,
-    categoriesLoading,
+    careerCategoryName: user?.company?.careerCategory?.name ?? "",
+    careerCategoryId: user?.company?.careerCategory?.id ?? "",
     fieldErrors,
     form,
     globalMessage,
     isSubmitting,
     isSuccess,
     removeSkill,
-    skillInput,
     skills,
     submitForm,
-    setSkillInput,
     updateField,
     updateSkillWeight,
+    handleSelectSkills,
+    useCompanyAddress,
+    setUseCompanyAddress,
   };
 }

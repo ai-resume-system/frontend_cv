@@ -92,6 +92,7 @@ export interface CreateJobPayload {
   salaryMin?: number;
   salaryMax?: number;
   experienceYears?: number;
+  vacancyCount?: number;
   careerCategoryId?: string;
   expiredAt?: string;
   jobType?: EJobType;

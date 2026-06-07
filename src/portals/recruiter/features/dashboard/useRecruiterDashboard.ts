@@ -7,6 +7,7 @@ import {
   fetchApplicationsByJobId,
   fetchAllRecruiterJobApplications,
   fetchRecruiterNewApplicants,
+  fetchRecruiterInterviews,
 } from "@/shared/services/recruiter-job-application.service";
 import { fetchRecruiterJobs } from "@/shared/services/recruiter-job.service";
 import type { AuthUser } from "@/shared/types/account";
@@ -30,6 +31,7 @@ interface RecruiterDashboardState {
   metrics: RecruiterDashboardMetrics;
   recruiter: AuthUser | null;
   trend: RecruiterTrendPoint[];
+  todayInterviews: RecruiterApplicationApiItem[];
 }
 
 const INITIAL_METRICS: RecruiterDashboardMetrics = {
@@ -113,6 +115,7 @@ export function useRecruiterDashboard() {
     metrics: INITIAL_METRICS,
     recruiter: null,
     trend: EMPTY_TREND,
+    todayInterviews: [],
   });
 
   useEffect(() => {
@@ -120,13 +123,43 @@ export function useRecruiterDashboard() {
 
     async function loadDashboard() {
       try {
-        const [recruiter, jobsResult, allAppsResult, newApplicants] =
-          await Promise.all([
-            fetchCurrentUser(),
-            fetchRecruiterJobs({ page: 1, limit: 12 }),
-            fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
-            fetchRecruiterNewApplicants({ limit: 6 }),
-          ]);
+        const now = new Date();
+        const startOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          0,
+          0,
+          0,
+        ).toISOString();
+        const endOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          23,
+          59,
+          59,
+        ).toISOString();
+
+        const [
+          recruiter,
+          jobsResult,
+          allAppsResult,
+          newApplicants,
+          interviewsResult,
+        ] = await Promise.all([
+          fetchCurrentUser(),
+          fetchRecruiterJobs({ page: 1, limit: 12 }),
+          fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
+          fetchRecruiterNewApplicants({ limit: 6 }),
+          fetchRecruiterInterviews({
+            page: 1,
+            limit: 5,
+            from: startOfToday,
+            to: endOfToday,
+            sortOrder: "ASC",
+          }),
+        ]);
 
         const sortedJobs = [...jobsResult.jobs].sort(
           (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
@@ -195,6 +228,7 @@ export function useRecruiterDashboard() {
           trend: allApplications.length
             ? buildRecentTrend(allApplications)
             : EMPTY_TREND,
+          todayInterviews: interviewsResult.applications,
         });
       } catch (error) {
         if (cancelled) {

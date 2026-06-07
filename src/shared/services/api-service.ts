@@ -1,7 +1,9 @@
 import { API_ROUTES } from "@/shared/constants/constants/api";
+import { NETWORK_ERROR_MESSAGE } from "@/shared/constants/constants/api-error-messages";
 import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
-import { resolveApiDisplayMessage } from "@/shared/lib/errors/getErrorDisplayMessage";
 import { env } from "@/shared/lib/config/env";
+import { resolveApiDisplayMessage } from "@/shared/lib/errors/getErrorDisplayMessage";
+import { resolveAuthClient } from "@/shared/services/auth-client";
 import {
   clearAuthStore,
   getAccessToken,
@@ -11,16 +13,13 @@ import {
   setCurrentUser,
   shouldRefreshAccessToken,
 } from "@/shared/services/auth-store";
-import { resolveAuthClient } from "@/shared/services/auth-client";
-import type {
-  RefreshTokenResponseData,
-} from "@/shared/types/auth";
 import type { AuthUser } from "@/shared/types/account";
 import type {
   ApiFieldErrorResponse,
   AppApiError,
   IResponseApiItem,
 } from "@/shared/types/api";
+import type { RefreshTokenResponseData } from "@/shared/types/auth";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -188,6 +187,57 @@ async function refreshAccessToken(force = false): Promise<boolean> {
   return ongoingRefresh;
 }
 
+function isFetchNetworkError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    (error.message === "Failed to fetch" || error.message === "fetch failed")
+  );
+}
+
+function createApiError(
+  status: number,
+  message: string,
+  fields?: Record<string, string[]>,
+  rawMessage?: string,
+): AppApiError {
+  const error = new Error(message) as AppApiError;
+  error.status = status;
+  error.displayMessage = message;
+  error.rawMessage = rawMessage ?? message;
+  error.fields = fields;
+  return error;
+}
+
+function toApiError(error: unknown): AppApiError {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "displayMessage" in error &&
+    typeof (error as AppApiError).displayMessage === "string"
+  ) {
+    return error as AppApiError;
+  }
+
+  if (isFetchNetworkError(error)) {
+    return createApiError(0, NETWORK_ERROR_MESSAGE);
+  }
+
+  if (error instanceof Error) {
+    return createApiError(0, error.message);
+  }
+
+  return createApiError(0, NETWORK_ERROR_MESSAGE);
+}
+
+async function safeFetch(input: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init);
+  } catch (error: unknown) {
+    const apiError = toApiError(error);
+    throw apiError;
+  }
+}
+
 class ApiService {
   async get<TResponse>(
     path: string,
@@ -280,7 +330,7 @@ class ApiService {
       requestHeaders.set("Content-Type", "application/json");
     }
 
-    const response = await fetch(buildApiUrl(path), {
+    const response = await safeFetch(buildApiUrl(path), {
       ...requestConfig,
       method,
       headers: requestHeaders,

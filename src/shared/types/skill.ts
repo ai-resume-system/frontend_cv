@@ -8,6 +8,8 @@ export interface SkillDto {
   parentId?: string | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  children?: SkillDto[];
 }
 
 export type SkillApiItem = SkillDto;

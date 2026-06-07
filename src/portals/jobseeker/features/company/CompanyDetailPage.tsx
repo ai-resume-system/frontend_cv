@@ -130,7 +130,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
                 <div className="flex h-28 w-28 items-center justify-center rounded-[28px] border border-surface-container-high bg-white shadow-sm">
                   <img
                     alt={company.name ?? "Logo công ty"}
-                    className="h-20 w-20 rounded-2xl object-contain"
+                    className="h-20 w-20 rounded-2xl object-cover"
                     src={logoUrl ?? "/logo.png"}
                   />
                 </div>
@@ -147,7 +147,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
                       rel="noreferrer"
                       target="_blank"
                     >
-                      <Globe className="h-4 w-4" />
+                      <Globe className="h-4 w-4 text-primary" />
                       <span>{company.websiteUrl}</span>
                       <ExternalLink className="h-4 w-4" />
                     </a>
