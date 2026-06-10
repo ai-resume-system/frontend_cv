@@ -244,92 +244,96 @@ export function CvPage() {
             />
           </div>
 
-          {/* Controls */}
-          <div ref={sortDropdownRef} className="relative">
-            <button
-              onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex h-12 min-w-[180px] items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 text-sm transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
-              type="button"
-            >
-              {CV_SORT_OPTIONS.find((o) => o.value === getActiveSortVal())
-                ?.label || "Chọn..."}
-              <ChevronDown
-                className={`h-4 w-4 text-slate-400 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {isSortOpen && (
-              <div className="absolute top-full right-0 w-56 rounded-2xl border border-gray-300 bg-white p-2 shadow-md z-50 animate-in fade-in zoom-in-95 duration-200">
-                {CV_SORT_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setPage(1);
-                      if (option.value === "newest") {
-                        setSortBy("createdAt");
-                        setSortOrder("DESC");
-                      } else if (option.value === "oldest") {
-                        setSortBy("createdAt");
-                        setSortOrder("ASC");
-                      } else if (option.value === "updated_new") {
-                        setSortBy("updatedAt");
-                        setSortOrder("DESC");
-                      }
-                      setIsSortOpen(false);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition cursor-pointer ${
-                      getActiveSortVal() === option.value
-                        ? "bg-primary/15 text-primary font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
-                    type="button"
-                  >
-                    {option.label}
-                    {getActiveSortVal() === option.value && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Sliding Indicator */}
-          <div className="relative flex items-center p-1 rounded-2xl border-2 border-gray-300 bg-gray-200 h-12 w-[110px]">
+          {/* Control */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <div
-              className={cn(
-                "absolute top-1 bottom-1 w-[48px] rounded-xl bg-white shadow-md border border-gray-200/50 transition-all duration-300 ease-in-out",
-                layoutMode === "list" ? "left-[54px]" : "left-1",
-              )}
-            />
-            <button
-              onClick={() => setLayoutMode("grid")}
-              className={cn(
-                "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
-                layoutMode === "grid" && "text-primary font-semibold",
-              )}
-              title="Chế độ lưới"
-              type="button"
+              ref={sortDropdownRef}
+              className="flex flex-1 relative shrink-0"
             >
-              <LayoutGrid className="h-4.5 w-4.5" />
-            </button>
-            <button
-              onClick={() => setLayoutMode("list")}
-              className={cn(
-                "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
-                layoutMode === "list" && "text-primary font-semibold",
+              <button
+                onClick={() => setIsSortOpen(!isSortOpen)}
+                className="flex h-12 min-w-[180px] items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 text-sm transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
+                type="button"
+              >
+                {CV_SORT_OPTIONS.find((o) => o.value === getActiveSortVal())
+                  ?.label || "Chọn..."}
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isSortOpen && (
+                <div className="absolute top-full left-0 mt-2 w-56 rounded-2xl border border-gray-300 bg-white p-2 shadow-md z-50 animate-in fade-in zoom-in-95 duration-200">
+                  {CV_SORT_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setPage(1);
+                        if (option.value === "newest") {
+                          setSortBy("createdAt");
+                          setSortOrder("DESC");
+                        } else if (option.value === "oldest") {
+                          setSortBy("createdAt");
+                          setSortOrder("ASC");
+                        } else if (option.value === "updated_new") {
+                          setSortBy("updatedAt");
+                          setSortOrder("DESC");
+                        }
+                        setIsSortOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition cursor-pointer ${
+                        getActiveSortVal() === option.value
+                          ? "bg-primary/15 text-primary font-semibold"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                      type="button"
+                    >
+                      {option.label}
+                      {getActiveSortVal() === option.value && (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
-              title="Chế độ danh sách"
-              type="button"
-            >
-              <List className="h-4.5 w-4.5" />
-            </button>
+            </div>
+
+            <div className="relative flex flex-1 items-center p-1 rounded-2xl border-2 border-gray-300 bg-gray-200 h-12 w-[110px] shrink-0">
+              <div
+                className={cn(
+                  "absolute top-1 bottom-1 w-[48px] rounded-xl bg-white shadow-md border border-gray-200/50 transition-all duration-300 ease-in-out",
+                  layoutMode === "list" ? "left-[54px]" : "left-1",
+                )}
+              />
+              <button
+                onClick={() => setLayoutMode("grid")}
+                className={cn(
+                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
+                  layoutMode === "grid" && "text-primary font-semibold",
+                )}
+                title="Chế độ lưới"
+                type="button"
+              >
+                <LayoutGrid className="h-4.5 w-4.5" />
+              </button>
+              <button
+                onClick={() => setLayoutMode("list")}
+                className={cn(
+                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
+                  layoutMode === "list" && "text-primary font-semibold",
+                )}
+                title="Chế độ danh sách"
+                type="button"
+              >
+                <List className="h-4.5 w-4.5" />
+              </button>
+            </div>
           </div>
 
-          {/* Upload Button */}
           <BaseButton
             type="button"
             onClick={() => setIsUploadOpen(true)}
+            className="w-full sm:w-auto"
             startIcon={<Plus className="h-4 w-4" />}
           >
             Tải lên CV
@@ -434,12 +438,21 @@ export function CvPage() {
                     cv={cv}
                     isPreviewing={isPreviewingCvId === cv.id}
                     isDownloading={isDownloadingCvId === cv.id}
+                    isMenuOpen={openMenuCvId === cv.id}
+                    onMenuToggle={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuCvId((curr) =>
+                        curr === cv.id ? null : cv.id,
+                      );
+                    }}
+                    onCloseMenu={() => setOpenMenuCvId(null)}
                     key={cv.id}
                     onPreview={handlePreview}
                     onDownload={handleDownload}
                     onDelete={onConfirmDelete}
                     onSetDefault={onSetDefaultCv}
                     onRenameOpen={(id, title) => setRenameData({ id, title })}
+                    onCopyLink={handleCopyLink}
                     onNavigateToAnalysis={handleNavigateToAnalysis}
                   />
                 ),

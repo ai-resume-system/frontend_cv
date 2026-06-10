@@ -58,3 +58,22 @@ export interface CvAnalyzeResponse {
   processingStatus: EProcessingStatus;
   message: string;
 }
+
+export interface TempCvUploadResult {
+  tempFileKey: string;
+  fileName: string;
+  fileExtension: "pdf" | "docx" | "doc";
+  expiresInSeconds: number;
+}
+
+export interface TempCvPreviewResult {
+  tempFileKey: string;
+  fileName: string;
+  fileExtension: "pdf" | "docx" | "doc";
+  expiresInSeconds: number;
+  analysis: CvAnalysisResponse;
+}
+
+export interface TempCvSaveResult extends CvAnalysisResponse {
+  savedCvId: string;
+}

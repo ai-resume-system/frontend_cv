@@ -1,15 +1,17 @@
 "use client";
 
 import {
+  Copy,
   Download,
   Edit2,
   Eye,
   FileText,
   Loader2,
+  MoreVertical,
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PROCESSING_STATUS_CONFIG } from "@/shared/constants/enums/cv.enum";
 import { cn } from "@/shared/lib/utils/cn";
@@ -22,11 +24,15 @@ interface CvRowProps {
   cv: CvItem;
   isPreviewing: boolean;
   isDownloading: boolean;
+  isMenuOpen: boolean;
+  onMenuToggle: (e: React.MouseEvent) => void;
+  onCloseMenu: () => void;
   onPreview: (id: string) => void;
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
   onSetDefault: (id: string, isDefault: boolean) => void;
   onRenameOpen: (id: string, currentTitle: string) => void;
+  onCopyLink: (id: string) => void;
   onNavigateToAnalysis: (id: string, status: string) => void;
 }
 
@@ -34,11 +40,15 @@ export function CvRow({
   cv,
   isPreviewing,
   isDownloading,
+  isMenuOpen,
+  onMenuToggle,
+  onCloseMenu,
   onPreview,
   onDownload,
   onDelete,
   onSetDefault,
   onRenameOpen,
+  onCopyLink,
   onNavigateToAnalysis,
 }: CvRowProps) {
   const processingStatus = cv.processingStatus ?? "pending";
@@ -52,8 +62,20 @@ export function CvRow({
 
   const [isDeleting, setIsDeleting] = useState(false);
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleOutsideClick = () => onCloseMenu();
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [isMenuOpen, onCloseMenu]);
+
   return (
-    <div className="rounded-2xl border border-gray-300 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all duration-300 hover:translate-x-0.5 hover:border-primary/50 hover:shadow-[0_8px_16px_rgba(15,23,42,0.05)]">
+    <div
+      className={cn(
+        "relative rounded-2xl border border-gray-300 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all duration-300 hover:translate-x-0.5 hover:border-primary/50 hover:shadow-[0_8px_16px_rgba(15,23,42,0.05)]",
+        isMenuOpen ? "z-40" : "z-10",
+      )}
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4 min-w-0 flex-1">
           <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
@@ -68,19 +90,12 @@ export function CvRow({
             </div>
           </div>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h4
-                className="font-bold text-slate-800 truncate"
-                title={cv.title || ""}
-              >
-                {cv.title ?? "Hồ sơ không tên"}
-              </h4>
-              {cv.isDefault && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                  Mặc định
-                </span>
-              )}
-            </div>
+            <h4
+              className="flex flex-wrap items-center font-bold text-slate-800 truncate"
+              title={cv.title || ""}
+            >
+              {cv.title ?? "Hồ sơ không tên"}
+            </h4>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <span>Cập nhật: {formatDateTime(cv.updatedAt)}</span>
               <Badge
@@ -112,22 +127,45 @@ export function CvRow({
             </label>
           </div>
 
-          <div className="flex items-center gap-1 border-l border-slate-100 pl-3">
-            <button
-              onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
-              disabled={processingStatus === "processing"}
-              className="rounded-lg p-2 text-primary transition-colors hover:bg-primary/10 active:scale-95 disabled:opacity-50 cursor-pointer"
-              title="Phân tích CV bằng AI"
-              type="button"
-            >
-              <Sparkles className="h-4.5 w-4.5" />
-            </button>
+          <div className="flex items-center gap-1.5 border-l border-gray-300 pl-3">
+            {processingStatus === "completed" ? (
+              <div className="flex gap-1.5 shrink-0">
+                <button
+                  onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
+                  className="px-2.5 py-1 text-[11px] font-bold text-white bg-ai-strong focus-visible:outline-ai-strong  hover:bg-emerald-400 rounded-lg transition cursor-pointer"
+                  type="button"
+                >
+                  Xem kết quả
+                </button>
+                <button
+                  onClick={() => onNavigateToAnalysis(cv.id, "pending")}
+                  className="px-2.5 py-1 text-[11px] font-bold border border-primary/50 bg-surface text-primary hover:bg-primary-soft focus-visible:outline-primaryborder rounded-lg transition cursor-pointer"
+                  title="Phân tích lại"
+                  type="button"
+                >
+                  Phân tích lại
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
+                disabled={processingStatus === "processing"}
+                className="px-2.5 py-1 text-[11px] font-bold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg transition cursor-pointer"
+                type="button"
+              >
+                {processingStatus === "processing"
+                  ? "Đang phân tích..."
+                  : "Phân tích"}
+              </button>
+            )}
+          </div>
 
+          <div className="flex items-center justify-center border-l border-gray-300">
             <button
               onClick={() => onPreview(cv.id)}
               disabled={isPreviewing}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95 disabled:opacity-50  cursor-pointer"
-              title="Xem CV"
+              className="rounded-lg px-2 text-slate-500 transition-colors active:scale-95 disabled:opacity-50 cursor-pointer"
+              title="Xem hồ sơ"
               type="button"
             >
               {isPreviewing ? (
@@ -140,7 +178,7 @@ export function CvRow({
             <button
               onClick={() => onDownload(cv.id)}
               disabled={isDownloading}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95 disabled:opacity-50  cursor-pointer"
+              className="rounded-lg px-2 text-slate-500 transition-colors active:scale-95 disabled:opacity-50 cursor-pointer"
               title="Tải xuống"
               type="button"
             >
@@ -151,32 +189,68 @@ export function CvRow({
               )}
             </button>
 
-            <button
-              onClick={() => onRenameOpen(cv.id, cv.title || "")}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 active:scale-95  cursor-pointer"
-              title="Đổi tên"
-              type="button"
-            >
-              <Edit2 className="h-4.5 w-4.5" />
-            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMenuToggle(e);
+                }}
+                className="rounded-lg px-2 text-slate-500 transition-colors active:scale-95 disabled:opacity-50 cursor-pointer"
+                title="Thao tác khác"
+                type="button"
+              >
+                <MoreVertical className="h-4.5 w-4.5" />
+              </button>
 
-            <button
-              onClick={async () => {
-                setIsDeleting(true);
-                await onDelete(cv.id);
-                setIsDeleting(false);
-              }}
-              disabled={isDeleting}
-              className="rounded-lg p-2 text-error transition-colors hover:bg-error-container/20 active:scale-95 disabled:opacity-50  cursor-pointer"
-              title="Xóa"
-              type="button"
-            >
-              {isDeleting ? (
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
-              ) : (
-                <Trash2 className="h-4.5 w-4.5" />
+              {isMenuOpen && (
+                <div className="absolute right-0 top-11 z-20 w-44 rounded-xl border border-gray-300 bg-white py-1 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCopyLink(cv.id);
+                      onCloseMenu();
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                    type="button"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-slate-400" />
+                    Sao chép liên kết
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRenameOpen(cv.id, cv.title || "");
+                      onCloseMenu();
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                    type="button"
+                  >
+                    <Edit2 className="h-3.5 w-3.5 text-slate-400" />
+                    Đổi tên
+                  </button>
+                  <hr className="my-1 border-slate-100" />
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      setIsDeleting(true);
+                      await onDelete(cv.id);
+                      setIsDeleting(false);
+                      onCloseMenu();
+                    }}
+                    disabled={isDeleting}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-error hover:bg-error-container/20 cursor-pointer"
+                    type="button"
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5 text-error" />
+                    )}
+                    Xóa hồ sơ
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </div>
       </div>

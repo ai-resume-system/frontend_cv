@@ -53,7 +53,8 @@ function validateChangePasswordForm(
     values.newPassword &&
     values.currentPassword === values.newPassword
   ) {
-    errors.newPassword = "Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i";
+    errors.newPassword =
+      "Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i";
   }
 
   return errors;
@@ -151,9 +152,9 @@ export function useChangePassword({ onClose }: UseChangePasswordOptions) {
       onClose();
 
       await showAppAlert({
-        confirmButtonText: "ÄÄƒng nháº­p láº¡i",
-        text: "Máº­t kháº©u Ä‘Ã£ Ä‘Æ°á»£c Ä‘á»•i. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ tiáº¿p tá»¥c.",
-        title: "Äá»•i máº­t kháº©u thÃ nh cÃ´ng",
+        confirmButtonText: "Đăng nhập lại",
+        text: "Mật khẩu đã được đổi. Vui lòng đăng nhập lại để tiếp tục.",
+        title: "Đổi mật khẩu thành công",
       });
 
       window.location.href = ROUTES.JOB_SEEKER_LOGIN;
@@ -172,7 +173,9 @@ export function useChangePassword({ onClose }: UseChangePasswordOptions) {
 
       if (!hasFieldErrors) {
         showErrorAlert(
-          error instanceof Error ? error.message : "KhÃ´ng thá»ƒ Ä‘á»•i máº­t kháº©u.",
+          error instanceof Error
+            ? error.message
+            : "KhÃ´ng thá»ƒ Ä‘á»•i máº­t kháº©u.",
         );
       }
     } finally {

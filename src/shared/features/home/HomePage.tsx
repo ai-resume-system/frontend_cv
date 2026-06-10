@@ -3,7 +3,10 @@ import Link from "next/link";
 
 import { HomeSlideshow } from "@/portals/jobseeker/components/layouts/HomeSlideshow";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
-import { fetchTopCareerCategories } from "@/shared/services/category.service";
+import {
+  fetchCareerCategories,
+  fetchTopCareerCategories,
+} from "@/shared/services/category.service";
 import { fetchCompanies } from "@/shared/services/company.service";
 import { fetchJobs } from "@/shared/services/job.service";
 
@@ -42,38 +45,30 @@ function buildHomeStats(params: {
   ];
 }
 
+//fetchTopCareerCategories
 export default async function HomePage() {
   const [
     jobsResult,
     companiesResult,
     categoriesResult,
+    topCategoriesResult,
     jobsForLocationsResult,
   ] = await Promise.all([
-    fetchJobs({
-      page: 1,
-      limit: 100,
-      sortBy: "createdAt",
-      sortOrder: "DESC",
-    }),
-    fetchCompanies({
-      page: 1,
-      limit: 100,
-    }),
+    fetchJobs(),
+    fetchCompanies(),
+    fetchCareerCategories(),
     fetchTopCareerCategories({
       limit: 8,
     }),
-    fetchJobs({
-      limit: 100,
-      page: 1,
-      sortBy: "createdAt",
-      sortOrder: "DESC",
-    }),
+    fetchJobs(),
   ]);
 
   const totalJobs = jobsResult.pagination?.totalItems ?? jobsResult.jobs.length;
   const totalCompanies =
     companiesResult.pagination?.totalItems ?? companiesResult.companies.length;
-  const totalCategories = categoriesResult.length;
+  const totalCategories =
+    categoriesResult.pagination?.totalItems ??
+    categoriesResult.categories.length;
   const totalLocations = new Set(
     jobsForLocationsResult.jobs
       .map((job) => job.address ?? job.company?.address ?? "")
@@ -87,7 +82,6 @@ export default async function HomePage() {
     totalJobs,
     totalLocations,
   });
-  const categories = categoriesResult;
 
   return (
     <>
@@ -123,9 +117,9 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          {categories.length > 0 ? (
+          {topCategoriesResult.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {categories.map((category) => (
+              {topCategoriesResult.map((category) => (
                 <Link
                   key={category.id}
                   href={`/jobs?category=${category.slug}`}

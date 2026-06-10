@@ -18,6 +18,11 @@ export interface FetchCareerCategoriesParams {
   sortOrder?: "ASC" | "DESC";
 }
 
+interface FetchCareerCategoriesResult {
+  categories: CareerCategory[];
+  pagination?: IResponseApiPagination;
+}
+
 function buildCareerCategoryPath({
   page = 1,
   limit = 10,
@@ -45,34 +50,7 @@ function buildCareerCategoryPath({
   return `${API_ROUTES.CAREER_CATEGORY.BASE}?${searchParams.toString()}`;
 }
 
-function normalizeCareerCategories(
-  response: CareerCategory[] | CareerCategoryListResponse,
-): CareerCategory[] {
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  return response.data;
-}
-
-interface FetchCareerCategoriesResult {
-  categories: CareerCategory[];
-  pagination?: IResponseApiPagination;
-}
-
 export async function fetchCareerCategories(
-  params?: FetchCareerCategoriesParams,
-): Promise<CareerCategory[]> {
-  const response = await apiService.get<
-    CareerCategory[] | CareerCategoryListResponse
-  >(buildCareerCategoryPath(params), {
-    cache: "no-store",
-  });
-
-  return normalizeCareerCategories(response);
-}
-
-export async function fetchCareerCategoriesWithPagination(
   params?: FetchCareerCategoriesParams,
 ): Promise<FetchCareerCategoriesResult> {
   const response = await apiService.get<CareerCategoryListResponse>(

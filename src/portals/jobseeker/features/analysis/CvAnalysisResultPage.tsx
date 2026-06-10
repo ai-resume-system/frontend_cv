@@ -19,8 +19,11 @@ import {
   fetchCvAnalysis,
   fetchCvDownload,
   fetchCvPreview,
+  fetchCvRecommendedJobs,
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
+import type { JobApiItem } from "@/shared/types/job";
+import { JobCard } from "@/shared/components/layouts/JobCard";
 
 interface CvAnalysisResultPageProps {
   cvId: string;
@@ -80,6 +83,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
   const [cvTitle, setCvTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [recommendedJobs, setRecommendedJobs] = useState<JobApiItem[]>([]);
+  const [isJobsLoading, setIsJobsLoading] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -92,6 +97,20 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
         if (cancelled) return;
         setAnalysis(result);
         setCvTitle(result.cvId.slice(0, 12) + "...");
+
+        if (result.processingStatus === "completed") {
+          setIsJobsLoading(true);
+          try {
+            const jobs = await fetchCvRecommendedJobs(cvId);
+            if (!cancelled) {
+              setRecommendedJobs(jobs);
+            }
+          } catch (jobErr) {
+            console.error("Failed to load recommended jobs:", jobErr);
+          } finally {
+            if (!cancelled) setIsJobsLoading(false);
+          }
+        }
       } catch (err) {
         if (cancelled) return;
         setError(
@@ -188,9 +207,6 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
 
         <header className="mb-10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-secondary-fixed text-on-secondary-fixed-variant px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
-              Báo cáo phân tích AI
-            </span>
             {analysis.analyzedAt ? (
               <>
                 <span className="text-outline text-xs">•</span>
@@ -201,7 +217,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </>
             ) : null}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Kết quả phân tích CV
           </h1>
         </header>
@@ -466,6 +482,54 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 </div>
               </div>
             </div>
+
+            {analysis.processingStatus === "completed" && (
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h5 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                      Việc làm phù hợp nhất cho bạn
+                    </h5>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Dựa trên lịch sử tìm kiếm và phân tích năng lực cá nhân.
+                    </p>
+                  </div>
+                  <Link
+                    href={JOBSEEKER_ROUTES.JOBS}
+                    className="text-xs font-bold text-primary hover:underline"
+                  >
+                    Xem tất cả
+                  </Link>
+                </div>
+
+                {isJobsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="h-24 animate-pulse rounded-2xl bg-slate-100 border border-slate-200"
+                      />
+                    ))}
+                  </div>
+                ) : recommendedJobs.length > 0 ? (
+                  <div className="space-y-3">
+                    {recommendedJobs.slice(0, 3).map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job as any}
+                        showSkills={true}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center bg-slate-50/50">
+                    <p className="text-xs text-slate-500">
+                      Chưa tìm thấy công việc phù hợp trực tiếp với CV này.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link

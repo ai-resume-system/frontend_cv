@@ -19,7 +19,10 @@ import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/Recruite
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { BaseTable, BaseTableColumn } from "@/shared/components/ui/BaseTable";
 import { RecruiterJobPreviewModal } from "@/portals/recruiter/features/jobs/RecruiterJobPreviewModal";
-import { EJobStatus } from "@/shared/constants/enums/job.enum";
+import {
+  EJobStatus,
+  EJobStatusLabels,
+} from "@/shared/constants/enums/job.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseSearch } from "@/shared/components/ui/BaseSearch";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
@@ -33,34 +36,17 @@ function formatSalary(value?: number): string {
 function getJobStatusClass(status: EJobStatus): string {
   switch (status) {
     case EJobStatus.OPEN:
-      return "bg-tertiary-soft text-tertiary";
+      return "bg-green-200 text-green-800";
     case EJobStatus.CLOSED:
-      return "bg-error/10 text-error";
+      return "bg-red-200 text-red-800";
     case EJobStatus.PENDING:
-      return "bg-warning/10 text-warning";
+      return "bg-yellow-200 text-yellow-800";
     case EJobStatus.REJECTED:
       return "bg-error/10 text-error";
     case EJobStatus.EXPIRED:
-      return "bg-outline/10 text-on-surface-variant";
+      return "bg-orange-200 text-orange-800";
     case EJobStatus.DRAFT:
       return "bg-outline/20 text-on-surface-variant";
-  }
-}
-
-function getJobStatusLabel(status: EJobStatus): string {
-  switch (status) {
-    case EJobStatus.OPEN:
-      return "Đang mở";
-    case EJobStatus.CLOSED:
-      return "Đã đóng";
-    case EJobStatus.PENDING:
-      return "Chờ duyệt";
-    case EJobStatus.REJECTED:
-      return "Từ chối";
-    case EJobStatus.EXPIRED:
-      return "Hết hạn";
-    case EJobStatus.DRAFT:
-      return "Bản nháp";
   }
 }
 
@@ -128,7 +114,7 @@ export function RecruiterJobListPage() {
             job.status,
           )}`}
         >
-          {getJobStatusLabel(job.status)}
+          {EJobStatusLabels[job.status]}
         </span>
       ),
     },

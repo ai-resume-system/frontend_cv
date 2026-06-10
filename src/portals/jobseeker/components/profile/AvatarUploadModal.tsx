@@ -218,7 +218,6 @@ export function AvatarUploadModal({
   }
 
   function handleDeleteClick() {
-    // Chỉ cập nhật UI: Đánh dấu là muốn xóa ảnh và hiển thị placeholder mặc định
     setIsDeletedAvatarAction(true);
   }
 

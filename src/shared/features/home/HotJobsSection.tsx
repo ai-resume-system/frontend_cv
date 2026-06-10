@@ -339,7 +339,7 @@ export function HotJobsSection() {
                 </button>
 
                 <div
-                  className="flex min-w-0 flex-1 cursor-grab gap-2 overflow-x-auto py-1 touch-pan-x select-none [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                  className="flex min-w-0 flex-1 cursor-grab gap-2 overflow-x-auto py-1 touch-pan-x select-none scrollbar-none active:cursor-grabbing"
                   onPointerCancel={handleChipPointerEnd}
                   onPointerDown={handleChipPointerDown}
                   onPointerMove={handleChipPointerMove}

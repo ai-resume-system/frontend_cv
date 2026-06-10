@@ -83,7 +83,7 @@ export function ApplicationsPage() {
   const { applications, pagination, loading, error, refetch } =
     useMyApplications({
       page,
-      limit: 6, // 6 items per page (Grid 3x2)
+      limit: 1, // 6 items per page (Grid 3x2)
       status: status || undefined,
       sortBy: "createdAt",
       sortOrder: sort === "oldest" ? "ASC" : "DESC",
@@ -288,45 +288,6 @@ export function ApplicationsPage() {
 
         {/* Footer Layout: Banner & Pagination */}
         <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3 items-end">
-          {/* <div className="lg:col-span-2">
-            <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-primary via-primary/90 to-blue-700 p-6 text-white shadow-lg transition-transform duration-300 hover:scale-[1.01]">
-              <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none translate-x-10 translate-y-10">
-                <Sparkles className="h-48 w-48 text-white fill-white" />
-              </div>
-
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                    Thống kê tháng này
-                  </span>
-                  <h3 className="mt-3 text-xl font-extrabold tracking-tight">
-                    Hiệu suất tìm việc của bạn
-                  </h3>
-                  <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-amber-300">
-                      85%
-                    </span>
-                    <p className="text-sm font-medium text-blue-100 max-w-sm leading-snug">
-                      Hồ sơ của bạn đang thuộc **top 15%** ứng viên tiềm năng
-                      trong lĩnh vực Thiết kế & Phát triển phần mềm.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="shrink-0">
-                  <BaseButton
-                    variant="secondary"
-                    href={ROUTES.JOB_SEEKER_ANALYSIS}
-                    className="rounded-2xl border-none bg-amber-300 text-slate-900 font-bold hover:bg-amber-200 text-xs py-3 px-5 transition-transform active:scale-95 shadow-md flex items-center gap-1.5"
-                  >
-                    <Sparkles className="h-4 w-4 text-primary fill-primary/10" />
-                    Nâng cấp với AI
-                  </BaseButton>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
           {/* Pagination */}
           <div className="lg:col-span-1 flex justify-center lg:justify-end pb-2">
             {totalPages > 1 && (

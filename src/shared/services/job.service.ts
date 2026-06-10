@@ -67,16 +67,16 @@ function buildJobsPath({
     limit: `${limit}`,
   });
 
+  if (q) {
+    searchParams.set("q", q);
+  }
+
   if (careerCategoryId) {
     searchParams.set("careerCategoryId", careerCategoryId);
   }
 
   if (careerCategorySlug) {
     searchParams.set("careerCategorySlug", careerCategorySlug);
-  }
-
-  if (q) {
-    searchParams.set("q", q);
   }
 
   if (address) {
@@ -189,7 +189,9 @@ function toOptionalNumber(value: number | null): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
-function toOptionalString(value: string | null | undefined): string | undefined {
+function toOptionalString(
+  value: string | null | undefined,
+): string | undefined {
   return value ?? undefined;
 }
 

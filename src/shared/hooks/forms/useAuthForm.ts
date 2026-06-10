@@ -344,7 +344,7 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       router.push(isRecruiter ? ROUTES.RECRUITER_DASHBOARD : ROUTES.HOME);
     } catch (error) {
       showErrorAlert(
-        error instanceof Error ? error.message : "KhÃ´ng thá»ƒ Ä‘Äƒng nháº­p.",
+        error instanceof Error ? error.message : "Không thể đăng nhập.",
       );
     } finally {
       setIsSubmitting(false);
@@ -392,7 +392,7 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       showErrorAlert(
         error instanceof Error
           ? error.message
-          : "ÄÄƒng kÃ½ thÃ nh cÃ´ng. Vui lÃ²ng kiá»ƒm tra email Ä‘á»ƒ xÃ¡c thá»±c OTP.",
+          : "Vui lòng kiểm tra email để xác thực OTP.",
       );
     } finally {
       setIsSubmitting(false);
@@ -418,9 +418,9 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       });
 
       await showAppAlert({
-        confirmButtonText: "ÄÄƒng nháº­p",
-        text: "TÃ i khoáº£n cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c thá»±c. Tiáº¿p tá»¥c Ä‘Äƒng nháº­p Ä‘á»ƒ báº¯t Ä‘áº§u sá»­ dá»¥ng FUSE.",
-        title: "Táº¡o tÃ i khoáº£n thÃ nh cÃ´ng",
+        confirmButtonText: "Đăng nhập",
+        text: "Tài khoản của bạn đã được xác thực. Tiếp tục đăng nhập để bắt đầu sử dụng FUSE.",
+        title: "Tạo tài khoản thành công",
       });
 
       if (typeof window !== "undefined") {
@@ -434,7 +434,7 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       router.push(loginTarget);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "XÃ¡c nháº­n tháº¥t báº¡i";
+        error instanceof Error ? error.message : "Xác nhận thất bại";
 
       setOtpError(message);
       await showErrorAlert(message);
@@ -453,7 +453,9 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
     } catch (error) {
       showErrorAlert(
-        error instanceof Error ? error.message : "KhÃ´ng thá»ƒ gá»­i láº¡i OTP.",
+        error instanceof Error
+          ? error.message
+          : "KhÃ´ng thá»ƒ gá»­i láº¡i OTP.",
       );
     }
   }

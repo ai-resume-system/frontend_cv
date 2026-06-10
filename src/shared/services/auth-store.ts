@@ -4,9 +4,9 @@ import {
 } from "@/shared/constants/constants/local-storage";
 import type { AuthUser } from "@/shared/types/account";
 import {
-  JOBSEEKER_ROUTES,
-  RECRUITER_ROUTES,
-} from "../constants/constants/routes";
+  buildAuthRedirectPath,
+  getProtectedFallbackRouteForPath,
+} from "./auth-client";
 
 export const AUTH_STORE_CHANGED_EVENT = "auth-store-changed";
 export const AUTH_SYNC_CHANNEL_NAME = "auth-sync";
@@ -243,15 +243,12 @@ export function redirectToLogin(): void {
   }
 
   const currentPath = window.location.pathname;
-  const isRecruiter = currentPath.startsWith("/recruiter");
-  const loginUrl = isRecruiter
-    ? RECRUITER_ROUTES.LOGIN
-    : JOBSEEKER_ROUTES.LOGIN;
+  const loginUrl = getProtectedFallbackRouteForPath(currentPath);
 
   if (currentPath !== loginUrl) {
     window.sessionStorage.setItem(
       SESSION_STORAGE_KEYS.AUTH_REDIRECT_PATH,
-      currentPath,
+      buildAuthRedirectPath(currentPath, window.location.search),
     );
   }
 

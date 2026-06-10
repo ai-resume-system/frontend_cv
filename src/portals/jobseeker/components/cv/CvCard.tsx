@@ -4,18 +4,16 @@ import {
   Copy,
   Download,
   Edit2,
-  Eye,
   FileText,
   Loader2,
   MoreVertical,
-  Share2,
-  Sparkles,
   Star,
   Trash2,
 } from "lucide-react";
 import { useEffect } from "react";
 
 import { Badge } from "@/shared/components/ui/Badge";
+import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { PROCESSING_STATUS_CONFIG } from "@/shared/constants/enums/cv.enum";
 import { cn } from "@/shared/lib/utils/cn";
 import type { CvItem } from "@/shared/types/cv";
@@ -53,7 +51,6 @@ interface CvCardProps {
 
 export function CvCard({
   cv,
-  isPreviewing,
   isDownloading,
   isMenuOpen,
   onMenuToggle,
@@ -127,19 +124,6 @@ export function CvCard({
               : "opacity-0 invisible group-hover:opacity-100 group-hover:visible z-10",
           )}
         >
-          {/* <button
-            onClick={() => onPreview(cv.id)}
-            disabled={isPreviewing}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-700 shadow-md transition hover:bg-slate-50 disabled:opacity-60 active:scale-95 cursor-pointer"
-            type="button"
-          >
-            {isPreviewing ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Eye className="h-3.5 w-3.5 text-slate-500" />
-            )}
-          </button> */}
-
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -217,7 +201,7 @@ export function CvCard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col flex-1 gap-4">
+      <div className="mt-4 flex flex-col flex-1 gap-3">
         <div className="flex items-start justify-between gap-2">
           <h4
             className="font-bold leading-tight text-slate-800 line-clamp-1 flex-1"
@@ -225,16 +209,6 @@ export function CvCard({
           >
             {cv.title ?? "Hồ sơ không tên"}
           </h4>
-
-          <button
-            onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
-            disabled={processingStatus === "processing"}
-            className="shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-primary bg-primary/10 hover:bg-primary/20 transition disabled:opacity-50 cursor-pointer"
-            title="Xem kết quả phân tích hồ sơ"
-            type="button"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-          </button>
         </div>
 
         <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
@@ -249,6 +223,40 @@ export function CvCard({
           >
             {statusConfig.label}
           </Badge>
+        </div>
+
+        <div className="mt-2 pt-3 border-t border-slate-100 flex gap-2 w-full">
+          {processingStatus === "completed" ? (
+            <>
+              <BaseButton
+                variant="ai"
+                onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
+                className="flex-1 hover:bg-ai-strong/70!"
+                type="button"
+              >
+                Xem kết quả
+              </BaseButton>
+              <BaseButton
+                variant="secondary"
+                onClick={() => onNavigateToAnalysis(cv.id, "pending")}
+                title="Phân tích lại bằng AI"
+                type="button"
+              >
+                Phân tích lại
+              </BaseButton>
+            </>
+          ) : (
+            <BaseButton
+              onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
+              disabled={processingStatus === "processing"}
+              className="w-full py-2 px-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-md transition cursor-pointer text-center"
+              type="button"
+            >
+              {processingStatus === "processing"
+                ? "Đang phân tích bằng AI..."
+                : "Phân tích hồ sơ"}
+            </BaseButton>
+          )}
         </div>
       </div>
     </article>

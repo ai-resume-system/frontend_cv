@@ -226,6 +226,13 @@ h3 {
   }
 }
 
+@utility scrollbar-none {
+  scrollbar-width: none; /* Cho Firefox */
+  &::-webkit-scrollbar {
+    display: none;       /* Cho Chrome, Safari, Edge */
+  }
+}
+
 /* ------------------------------------------------------ */
 /* Custom React Toastify to match mockup (Premium UI)     */
 /* ------------------------------------------------------ */

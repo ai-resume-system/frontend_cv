@@ -50,7 +50,9 @@ export function useCareerCategories({
 
         const request =
           careerCategoryRequests.get(cacheKey) ??
-          fetchCareerCategories({ page, limit });
+          fetchCareerCategories({ page, limit }).then(
+            (result) => result.categories,
+          ); // Hiện tại chỉ lấy danh sách để lọc không cần phân trang
 
         careerCategoryRequests.set(cacheKey, request);
 

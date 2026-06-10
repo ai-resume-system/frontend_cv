@@ -304,11 +304,6 @@ export function RecruiterDashboardPage() {
                           <span className="rounded-full bg-secondary-soft px-3 py-1 text-[11px] font-semibold text-secondary">
                             {job.applicationCount} hồ sơ
                           </span>
-                          <span className="rounded-full bg-tertiary-fixed/25 px-3 py-1 text-[11px] font-semibold text-tertiary">
-                            {job.matchingAverage === null
-                              ? "AI N/A"
-                              : `AI ${Math.round(job.matchingAverage)}%`}
-                          </span>
                         </div>
                       </div>
                     </article>

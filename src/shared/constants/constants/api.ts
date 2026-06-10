@@ -45,6 +45,12 @@ export const API_ROUTES = {
     DEFAULT: (id: string) => `${API_PREFIX}/cvs/${id}/default`,
     ANALYZE: (id: string) => `${API_PREFIX}/cvs/${id}/analyze`,
     ANALYSIS: (id: string) => `${API_PREFIX}/cvs/${id}/analysis`,
+    RECOMMENDED_JOBS: (id: string) => `${API_PREFIX}/cvs/${id}/recommended-jobs`,
+  },
+  CV_ANALYSIS_PREVIEW: {
+    UPLOAD_TEMP: `${API_PREFIX}/cv-analysis/upload-temp`,
+    PREVIEW: `${API_PREFIX}/cv-analysis/preview`,
+    SAVE_PREVIEW: `${API_PREFIX}/cv-analysis/save-preview`,
   },
   JOB_PUBLIC: {
     BASE: `${API_PREFIX}/jobs`,

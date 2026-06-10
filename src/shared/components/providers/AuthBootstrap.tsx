@@ -3,21 +3,19 @@
 import { FileText, Search } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
 import { fetchCurrentUser } from "@/shared/services/account.service";
 import { refreshAccessToken } from "@/shared/services/api-service";
-import { getExpectedRoleForPath } from "@/shared/services/auth-client";
 import {
   clearAuthStore,
   clearAuthStoreFromSync,
   getAccessToken,
   getCurrentUser,
   hydrateAuthStoreFromStorage,
-  redirectToLogin,
   setCurrentUser,
   shouldRefreshAccessToken,
   subscribeToAuthSync,
 } from "@/shared/services/auth-store";
-import { ACCESS_TOKEN_REFRESH_BUFFER_MS } from "@/shared/constants/constants/auth-client";
 
 export const AUTH_BOOTSTRAP_READY_EVENT = "auth-bootstrap-ready";
 
@@ -39,35 +37,41 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
   useEffect(() => {
     let isActive = true;
 
+    async function syncCurrentUserFromToken(): Promise<void> {
+      const accessToken = getAccessToken();
+
+      if (!accessToken) {
+        if (isActive) {
+          setCurrentUser(null);
+        }
+        return;
+      }
+
+      if (getCurrentUser()) {
+        return;
+      }
+
+      const hydratedUser = await fetchCurrentUser();
+
+      if (isActive) {
+        setCurrentUser(hydratedUser);
+      }
+    }
+
     async function bootstrapAuth() {
-      const expectedRole = getExpectedRoleForPath();
       hydrateAuthStoreFromStorage();
 
       try {
         const initialToken = getAccessToken();
 
         if (
-          !initialToken ||
+          initialToken &&
           shouldRefreshAccessToken(ACCESS_TOKEN_REFRESH_BUFFER_MS)
         ) {
           await refreshAccessToken();
         }
 
-        const accessToken = getAccessToken();
-        const currentUser = getCurrentUser();
-
-        if (accessToken && !currentUser) {
-          const hydratedUser = await fetchCurrentUser();
-
-          if (isActive) {
-            if (hydratedUser.role !== expectedRole) {
-              clearAuthStore();
-              redirectToLogin();
-              return;
-            }
-            setCurrentUser(hydratedUser);
-          }
-        }
+        await syncCurrentUserFromToken();
       } catch (error) {
         const apiError = error as Error & { status?: number };
 
@@ -76,13 +80,6 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
         } else if (isActive) {
           setCurrentUser(null);
         }
-      }
-
-      const latestUser = getCurrentUser();
-      if (latestUser && latestUser.role !== expectedRole) {
-        clearAuthStore();
-        redirectToLogin();
-        return;
       }
 
       if (!isActive) {
@@ -102,6 +99,15 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
       }
 
       hydrateAuthStoreFromStorage();
+      void syncCurrentUserFromToken().catch((error: unknown) => {
+        const apiError = error as Error & { status?: number };
+
+        if (apiError.status === 401 || apiError.status === 403) {
+          clearAuthStoreFromSync();
+        } else if (isActive) {
+          setCurrentUser(null);
+        }
+      });
     });
 
     return () => {
@@ -159,7 +165,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
           </div>
 
           <span className="text-sm font-medium tracking-wide text-slate-400">
-            Đang tải phiên làm việc...
+            Äang táº£i phiÃªn lÃ m viá»‡c...
           </span>
         </div>
       </div>
