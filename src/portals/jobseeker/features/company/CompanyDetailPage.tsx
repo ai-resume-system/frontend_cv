@@ -9,7 +9,7 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { JobCard } from "@/shared/components/layouts/JobCard";
 import { BaseField } from "@/shared/components/ui/BaseField";
@@ -17,6 +17,7 @@ import { JobCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import { useCompanyJobs } from "@/shared/hooks/data/useCompanyJobs";
 import { resolveMediaUrl } from "@/shared/lib/utils/resolveMediaUrl";
 import type { CompanyDto } from "@/shared/types/company";
+import { BaseButton } from "@/shared/components/ui/BaseButton";
 
 interface CompanyDetailPageProps {
   company: CompanyDto;
@@ -86,6 +87,30 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
   const [appliedFilters, setAppliedFilters] =
     useState<CompanyJobFilters>(INITIAL_FILTERS);
   const [expanded, setExpanded] = useState(false);
+  const [isContentOverflowing, setIsContentOverflowing] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = descriptionRef.current;
+    if (!element) return;
+
+    const checkOverflow = () => {
+      if (!expanded) {
+        setIsContentOverflowing(element.scrollHeight > element.clientHeight);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkOverflow();
+    });
+    resizeObserver.observe(element);
+
+    checkOverflow();
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [company.description, expanded]);
 
   const companySlug = company.slug ?? "";
   const {
@@ -112,10 +137,10 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
 
   return (
     <section className="bg-background pb-14">
-      <div className="border-b border-surface-container-high bg-surface-container-low">
+      <div className="border-b border-surface-container-high bg-surface-container-high">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-[32px] border border-surface-container-high bg-white shadow-sm">
-            <div className="h-48 bg-linear-to-r from-primary/15 via-white to-secondary/10">
+            <div className="h-50 bg-linear-to-r from-primary/15 via-white to-secondary/10">
               {bannerUrl ? (
                 <img
                   alt={company.name ?? "Công ty"}
@@ -126,17 +151,17 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
             </div>
 
             <div className="px-6 pb-6 sm:px-8">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
-                <div className="flex h-28 w-28 items-center justify-center rounded-[28px] border border-surface-container-high bg-white shadow-sm">
+              <div className="flex flex-col gap-2 xl:gap-5 sm:flex-row sm:items-end">
+                <div className="relative -mt-5 xl:-mt-15  mb-0 sm:mb-2 z-10 flex shrink-0">
                   <img
                     alt={company.name ?? "Logo công ty"}
-                    className="h-20 w-20 rounded-2xl object-cover"
+                    className="h-20 w-20 sm:h-28 sm:w-28 aspect-square rounded-2xl border-2 border-white bg-white object-cover shadow-md transition-all"
                     src={logoUrl ?? "/logo.png"}
                   />
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-3xl font-bold uppercase tracking-tight text-primary sm:text-4xl">
+                <div className="mt-2 md:mt-4 xl:mt-6 flex-1 min-w-0">
+                  <h1 className="text-2xl font-bold uppercase tracking-tight md:text-3xl">
                     {company.name ?? "Công ty đang cập nhật"}
                   </h1>
 
@@ -149,9 +174,13 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
                     >
                       <Globe className="h-4 w-4 text-primary" />
                       <span>{company.websiteUrl}</span>
-                      <ExternalLink className="h-4 w-4" />
                     </a>
-                  ) : null}
+                  ) : (
+                    <span className="mt-3 inline-flex items-center gap-2 text-sm text-on-surface-variant transition">
+                      <Globe className="h-4 w-4 text-primary" />
+                      <span>Chưa cập nhật website</span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -165,17 +194,21 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
             className="rounded-[28px] border border-surface-container-high bg-white p-6 shadow-sm"
             id="company-overview"
           >
-            <h2 className="text-2xl font-bold text-primary">
-              Giới thiệu công ty
-            </h2>
+            <h2 className="text-2xl font-bold">Giới thiệu công ty</h2>
             <div className="mt-5 space-y-4 text-[15px] leading-7 text-on-surface-variant">
-              <p className={expanded ? undefined : "line-clamp-6"}>
-                {company.description ??
-                  "Thông tin giới thiệu của doanh nghiệp đang được cập nhật."}
-              </p>
-              {company.description ? (
+              <div
+                ref={descriptionRef}
+                className={`prose prose-sm max-w-none text-on-surface-variant ${expanded ? "" : "line-clamp-6"}`}
+                dangerouslySetInnerHTML={{
+                  __html: (
+                    company.description ??
+                    "Thông tin giới thiệu của doanh nghiệp đang được cập nhật."
+                  ).replace(/&nbsp;/g, " "),
+                }}
+              />
+              {company.description && isContentOverflowing ? (
                 <button
-                  className="text-sm font-semibold text-primary transition hover:text-primary-hover"
+                  className="text-sm font-semibold text-primary transition hover:text-primary-hover cursor-pointer"
                   onClick={() => setExpanded((currentState) => !currentState)}
                   type="button"
                 >
@@ -190,9 +223,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
             id="company-jobs"
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="text-2xl font-bold text-primary">
-                Tin tuyển dụng
-              </h2>
+              <h2 className="text-2xl font-bold">Tin tuyển dụng</h2>
             </div>
 
             <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto]">
@@ -207,6 +238,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
                     q: event.target.value,
                   }))
                 }
+                className="h-11!"
               />
               <BaseField
                 id="company-job-search-address"
@@ -219,14 +251,15 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
                     address: event.target.value,
                   }))
                 }
+                className="h-11!"
               />
-              <button
-                className="inline-flex h-14 items-center justify-center rounded-2xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-primary-hover cursor-pointer"
-                onClick={() => setAppliedFilters(filters)}
+              <BaseButton
+                variant="primary"
                 type="button"
+                onClick={() => setAppliedFilters(filters)}
               >
                 Tìm kiếm
-              </button>
+              </BaseButton>
             </div>
 
             <div className="mt-6 space-y-4">
@@ -249,7 +282,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
 
         <aside className="space-y-6">
           <section className="rounded-[28px] border border-surface-container-high bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-primary">Thông tin chung</h2>
+            <h2 className="text-2xl font-bold">Thông tin chung</h2>
             <div className="mt-5 space-y-5">
               <div className="flex gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-container text-primary">

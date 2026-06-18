@@ -76,12 +76,11 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-300 p-6 shadow-md transition duration-300 hover:border-primary/40 hover:shadow-lg"
     >
       <div className="flex items-start gap-4 w-full">
-        {/* Logo */}
         <div className="flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-sm">
           <img
             src={job?.company?.logoUrl ?? "/logo.png"}
             alt={job.company?.name ?? "Doanh nghiệp"}
-            className="h-full w-full object-cover"
+            className="h-full w-full aspect-square object-cover"
           />
         </div>
 

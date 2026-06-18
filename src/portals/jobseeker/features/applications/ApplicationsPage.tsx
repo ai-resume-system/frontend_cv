@@ -25,8 +25,8 @@ import { useMyApplications } from "../../../../shared/hooks/data/useMyApplicatio
 import { ApplicationCard } from "../../components/applications/ApplicationCard";
 import { ApplicationCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import type { JobSeekerApplicationApiItem } from "@/shared/types/application";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
 
-// Tabs lọc trạng thái ứng tuyển
 const FILTER_TABS = [
   { label: "Tất cả", value: "" },
   { label: "Vừa ứng tuyển", value: EJobApplicationStatus.APPLIED },
@@ -62,28 +62,23 @@ export function ApplicationsPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Đọc các giá trị lọc từ URL
   const page = Number(searchParams.get("page") ?? "1");
   const status = searchParams.get("status") ?? "";
   const sort = searchParams.get("sort") ?? "newest";
 
-  // State xử lý dropdown Sort
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
-  // State xử lý Modal phỏng vấn
   const [activeInterviewApp, setActiveInterviewApp] =
     useState<JobSeekerApplicationApiItem | null>(null);
 
-  // State xử lý Modal xác nhận rút đơn
   const [withdrawAppId, setWithdrawAppId] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
-  // Gọi API thông qua custom hook
   const { applications, pagination, loading, error, refetch } =
     useMyApplications({
       page,
-      limit: 1, // 6 items per page (Grid 3x2)
+      limit: 6,
       status: status || undefined,
       sortBy: "createdAt",
       sortOrder: sort === "oldest" ? "ASC" : "DESC",
@@ -92,7 +87,6 @@ export function ApplicationsPage() {
   const totalItems = pagination?.totalItems ?? applications.length;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
-  // Đóng dropdown sort khi click ra ngoài
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -114,7 +108,7 @@ export function ApplicationsPage() {
     } else {
       nextParams.delete("status");
     }
-    nextParams.set("page", "1"); // Reset về trang 1
+    nextParams.set("page", "1");
     router.push(`${pathname}?${nextParams.toString()}`);
   };
 
@@ -153,19 +147,12 @@ export function ApplicationsPage() {
   return (
     <section className="bg-slate-50 min-h-screen py-10 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header Section */}
-        <div className="mb-10">
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl font-display">
-            Danh sách việc làm đã ứng tuyển
-          </h1>
-          <p className="mt-2.5 text-sm text-slate-500 max-w-2xl leading-relaxed">
-            Theo dõi, cập nhật tiến trình và quản lý các cơ hội nghề nghiệp bạn
-            đã nộp hồ sơ.
-          </p>
-        </div>
+        <h1 className="mt-2 mb-10 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl font-display">
+          Danh sách việc làm đã ứng tuyển
+        </h1>
 
         {/* Filter & Sort Bar */}
-        <div className="mb-8 flex flex-col gap-4 border-b border-gray-300 pb-3 md:flex-row md:items-center md:justify-between">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Tabs */}
           <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
             {FILTER_TABS.map((tab) => {
@@ -233,14 +220,6 @@ export function ApplicationsPage() {
           </div>
         </div>
 
-        {/* Content Section */}
-        {error ? (
-          <div className="mb-8 rounded-3xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 shadow-sm">
-            <h3 className="font-bold">Đã xảy ra lỗi khi tải dữ liệu</h3>
-            <p className="mt-1">{error}</p>
-          </div>
-        ) : null}
-
         {loading ? (
           <ApplicationCardSkeleton length={6} />
         ) : applications.length > 0 ? (
@@ -255,52 +234,28 @@ export function ApplicationsPage() {
             ))}
           </div>
         ) : (
-          /* Empty State */
-          <div className="rounded-3xl border-2 border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
-            <div className="flex justify-center">
-              <Image
-                alt="Không có đơn ứng tuyển"
-                height={120}
-                priority
-                src="/no_data.png"
-                width={120}
-                className="opacity-75"
-              />
-            </div>
-            <h2 className="mt-5 text-xl font-bold text-slate-800">
-              Chưa có hồ sơ ứng tuyển
-            </h2>
-            <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-              Bạn chưa ứng tuyển công việc nào ở bộ lọc này. Hãy tiếp tục tìm
-              kiếm và ứng tuyển các cơ hội việc làm phù hợp.
-            </p>
-            <div className="mt-6 flex justify-center">
-              <BaseButton
-                variant="primary"
-                href={ROUTES.JOBS}
-                className="rounded-2xl px-6 py-2.5 font-bold shadow-sm"
-              >
-                Khám phá việc làm ngay
-              </BaseButton>
-            </div>
-          </div>
+          <StateLayout
+            type="empty"
+            title="Chưa có hồ sơ ứng tuyển"
+            description="Bạn chưa ứng tuyển công việc nào ở bộ lọc này. Hãy tiếp tục tìm kiếm và ứng tuyển các cơ hội việc làm phù hợp."
+            action={{
+              label: "Khám phá việc làm ngay",
+              href: ROUTES.JOBS,
+            }}
+          />
         )}
-
-        {/* Footer Layout: Banner & Pagination */}
-        <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3 items-end">
-          {/* Pagination */}
-          <div className="lg:col-span-1 flex justify-center lg:justify-end pb-2">
-            {totalPages > 1 && (
-              <BasePagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                variant="text"
-              />
-            )}
-          </div>
-        </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-12 flex justify-center items-center pb-8">
+          <BasePagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            variant="text"
+          />
+        </div>
+      )}
 
       {/* Modal 1: Chi tiết lịch hẹn phỏng vấn */}
       {activeInterviewApp && (

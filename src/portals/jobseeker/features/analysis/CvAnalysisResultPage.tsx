@@ -24,56 +24,10 @@ import {
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 import type { JobApiItem } from "@/shared/types/job";
 import { JobCard } from "@/shared/components/layouts/JobCard";
+import { ScoreGauge, getScoreLabel } from "@/shared/components/ui/ScoreGauge";
 
 interface CvAnalysisResultPageProps {
   cvId: string;
-}
-
-function ScoreGauge({ score }: { score: number }) {
-  const radius = 58;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  return (
-    <div className="relative w-32 h-32 flex-shrink-0">
-      <svg className="w-full h-full transform -rotate-90">
-        <circle
-          className="text-surface-container-highest"
-          cx="64"
-          cy="64"
-          fill="transparent"
-          r={radius}
-          stroke="currentColor"
-          strokeWidth="12"
-        />
-        <circle
-          className="transition-all duration-1000"
-          cx="64"
-          cy="64"
-          fill="transparent"
-          r={radius}
-          stroke="#4edea3"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeWidth="12"
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-extrabold text-on-surface">{score}</span>
-        <span className="text-[10px] text-on-surface-variant font-semibold uppercase">
-          Điểm số
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function getScoreLabel(score: number): { label: string; color: string } {
-  if (score >= 85) return { label: "Xuất sắc", color: "text-tertiary" };
-  if (score >= 70) return { label: "Tốt", color: "text-primary" };
-  if (score >= 50) return { label: "Trung bình", color: "text-yellow-600" };
-  return { label: "Cần cải thiện", color: "text-error" };
 }
 
 export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
@@ -174,7 +128,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
   }
 
   const score = analysis.score ?? 0;
-  const scoreInfo = getScoreLabel(score);
+  const scoreInfo = getScoreLabel(score, "theme");
 
   async function handlePreview() {
     try {
@@ -303,7 +257,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-8">
-                <ScoreGauge score={score} />
+                <ScoreGauge score={score} variant="theme" />
                 <div className="flex-1 w-full space-y-4">
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
@@ -541,7 +495,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </Link>
               <Link
                 href={JOBSEEKER_ROUTES.JOBS}
-                className="flex-1 py-4 px-4 bg-gradient-to-br from-primary to-primary-container rounded-xl text-white font-bold text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-4 px-4 bg-linear-to-br from-primary to-primary-container rounded-xl text-white font-bold text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2"
               >
                 <Sparkles className="h-4 w-4" />
                 Tìm việc phù hợp

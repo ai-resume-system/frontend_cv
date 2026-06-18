@@ -11,6 +11,7 @@ import { useCompanies } from "@/shared/hooks/data/useCompanies";
 import Image from "next/image";
 import { CompanyCardSkeleton } from "@/shared/components/ui/CardSkelton";
 import { cn } from "@/shared/lib/utils/cn";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
 
 interface CompanyListFilterState {
   q: string;
@@ -179,20 +180,12 @@ export function CompanyListPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-[28px] border border-dashed border-surface-container-high bg-white px-6 py-16 text-center">
-            <div className="flex items-center justify-center">
-              <Image
-                alt="Không có dữ liệu"
-                height={100}
-                priority
-                src="/error_data.png"
-                width={100}
-              />
-            </div>
-            <h4 className="mt-4 text-base font-semibold text-foreground">
-              Không thể tải danh sách công ty lúc này.
-            </h4>
-          </div>
+          <StateLayout
+            type="error"
+            title=" Không thể tải danh sách công ty lúc này"
+            description="Không thể tải danh sách việc làm do lỗi kết nối máy chủ FUSE. Vui lòng kiểm tra lại mạng hoặc liên hệ admin."
+            noBorder={false}
+          />
         ) : companies.length > 0 ? (
           <>
             <div
@@ -220,23 +213,19 @@ export function CompanyListPage() {
             />
           </>
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex items-center justify-center">
-              <Image
-                alt="Không có dữ liệu"
-                height={100}
-                priority
-                src="/no_data.png"
-                width={100}
-              />
-            </div>
-            <h4 className="mt-4 text-base font-semibold text-foreground">
-              Chưa tìm thấy công ty phù hợp
-            </h4>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm
-            </p>
-          </div>
+          <StateLayout
+            type="empty"
+            title=" Chưa tìm thấy công ty phù hợp"
+            description={
+              filters.q
+                ? `Không tìm thấy kết quả nào phù hợp cho "${filters.q}".`
+                : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."
+            }
+            noBorder
+            imageWidth={100}
+            imageHeight={100}
+            className="col-span-full"
+          />
         )}
       </div>
     </section>

@@ -234,9 +234,10 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                 <div
                   className="prose prose-sm max-w-none mt-6 text-sm leading-7 text-slate-600 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-5 [&>ol]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&_a]:text-primary [&_a]:underline"
                   dangerouslySetInnerHTML={{
-                    __html:
+                    __html: (
                       job.description ||
-                      "<p>Nhà tuyển dụng chưa cập nhật mô tả chi tiết.</p>",
+                      "<p>Nhà tuyển dụng chưa cập nhật mô tả chi tiết.</p>"
+                    ).replace(/&nbsp;/g, " "),
                   }}
                 />
 

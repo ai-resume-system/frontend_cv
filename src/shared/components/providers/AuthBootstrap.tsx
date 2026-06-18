@@ -165,7 +165,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
           </div>
 
           <span className="text-sm font-medium tracking-wide text-slate-400">
-            Äang táº£i phiÃªn lÃ m viá»‡c...
+            Đang tải phiên làm việc...
           </span>
         </div>
       </div>

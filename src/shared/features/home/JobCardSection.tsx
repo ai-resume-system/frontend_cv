@@ -110,7 +110,7 @@ function JobCardContent({
       <div className="mb-5 flex items-start justify-between gap-2">
         <img
           alt={company}
-          className="h-[70px] w-[70px] rounded-2xl border border-gray-300 object-contain transition-colors"
+          className="h-[70px] w-[70px] aspect-square rounded-xl border-2 border-gray-300 object-cover transition-colors"
           src={logoUrl ?? "/logo.png"}
         />
       </div>

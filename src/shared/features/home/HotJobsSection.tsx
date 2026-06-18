@@ -33,6 +33,7 @@ import type { Job } from "@/shared/types/job";
 
 import { JobCardLink } from "./JobCardSection";
 import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp đang cập nhật";
@@ -226,23 +227,23 @@ export function HotJobsSection() {
     <section className="bg-surface-container-high px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-end justify-between gap-6">
-          <div>
-            <h2 className="font-display text-2xl font-bold sm:text-3xl">
+          <div className="flex flex-col gap-1.5">
+            <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">
               Việc làm HOT nhất
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-sm font-normal text-slate-500">
               Đề xuất từ hệ thống FUSE
             </p>
           </div>
+
           <Link
             className="flex shrink-0 items-center gap-1.5 text-sm font-bold text-primary transition-all hover:gap-2 hover:text-primary-hover"
             href={ROUTES.JOBS}
           >
-            Xem thêm
+            Xem tất cả
             <ArrowRightIcon className="h-4 w-4" />
           </Link>
         </div>
-
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative shrink-0" ref={filterMenuRef}>
             <button
@@ -421,27 +422,21 @@ export function HotJobsSection() {
                   </div>
                 ))
               ) : (
-                <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                  <div className="flex items-center justify-center">
-                    <Image
-                      alt="Không có dữ liệu"
-                      height={100}
-                      priority
-                      src="/no_data.png"
-                      width={100}
-                    />
-                  </div>
-                  <h4 className="mt-4 text-lg font-semibold text-foreground">
-                    Không có việc làm phù hợp
-                  </h4>
-                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                    {activeFilterKey === "address" && filters.address
+                <StateLayout
+                  type="empty"
+                  title="Không có việc làm phù hợp"
+                  description={
+                    activeFilterKey === "address" && filters.address
                       ? `Không tìm thấy kết quả nào tại địa điểm "${filters.address}".`
                       : activeFilterKey === "category" && categoriesError
                         ? "Chưa tải được danh sách ngành nghề để lọc."
-                        : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."}
-                  </p>
-                </div>
+                        : "Thử thay đổi tiêu chí bộ lọc khác để tìm kiếm."
+                  }
+                  noBorder
+                  imageWidth={100}
+                  imageHeight={100}
+                  className="col-span-full"
+                />
               )}
             </div>
 

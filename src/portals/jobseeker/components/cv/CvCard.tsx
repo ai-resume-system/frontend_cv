@@ -80,7 +80,7 @@ export function CvCard({
   }, [isMenuOpen, onCloseMenu]);
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-300 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
+    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md">
       <div
         className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-slate-100/70 flex items-center justify-center border border-slate-100 cursor-pointer"
         onClick={() => onPreview(cv.id)}
@@ -107,13 +107,18 @@ export function CvCard({
           className={cn(
             "absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center transition hover:scale-110 active:scale-95 cursor-pointer",
             cv.isDefault
-              ? "text-amber-400"
-              : "text-slate-400 hover:text-slate-600",
+              ? "text-amber-500"
+              : "text-slate-500 hover:text-slate-700",
           )}
           title={cv.isDefault ? "Hồ sơ mặc định" : "Đặt làm mặc định"}
           type="button"
         >
-          <Star className={cn("h-6 w-6", cv.isDefault && "fill-amber-400")} />
+          <Star
+            className={cn(
+              "h-6 w-6",
+              cv.isDefault && "fill-amber-500 text-amber-500",
+            )}
+          />
         </button>
 
         <div
@@ -212,7 +217,7 @@ export function CvCard({
         </div>
 
         <div className="mt-1 flex items-center justify-between gap-2 flex-wrap">
-          <span className="text-sm text-slate-500">
+          <span className="text-sm font-medium text-slate-400">
             Cập nhật: {formatDateTime(cv.updatedAt)}
           </span>
           <Badge
@@ -225,13 +230,13 @@ export function CvCard({
           </Badge>
         </div>
 
-        <div className="mt-2 pt-3 border-t border-slate-100 flex gap-2 w-full">
+        <div className="mt-2 pt-3 border-t border-slate-200 flex gap-2 w-full">
           {processingStatus === "completed" ? (
             <>
               <BaseButton
-                variant="ai"
+                variant="primary"
                 onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
-                className="flex-1 hover:bg-ai-strong/70!"
+                className="flex-1 rounded-xl text-xs font-bold"
                 type="button"
               >
                 Xem kết quả
@@ -240,6 +245,7 @@ export function CvCard({
                 variant="secondary"
                 onClick={() => onNavigateToAnalysis(cv.id, "pending")}
                 title="Phân tích lại bằng AI"
+                className="rounded-xl text-xs font-bold border-slate-400 hover:border-primary/50 text-slate-900"
                 type="button"
               >
                 Phân tích lại
@@ -249,7 +255,7 @@ export function CvCard({
             <BaseButton
               onClick={() => onNavigateToAnalysis(cv.id, processingStatus)}
               disabled={processingStatus === "processing"}
-              className="w-full py-2 px-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-md transition cursor-pointer text-center"
+              className="w-full py-2 px-3 text-sm font-bold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-xl transition cursor-pointer text-center"
               type="button"
             >
               {processingStatus === "processing"

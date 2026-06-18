@@ -12,7 +12,7 @@ export const EJobApplicationStatusLabels: Record<
   EJobApplicationStatus,
   string
 > = {
-  [EJobApplicationStatus.APPLIED]: "Đã ứng tuyển",
+  [EJobApplicationStatus.APPLIED]: "Vừa ứng tuyển",
   [EJobApplicationStatus.REVIEWING]: "Đang xem xét",
   [EJobApplicationStatus.INTERVIEW]: "Đã lên lịch phỏng vấn",
   [EJobApplicationStatus.REJECTED]: "Đã từ chối",

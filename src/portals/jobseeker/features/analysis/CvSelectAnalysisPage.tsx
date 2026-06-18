@@ -27,6 +27,8 @@ import {
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 import { PreviewAnalysisModal } from "./PreviewAnalysisModal";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
+
 
 const ACCEPTED_TYPES = [
   "application/pdf",
@@ -199,8 +201,8 @@ export function CvSelectAnalysisPage() {
                 className={cn(
                   "relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition-all text-center bg-white shadow-xs hover:shadow-md",
                   isDragging
-                    ? "border-primary bg-primary/0.02"
-                    : "border-slate-300 bg-slate-50/30 hover:border-primary hover:bg-slate-50/60",
+                    ? "border-blue-700 bg-blue-50/30"
+                    : "border-slate-400 bg-slate-100/30 hover:border-blue-700 hover:bg-slate-100/60",
                   isUploading && "pointer-events-none opacity-70",
                 )}
                 onClick={() => fileInputRef.current?.click()}
@@ -225,7 +227,7 @@ export function CvSelectAnalysisPage() {
                   Chọn hồ sơ từ máy tính của bạn, hoặc kéo và thả CV của bạn vào
                   đây
                 </p>
-                <p className="mb-4 text-xs text-slate-400">
+                <p className="mb-4 text-xs font-medium text-slate-600">
                   Hỗ trợ định dạng PDF, DOCX (Dung lượng tối đa{" "}
                   {MAX_FILE_SIZE_MB}MB)
                 </p>
@@ -256,7 +258,14 @@ export function CvSelectAnalysisPage() {
                 const isSelectedDoc =
                   selectedFileExt === "DOC" || selectedFileExt === "DOCX";
                 return (
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 transition-all duration-300 select-none shadow-xs">
+                  <div
+                    className={cn(
+                      "flex items-center justify-between rounded-2xl border p-4 transition-all duration-300 select-none",
+                      selectedUploadFile
+                        ? "border-primary bg-primary/0.03 shadow-[0_4px_12px_rgba(var(--color-primary-rgb),0.08)]"
+                        : "border-slate-200 bg-white shadow-xs",
+                    )}
+                  >
                     <div className="flex items-center gap-4 min-w-0 flex-1">
                       <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100">
                         <FileText className="h-10 w-10 text-slate-400" />
@@ -279,8 +288,11 @@ export function CvSelectAnalysisPage() {
                           <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                             Tệp mới chọn
                           </span>
+                          <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center text-green-600">
+                            <CheckCircle className="h-4 w-4 stroke-3" />
+                          </div>
                         </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs font-medium text-slate-600">
                           <span>
                             Dung lượng:{" "}
                             {(selectedUploadFile.size / (1024 * 1024)).toFixed(
@@ -355,7 +367,7 @@ export function CvSelectAnalysisPage() {
               <div className="space-y-4">
                 <div className="max-h-[300px] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
                   {sortedCvs.map((cv) => {
-                    const isSelected = cv.id === selectedCvId;
+                    const isSelected = cv.id === selectedCvId && !selectedUploadFile;
                     const fileExt = (
                       cv.fileExtension?.replace(".", "") || "PDF"
                     ).toUpperCase();
@@ -367,7 +379,12 @@ export function CvSelectAnalysisPage() {
 
                     return (
                       <div
-                        onClick={() => setSelectedCvId(cv.id)}
+                        onClick={() => {
+                          setSelectedCvId(cv.id);
+                          setSelectedUploadFile(null);
+                          setTempFileKey(null);
+                          setTempAnalysisResult(null);
+                        }}
                         className={cn(
                           "flex items-center justify-between rounded-2xl border p-4 cursor-pointer transition-all duration-300 select-none",
                           isSelected
@@ -442,14 +459,14 @@ export function CvSelectAnalysisPage() {
                                     ROUTES.JOB_SEEKER_ANALYSIS_RESULT(cv.id),
                                   )
                                 }
-                                className="px-2.5 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
+                                className="px-2.5 py-1.5 text-xs font-bold text-blue-900 border border-blue-300 bg-blue-50 hover:bg-blue-100/80 rounded-lg shadow-2xs transition cursor-pointer"
                                 type="button"
                               >
                                 Xem kết quả
                               </button>
                               <button
                                 onClick={() => handleStartAnalysis(cv)}
-                                className="px-2.5 py-1.5 text-xs font-bold text-slate-500 border border-slate-200 bg-slate-50/50 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                                className="px-2.5 py-1.5 text-xs font-bold text-slate-700 border border-slate-300 bg-slate-100 hover:bg-slate-200/80 rounded-lg shadow-2xs transition cursor-pointer"
                                 type="button"
                               >
                                 Phân tích lại
@@ -474,15 +491,12 @@ export function CvSelectAnalysisPage() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center bg-slate-50/20">
-                <FileText className="mx-auto mb-3 h-9 w-9 text-slate-400/50" />
-                <p className="text-sm font-bold text-slate-600">
-                  Bạn chưa có hồ sơ nào trong thư viện
-                </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Hãy kéo thả hoặc click chọn tệp ở trên để tải hồ sơ lên.
-                </p>
-              </div>
+              <StateLayout
+                type="empty"
+                title="Bạn chưa có hồ sơ nào trong thư viện"
+                description="Hãy kéo thả hoặc click chọn tệp ở trên để tải hồ sơ lên."
+                className="py-10!"
+              />
             )}
           </div>
         </div>

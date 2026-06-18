@@ -29,6 +29,7 @@ import { CvCard } from "../../components/cv/CvCard";
 import { CvRow } from "../../components/cv/CvRow";
 import { RenameModal } from "../../components/cv/RenameModal";
 import { UploadModal } from "../../components/cv/UploadModal";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
 
 // ==================== MAIN PAGE COMPONENT ====================
 const CV_SORT_OPTIONS = [
@@ -225,7 +226,7 @@ export function CvPage() {
           <div className="flex-1">
             <BaseField
               id="cv-search-q"
-              className="bg-white border-2 border-gray-300 rounded-2xl h-12!"
+              className="bg-white border border-slate-400 rounded-2xl h-12!"
               leadingIcon={<Search className="h-4.5 w-4.5 text-slate-400" />}
               placeholder="Tìm kiếm hồ sơ theo tên..."
               value={searchVal}
@@ -248,11 +249,11 @@ export function CvPage() {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div
               ref={sortDropdownRef}
-              className="flex flex-1 relative shrink-0"
+              className="relative w-2/3 sm:w-auto shrink-0"
             >
               <button
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex h-12 min-w-[180px] items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 text-sm transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
+                className="flex h-12 w-full sm:min-w-[180px] items-center justify-between gap-3 rounded-2xl border border-slate-400 bg-white px-4 text-sm transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
                 type="button"
               >
                 {CV_SORT_OPTIONS.find((o) => o.value === getActiveSortVal())
@@ -263,7 +264,7 @@ export function CvPage() {
               </button>
 
               {isSortOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 rounded-2xl border border-gray-300 bg-white p-2 shadow-md z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full left-0 mt-2 w-56 rounded-2xl border border-slate-300 bg-white p-2 shadow-md z-50 animate-in fade-in zoom-in-95 duration-200">
                   {CV_SORT_OPTIONS.map((option) => (
                     <button
                       key={option.value}
@@ -284,7 +285,7 @@ export function CvPage() {
                       className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition cursor-pointer ${
                         getActiveSortVal() === option.value
                           ? "bg-primary/15 text-primary font-semibold"
-                          : "text-slate-700 hover:bg-slate-50"
+                          : "text-slate-700 hover:bg-slate-100 font-semibold"
                       }`}
                       type="button"
                     >
@@ -298,17 +299,19 @@ export function CvPage() {
               )}
             </div>
 
-            <div className="relative flex flex-1 items-center p-1 rounded-2xl border-2 border-gray-300 bg-gray-200 h-12 w-[110px] shrink-0">
+            <div className="relative flex items-center p-1 rounded-2xl border border-slate-400 bg-slate-200/80 h-12 w-1/3 sm:w-[110px] shrink-0">
               <div
                 className={cn(
-                  "absolute top-1 bottom-1 w-[48px] rounded-xl bg-white shadow-md border border-gray-200/50 transition-all duration-300 ease-in-out",
-                  layoutMode === "list" ? "left-[54px]" : "left-1",
+                  "absolute top-1 bottom-1 rounded-xl bg-white shadow-md border border-slate-200/55 transition-all duration-300 ease-in-out",
+                  layoutMode === "list"
+                    ? "left-[calc(50%+2px)] w-[calc(50%-6px)]"
+                    : "left-1 w-[calc(50%-6px)]",
                 )}
               />
               <button
                 onClick={() => setLayoutMode("grid")}
                 className={cn(
-                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
+                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-600 hover:text-slate-800 transition-colors duration-300 cursor-pointer active:scale-95",
                   layoutMode === "grid" && "text-primary font-semibold",
                 )}
                 title="Chế độ lưới"
@@ -319,7 +322,7 @@ export function CvPage() {
               <button
                 onClick={() => setLayoutMode("list")}
                 className={cn(
-                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-400 transition-colors duration-300 cursor-pointer active:scale-95",
+                  "relative z-10 flex-1 flex items-center justify-center h-full text-slate-600 hover:text-slate-800 transition-colors duration-300 cursor-pointer active:scale-95",
                   layoutMode === "list" && "text-primary font-semibold",
                 )}
                 title="Chế độ danh sách"
@@ -367,39 +370,29 @@ export function CvPage() {
             ))}
           </div>
         ) : loadError ? (
-          /* Error Page */
-          <div className="rounded-3xl border border-dashed border-rose-200 bg-rose-50/20 px-6 py-14 text-center">
-            <p className="font-semibold text-rose-600">
-              Không thể tải danh sách hồ sơ tuyển dụng.
-            </p>
-            <p className="mt-2 text-sm text-slate-500">{loadError}</p>
-          </div>
+          <StateLayout
+            type="error"
+            title="Không thể tải danh sách hồ sơ tuyển dụng."
+            description={loadError}
+          />
         ) : cvList.length === 0 ? (
-          /* Empty State */
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-            <div className="flex items-center justify-center opacity-60 mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-                <FileText className="h-6 w-6 text-slate-400" />
-              </div>
-            </div>
-            <h3 className="text-base font-bold text-slate-800">
-              Danh sách hồ sơ trống
-            </h3>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-              {q
+          <StateLayout
+            type="empty"
+            title="Danh sách hồ sơ trống"
+            description={
+              q
                 ? "Không tìm thấy hồ sơ nào khớp với từ khóa tìm kiếm của bạn."
-                : "Bạn chưa tải lên bất kỳ CV nào. Tải lên CV đầu tiên để bắt đầu ứng tuyển."}
-            </p>
-            {!q && (
-              <button
-                onClick={() => setIsUploadOpen(true)}
-                className="mt-5 inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-xs font-bold text-white transition hover:bg-primary-hover active:scale-95"
-                type="button"
-              >
-                Tải lên hồ sơ ngay
-              </button>
-            )}
-          </div>
+                : "Bạn chưa tải lên bất kỳ CV nào. Tải lên CV đầu tiên để bắt đầu ứng tuyển."
+            }
+            action={
+              !q
+                ? {
+                    label: "Tải lên hồ sơ ngay",
+                    onClick: () => setIsUploadOpen(true),
+                  }
+                : undefined
+            }
+          />
         ) : (
           /* List */
           <>

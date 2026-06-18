@@ -6,7 +6,10 @@ import { useState, useRef, useEffect } from "react";
 
 import { Badge } from "@/shared/components/ui/Badge";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
-import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import {
+  EJobApplicationStatus,
+  EJobApplicationStatusLabels,
+} from "@/shared/constants/enums/job-application.enum";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import type { JobSeekerApplicationApiItem } from "@/shared/types/application";
 import { cn } from "@/shared/lib/utils/cn";
@@ -31,46 +34,24 @@ function formatAppliedDate(dateStr?: string | null): string {
   }
 }
 
-// Hàm lấy thông tin text của status
-function getStatusLabel(status: EJobApplicationStatus): string {
-  switch (status) {
-    case EJobApplicationStatus.APPLIED:
-      return "ĐANG CHỜ";
-    case EJobApplicationStatus.REVIEWING:
-      return "ĐANG XEM XÉT";
-    case EJobApplicationStatus.INTERVIEW:
-      return "PHỎNG VẤN";
-    case EJobApplicationStatus.REJECTED:
-      return "TỪ CHỐI";
-    case EJobApplicationStatus.OFFERED:
-      return "ĐỀ NGHỊ";
-    case EJobApplicationStatus.ACCEPTED:
-      return "NHẬN VIỆC";
-    case EJobApplicationStatus.WITHDRAWN:
-      return "ĐÃ RÚT";
-    default:
-      return "ĐANG XỬ LÝ";
-  }
-}
-
 // Hàm lấy classes màu sắc cho status badge
 function getStatusBadgeClass(status: EJobApplicationStatus): string {
   switch (status) {
     case EJobApplicationStatus.APPLIED:
-      return "bg-amber-100 text-amber-700 border border-amber-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-amber-100 text-amber-900 border border-amber-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.REVIEWING:
-      return "bg-sky-100 text-sky-700 border border-sky-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-sky-100 text-sky-900 border border-sky-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.INTERVIEW:
-      return "bg-blue-100 text-blue-700 border border-blue-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-blue-100 text-blue-900 border border-blue-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.REJECTED:
-      return "bg-red-100 text-red-700 border border-red-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-red-100 text-red-950 border border-red-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.OFFERED:
     case EJobApplicationStatus.ACCEPTED:
-      return "bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.WITHDRAWN:
-      return "bg-slate-100 text-slate-500 border border-slate-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-slate-100 text-slate-700 border border-slate-300 text-xs py-0.5 px-3 font-bold rounded-full";
     default:
-      return "bg-gray-100 text-gray-600 border border-gray-200 text-xs py-0.5 px-2.5 font-bold";
+      return "bg-gray-100 text-gray-800 border border-gray-300 text-xs py-0.5 px-3 font-bold rounded-full";
   }
 }
 
@@ -103,11 +84,11 @@ export function ApplicationCard({
   const canWithdraw = status === EJobApplicationStatus.APPLIED;
 
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-slate-300 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
       <div>
         {/* Header: Logo & Status Badge */}
         <div className="flex items-start justify-between gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-sm">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
             <img
               src={company?.logoUrl ?? "/logo.png"}
               alt={companyName}
@@ -117,8 +98,13 @@ export function ApplicationCard({
               }}
             />
           </div>
-          <Badge className={getStatusBadgeClass(status)}>
-            {getStatusLabel(status)}
+          <Badge
+            className={cn(
+              getStatusBadgeClass(status),
+              "uppercase tracking-wider shadow-xs",
+            )}
+          >
+            {EJobApplicationStatusLabels[status]}
           </Badge>
         </div>
 
@@ -126,32 +112,32 @@ export function ApplicationCard({
         <div className="mt-5">
           <Link
             href={job?.slug ? ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug) : "#"}
-            className="line-clamp-1 text-base font-bold text-slate-800 hover:text-primary transition-colors"
+            className="line-clamp-1 text-lg font-extrabold text-slate-900 hover:text-primary transition-colors duration-200"
           >
             {jobTitle}
           </Link>
-          <p className="mt-1 line-clamp-1 text-sm font-semibold uppercase text-slate-400">
+          <p className="mt-1.5 line-clamp-1 text-xs font-bold uppercase tracking-wider text-slate-600">
             {companyName}
           </p>
 
-          <div className="mt-2.5 flex flex-wrap gap-2">
-            <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1">
-              <MapPin className="h-3.5 w-3.5 text-slate-400" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-xl px-2.5 py-1 shadow-2xs">
+              <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0" />
               <span className="truncate max-w-[150px]">{address}</span>
-            </div>
+            </Badge>
 
             {matchingScore !== null && matchingScore !== undefined && (
-              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-500 fill-emerald-100" />
+              <Badge className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-xl px-2.5 py-1 shadow-2xs">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-600 fill-emerald-250 shrink-0" />
                 <span>AI Match: {matchingScore}%</span>
-              </div>
+              </Badge>
             )}
           </div>
         </div>
 
         {/* Date Info */}
-        <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
-          <Calendar className="h-4 w-4 text-slate-400" />
+        <div className="mt-6 flex items-center gap-2 text-xs font-medium text-slate-600">
+          <Calendar className="h-4 w-4 text-slate-500 shrink-0" />
           <span>Đã ứng tuyển: {formatAppliedDate(createdAt)}</span>
         </div>
       </div>
@@ -179,10 +165,10 @@ export function ApplicationCard({
           </BaseButton>
         ) : (
           <BaseButton
-            variant="secondary"
+            variant="primary"
             size="sm"
             href={job?.slug ? ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug) : "#"}
-            className="flex-1 rounded-2xl text-xs font-bold"
+            className="flex-1"
           >
             Chi tiết công việc
           </BaseButton>
@@ -190,19 +176,20 @@ export function ApplicationCard({
 
         {/* Nút Rút đơn & Dropdown Menu */}
         <div ref={menuRef} className="relative">
-          <button
+          <BaseButton
+            variant="secondary"
+            size="sm"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20",
-              isMenuOpen && "bg-slate-100 text-slate-800"
+              "w-10 p-0 flex items-center justify-center rounded-2xl border border-slate-350 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20",
+              isMenuOpen && "bg-slate-100 text-slate-900 border-slate-450",
             )}
-            type="button"
           >
             <MoreHorizontal className="h-5 w-5" />
-          </button>
+          </BaseButton>
 
           {isMenuOpen && (
-            <div className="absolute bottom-full right-0 z-50 mb-2 w-40 origin-bottom-right rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150">
+            <div className="absolute bottom-full right-0 z-50 mb-2 w-44 origin-bottom-right rounded-2xl border border-slate-300 bg-white p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150">
               <button
                 disabled={!canWithdraw}
                 onClick={() => {
@@ -210,13 +197,17 @@ export function ApplicationCard({
                   setIsMenuOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center rounded-xl px-3 py-2 text-left text-xs font-semibold transition-colors",
+                  "flex w-full items-center rounded-xl px-3 py-2.5 text-left text-xs font-bold transition-colors cursor-pointer",
                   canWithdraw
-                    ? "text-red-600 hover:bg-red-50"
-                    : "text-slate-300 cursor-not-allowed"
+                    ? "text-red-700 hover:bg-red-50"
+                    : "text-slate-400 cursor-not-allowed",
                 )}
                 type="button"
-                title={!canWithdraw ? "Chỉ có thể rút đơn khi đang chờ duyệt" : undefined}
+                title={
+                  !canWithdraw
+                    ? "Chỉ có thể rút đơn khi đang chờ duyệt"
+                    : undefined
+                }
               >
                 Rút đơn ứng tuyển
               </button>

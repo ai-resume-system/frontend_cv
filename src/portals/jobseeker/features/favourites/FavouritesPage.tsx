@@ -82,7 +82,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
         <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-300 transition-colors group-hover:border-slate-200 sm:h-24 sm:w-24">
           <img
             alt={company}
-            className=" h-full w-full object-contain transition-colors"
+            className=" h-full w-full aspect-square object-cover transition-colors"
             src={job.company?.logoUrl ?? "/logo.png"}
           />
         </div>
