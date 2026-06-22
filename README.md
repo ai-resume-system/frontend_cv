@@ -2,6 +2,14 @@
 
 `frontend_cv` là frontend chính cho người tìm việc và nhà tuyển dụng trong hệ thống AI Resume System. Source này được xây dựng bằng Next.js, cung cấp giao diện xem việc làm, quản lý CV, phân tích CV, ứng tuyển và quản lý tin tuyển dụng.
 
+## Liên Kết Source
+
+Khi chạy hoặc kiểm tra từng phần của hệ thống, mở đúng source tương ứng:
+
+- Backend API: [ai-resume-system/backend_cv](https://github.com/ai-resume-system/backend_cv)
+- Frontend cho nhà tuyển dụng và người tìm việc: [ai-resume-system/frontend_cv](https://github.com/ai-resume-system/frontend_cv)
+- Frontend quản trị admin: [ai-resume-system/cms_frontend_cv](https://github.com/ai-resume-system/cms_frontend_cv)
+
 ## Mục Tiêu
 
 - Cho phép người tìm việc đăng ký, đăng nhập và quản lý tài khoản.
@@ -54,15 +62,11 @@ Tạo file `.env` từ `.env.example`:
 cp .env.example .env
 ```
 
-Các biến thường dùng:
+Các biến môi trường thường dùng:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-NEXT_PUBLIC_APP_URL=http://localhost:3100
-NEXT_PUBLIC_JOBSEEKER_URL=http://localhost:3100
-NEXT_PUBLIC_RECRUITER_URL=http://localhost:3100/recruiter
-NEXT_PUBLIC_PORTAL_MODE=single-domain
-NEXT_PUBLIC_APP_NODE_ENV=development
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_APP_NODE_ENV=
 ```
 
 Lưu ý:
@@ -78,16 +82,16 @@ cd frontend_cv
 npm install
 ```
 
+# Hoặc
+
+```bash
+npm i
+```
+
 ## Chạy Development
 
 ```bash
 npm run dev
-```
-
-Ứng dụng chạy mặc định ở:
-
-```txt
-http://localhost:3100
 ```
 
 ## Lệnh Hữu Ích
@@ -103,8 +107,7 @@ npm run lint
 1. Chạy hạ tầng PostgreSQL, Redis, MinIO.
 2. Chạy `ai_service` nếu cần phân tích CV.
 3. Chạy `backend_cv`.
-4. Chạy `frontend_cv`.
-5. Mở `http://localhost:3100`.
+4. Chạy `frontend_cv` và `cms_frontend_cv`.
 
 ## Ghi Chú Vận Hành
 
