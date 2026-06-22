@@ -10,6 +10,9 @@ import { useRecruiterApplications } from "@/portals/recruiter/features/applicant
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import type { RecruiterApplicationApiItem } from "@/shared/types/application";
+import { StatusUpdateModal } from "./components/StatusUpdateModal";
 
 export function RecruiterApplicantsPage() {
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
@@ -21,11 +24,18 @@ export function RecruiterApplicantsPage() {
     applications,
     loading,
     error,
-    reload,
-    handleAccept,
-    handleReject,
+    handleUpdateStatus,
     handleViewCv,
   } = useRecruiterApplications({ jobId: selectedJobId });
+
+  // State quản lý Modal cập nhật trạng thái
+  const [selectedApplication, setSelectedApplication] = useState<RecruiterApplicationApiItem | null>(null);
+  const [targetStatus, setTargetStatus] = useState<EJobApplicationStatus | null>(null);
+
+  const handleUpdateStatusClick = (app: RecruiterApplicationApiItem, status: EJobApplicationStatus) => {
+    setSelectedApplication(app);
+    setTargetStatus(status);
+  };
 
   return (
     <RecruiterWorkspaceShell
@@ -106,8 +116,7 @@ export function RecruiterApplicantsPage() {
                     <RecruiterApplicantRow
                       key={app.id}
                       application={app}
-                      onAccept={handleAccept}
-                      onReject={handleReject}
+                      onUpdateStatusClick={handleUpdateStatusClick}
                       onViewCv={handleViewCv}
                       showJobColumn
                     />
@@ -117,6 +126,21 @@ export function RecruiterApplicantsPage() {
             </div>
           )}
         </div>
+
+        <StatusUpdateModal
+          isOpen={Boolean(selectedApplication && targetStatus)}
+          onClose={() => {
+            setSelectedApplication(null);
+            setTargetStatus(null);
+          }}
+          candidateName={selectedApplication?.fullName ?? ""}
+          targetStatus={targetStatus}
+          onConfirm={async (payload) => {
+            if (selectedApplication) {
+              await handleUpdateStatus(selectedApplication.id, payload);
+            }
+          }}
+        />
       </div>
     </RecruiterWorkspaceShell>
   );

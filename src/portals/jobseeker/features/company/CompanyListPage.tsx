@@ -131,7 +131,7 @@ export function CompanyListPage() {
             <img
               src="/cong_ty_noi_bat.png"
               alt="cong-ty-noi-bat"
-              className="h-auto w-full max-w-[550px]"
+              className="h-auto w-full max-w-137.5"
               loading="eager"
             />
           </div>

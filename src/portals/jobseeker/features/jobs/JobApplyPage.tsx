@@ -272,6 +272,7 @@ function CvSelectionSection({
 
             {uploadedFile ? (
               <label
+                key="uploaded-cv-radio-label"
                 className="group relative cursor-pointer"
                 onClick={() => setSelectedCvId("new_upload")}
               >
@@ -332,7 +333,7 @@ function CvSelectionSection({
                 </div>
               </label>
             ) : (
-              <label className="group relative cursor-pointer">
+              <label key="upload-cv-file-label" className="group relative cursor-pointer">
                 <input
                   accept=".pdf,.docx"
                   className="hidden"

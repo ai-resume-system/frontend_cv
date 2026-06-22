@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   BriefcaseBusiness,
@@ -51,8 +51,16 @@ function getJobStatusClass(status: EJobStatus): string {
 }
 
 export function RecruiterJobListPage() {
-  const { jobs, loading, error, handleDelete, handleClose } =
-    useRecruiterJobList();
+  const {
+    jobs,
+    pagination,
+    allJobsForCounts,
+    loading,
+    error,
+    loadJobs,
+    handleDelete,
+    handleClose,
+  } = useRecruiterJobList();
 
   // State bộ lọc và tìm kiếm
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,30 +70,22 @@ export function RecruiterJobListPage() {
 
   const limit = 8;
 
-  // Lọc danh sách công việc
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (job.careerCategory?.name ?? "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  // Lọc và phân trang ở Server-side qua useEffect
+  useEffect(() => {
+    void loadJobs({
+      page,
+      limit,
+      q: searchQuery,
+      status: selectedStatus === "ALL" ? undefined : (selectedStatus as EJobStatus),
+    });
+  }, [page, searchQuery, selectedStatus, limit, loadJobs]);
 
-    const matchesStatus =
-      selectedStatus === "ALL" ? true : job.status === selectedStatus;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Số lượng tin theo từng trạng thái để hiển thị lên 3 Card
-  const countOpen = jobs.filter((j) => j.status === EJobStatus.OPEN).length;
-  const countPending = jobs.filter(
+  // Số lượng tin theo từng trạng thái để hiển thị lên 3 Card từ allJobsForCounts
+  const countOpen = allJobsForCounts.filter((j) => j.status === EJobStatus.OPEN).length;
+  const countPending = allJobsForCounts.filter(
     (j) => j.status === EJobStatus.PENDING,
   ).length;
-  const countClosed = jobs.filter((j) => j.status === EJobStatus.CLOSED).length;
-
-  // Phân trang
-  const startIndex = (page - 1) * limit;
-  const pagedJobs = filteredJobs.slice(startIndex, startIndex + limit);
+  const countClosed = allJobsForCounts.filter((j) => j.status === EJobStatus.CLOSED).length;
 
   // Định nghĩa các cột của BaseTable
   const columns: BaseTableColumn<Job>[] = [
@@ -133,7 +133,7 @@ export function RecruiterJobListPage() {
     },
     {
       key: "expiredAt",
-      header: "Hạn nộp",
+      header: "Hạn nộp hồ sơ",
       render: (job) =>
         job.expiredAt
           ? new Intl.DateTimeFormat("vi-VN").format(new Date(job.expiredAt))
@@ -165,13 +165,15 @@ export function RecruiterJobListPage() {
           </button>
 
           {/* Nút Chỉnh sửa */}
-          <Link
-            href={RECRUITER_ROUTES.JOB_EDIT(job.slug ?? job.id)}
-            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
-            title="Chỉnh sửa tin"
-          >
-            <Pencil className="h-4 w-4" />
-          </Link>
+          {job.status !== EJobStatus.CLOSED && job.status !== EJobStatus.REJECTED && (
+            <Link
+              href={RECRUITER_ROUTES.JOB_EDIT(job.slug ?? job.id)}
+              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
+              title="Chỉnh sửa tin"
+            >
+              <Pencil className="h-4 w-4" />
+            </Link>
+          )}
 
           {/* Nút Đóng tin */}
           {job.status === EJobStatus.OPEN && (
@@ -203,29 +205,31 @@ export function RecruiterJobListPage() {
           )}
 
           {/* Nút Xóa tin */}
-          <button
-            type="button"
-            onClick={async () => {
-              if (
-                window.confirm("Bạn có chắc chắn muốn xóa tin tuyển dụng này?")
-              ) {
-                try {
-                  await handleDelete(job.id);
-                  showSuccessToast("Xóa tin tuyển dụng thành công.");
-                } catch (err) {
-                  showErrorToast(
-                    err instanceof Error
-                      ? err.message
-                      : "Không thể xóa tin tuyển dụng.",
-                  );
+          {job.status === EJobStatus.DRAFT && (
+            <button
+              type="button"
+              onClick={async () => {
+                if (
+                  window.confirm("Bạn có chắc chắn muốn xóa tin tuyển dụng này?")
+                ) {
+                  try {
+                    await handleDelete(job.id);
+                    showSuccessToast("Xóa tin tuyển dụng thành công.");
+                  } catch (err) {
+                    showErrorToast(
+                      err instanceof Error
+                        ? err.message
+                        : "Không thể xóa tin tuyển dụng.",
+                    );
+                  }
                 }
-              }
-            }}
-            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
-            title="Xóa tin"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+              }}
+              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+              title="Xóa tin"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       ),
     },
@@ -315,7 +319,7 @@ export function RecruiterJobListPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { label: "Tất cả", value: "ALL" },
-              { label: "Đang tuyển", value: EJobStatus.OPEN },
+              { label: "Đang mở", value: EJobStatus.OPEN },
               { label: "Chờ duyệt", value: EJobStatus.PENDING },
               { label: "Bản nháp", value: EJobStatus.DRAFT },
               { label: "Từ chối", value: EJobStatus.REJECTED },
@@ -344,14 +348,14 @@ export function RecruiterJobListPage() {
         {/* Bảng danh sách tin */}
         <BaseTable
           columns={columns}
-          data={pagedJobs}
+          data={jobs}
           loading={loading}
           emptyMessage="Doanh nghiệp của bạn chưa có tin tuyển dụng nào phù hợp bộ lọc."
           pagination={{
             page,
             limit,
-            total: filteredJobs.length,
-            totalPages: Math.ceil(filteredJobs.length / limit),
+            total: pagination?.totalItems ?? 0,
+            totalPages: pagination?.totalPages ?? 1,
             onPageChange: (newPage) => setPage(newPage),
           }}
         />

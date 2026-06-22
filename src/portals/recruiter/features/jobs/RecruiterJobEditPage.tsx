@@ -22,6 +22,8 @@ import {
   EJobEducationLevelLabels,
   EJobWorkArrangement,
   EJobWorkArrangementLabels,
+  EJobAction,
+  EJobStatus,
 } from "@/shared/constants/enums/job.enum";
 import {
   fetchRecruiterJobDetail,
@@ -218,7 +220,7 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
     );
   }
 
-  async function handleSave() {
+  async function handleSave(action?: EJobAction) {
     if (!job) return;
     setSaving(true);
     setError(null);
@@ -245,10 +247,24 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
       // Gửi kèm mảng kỹ năng đã chỉnh sửa
       payload.skills = skills.map((s) => ({ skillId: s.id, weight: s.weight }));
 
+      if (action) {
+        payload.action = action;
+      }
+
       await updateRecruiterJob(job.id, payload);
+      showSuccessToast(
+        action === EJobAction.SUBMIT
+          ? "Đăng tin tuyển dụng thành công! Đang chờ phê duyệt."
+          : "Lưu thay đổi thành công."
+      );
       setSuccess(true);
+      
+      if (action === EJobAction.SUBMIT) {
+        router.push(RECRUITER_ROUTES.JOBS);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cập nhật thất bại.");
+      showErrorToast(err instanceof Error ? err.message : "Cập nhật thất bại.");
     } finally {
       setSaving(false);
     }
@@ -307,9 +323,27 @@ export function RecruiterJobEditPage({ jobSlug }: RecruiterJobEditPageProps) {
           >
             Xem trước
           </BaseButton>
-          <BaseButton loading={saving} onClick={handleSave}>
-            Lưu thay đổi
-          </BaseButton>
+          {job?.status === EJobStatus.DRAFT ? (
+            <>
+              <BaseButton
+                variant="secondary"
+                loading={saving}
+                onClick={() => handleSave(EJobAction.DRAFT)}
+              >
+                Lưu bản nháp
+              </BaseButton>
+              <BaseButton
+                loading={saving}
+                onClick={() => handleSave(EJobAction.SUBMIT)}
+              >
+                Đăng tin tuyển dụng
+              </BaseButton>
+            </>
+          ) : (
+            <BaseButton loading={saving} onClick={() => handleSave()}>
+              Lưu thay đổi
+            </BaseButton>
+          )}
         </div>
       }
     >

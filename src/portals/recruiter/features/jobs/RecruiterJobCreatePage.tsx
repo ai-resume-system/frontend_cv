@@ -53,6 +53,7 @@ export function RecruiterJobCreatePage() {
 
   const {
     careerCategoryId,
+    careerCategoryName,
     fieldErrors,
     form,
     globalMessage,
@@ -134,7 +135,7 @@ export function RecruiterJobCreatePage() {
                   Lĩnh vực
                 </label>
                 <div className="flex h-14 w-full items-center rounded-2xl border border-outline-variant/30 bg-slate-50/70 px-4 text-[15px] font-semibold text-on-surface-variant/80 select-none">
-                  {form?.careerCategoryId ??
+                  {careerCategoryName ||
                     "Đang tải lĩnh vực của doanh nghiệp..."}
                 </div>
               </div>

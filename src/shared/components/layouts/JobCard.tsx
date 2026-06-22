@@ -14,6 +14,7 @@ import { Badge } from "@/shared/components/ui/Badge";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import type { Job } from "@/shared/types/job";
 import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 interface JobCardProps {
   job: Job;
@@ -21,7 +22,7 @@ interface JobCardProps {
 }
 
 function getAddress(job: Job): string {
-  return job.address ?? job.company?.address ?? "Đang cập nhật";
+  return formatBriefAddress(job.address ?? job.company?.address);
 }
 
 function formatExperience(years?: number | null): string {

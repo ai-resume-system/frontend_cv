@@ -139,7 +139,7 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
     <section className="bg-background pb-14">
       <div className="border-b border-surface-container-high bg-surface-container-high">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-[32px] border border-surface-container-high bg-white shadow-sm">
+          <div className="overflow-hidden rounded-4xl border border-surface-container-high bg-white shadow-sm">
             <div className="h-50 bg-linear-to-r from-primary/15 via-white to-secondary/10">
               {bannerUrl ? (
                 <img
@@ -266,13 +266,13 @@ export function CompanyDetailPage({ company }: CompanyDetailPageProps) {
               {loading ? (
                 <JobCardSkeleton length={3} type="row" />
               ) : error ? (
-                <div className="rounded-[24px] border border-dashed border-surface-container-high px-5 py-10 text-center text-sm text-on-surface-variant">
+                <div className="rounded-3xl border border-dashed border-surface-container-high px-5 py-10 text-center text-sm text-on-surface-variant">
                   Không thể tải danh sách việc làm của công ty lúc này.
                 </div>
               ) : jobs.length > 0 ? (
                 jobs.map((job) => <JobCard key={job.id} job={job} showSkills />)
               ) : (
-                <div className="rounded-[24px] border border-dashed border-surface-container-high px-5 py-10 text-center text-sm text-on-surface-variant">
+                <div className="rounded-3xl border border-dashed border-surface-container-high px-5 py-10 text-center text-sm text-on-surface-variant">
                   Công ty hiện chưa có tin tuyển dụng phù hợp với bộ lọc.
                 </div>
               )}

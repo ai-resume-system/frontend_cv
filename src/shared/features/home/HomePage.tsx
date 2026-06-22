@@ -105,8 +105,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* <HomeHeroSection stats={stats} /> */}
-
       <HotJobsSection />
 
       <section className="bg-background px-4 py-16 sm:px-8">

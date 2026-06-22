@@ -8,6 +8,9 @@ import {
   CircleCheck,
   CircleX,
   Download,
+  Calendar,
+  Award,
+  UserCheck,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,17 +22,18 @@ import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
+import { StatusUpdateModal } from "./components/StatusUpdateModal";
 
 function getStatusLabel(status: EJobApplicationStatus): string {
   switch (status) {
     case EJobApplicationStatus.APPLIED:
       return "Mới ứng tuyển";
     case EJobApplicationStatus.REVIEWING:
-      return "Đang xem";
+      return "Đang xem xét";
     case EJobApplicationStatus.INTERVIEW:
-      return "Phỏng vấn";
+      return "Lịch phỏng vấn";
     case EJobApplicationStatus.REJECTED:
-      return "Từ chối";
+      return "Đã từ chối";
     case EJobApplicationStatus.OFFERED:
       return "Đã gửi offer";
     case EJobApplicationStatus.ACCEPTED:
@@ -69,13 +73,16 @@ export function RecruiterApplicantsByJobPage({
     applications,
     loading,
     error,
-    handleAccept,
-    handleReject,
+    handleUpdateStatus,
     handleViewCv,
   } = useRecruiterApplications({ jobId });
 
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  // State quản lý Modal cập nhật trạng thái
+  const [selectedApplication, setSelectedApplication] = useState<RecruiterApplicationApiItem | null>(null);
+  const [targetStatus, setTargetStatus] = useState<EJobApplicationStatus | null>(null);
 
   // Phân trang
   const startIndex = (page - 1) * limit;
@@ -179,21 +186,110 @@ export function RecruiterApplicantsByJobPage({
             <Eye className="h-4 w-4" />
           </button>
 
-          {/* Nút Phê duyệt / Từ chối hồ sơ mới */}
-          {(app.status === EJobApplicationStatus.APPLIED ||
-            app.status === EJobApplicationStatus.REVIEWING) && (
+          {/* APPLIED: Duyệt sơ bộ / Từ chối */}
+          {app.status === EJobApplicationStatus.APPLIED && (
             <>
               <button
                 type="button"
-                onClick={() => handleAccept(app.id)}
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REVIEWING);
+                }}
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
-                title="Duyệt hồ sơ"
+                title="Duyệt sơ bộ hồ sơ"
               >
                 <CircleCheck className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                onClick={() => handleReject(app.id)}
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* REVIEWING: Lên lịch phỏng vấn / Từ chối */}
+          {app.status === EJobApplicationStatus.REVIEWING && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.INTERVIEW);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
+                title="Lên lịch phỏng vấn"
+              >
+                <Calendar className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* INTERVIEW: Gửi Offer / Từ chối */}
+          {app.status === EJobApplicationStatus.INTERVIEW && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.OFFERED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
+                title="Gửi Offer tuyển dụng"
+              >
+                <Award className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* OFFERED: Xác nhận nhận việc / Từ chối */}
+          {app.status === EJobApplicationStatus.OFFERED && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.ACCEPTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
+                title="Ứng viên đồng ý nhận việc"
+              >
+                <UserCheck className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
                 title="Từ chối hồ sơ"
               >
@@ -257,6 +353,21 @@ export function RecruiterApplicantsByJobPage({
             total: applications.length,
             totalPages: Math.ceil(applications.length / limit),
             onPageChange: (newPage) => setPage(newPage),
+          }}
+        />
+
+        <StatusUpdateModal
+          isOpen={Boolean(selectedApplication && targetStatus)}
+          onClose={() => {
+            setSelectedApplication(null);
+            setTargetStatus(null);
+          }}
+          candidateName={selectedApplication?.fullName ?? ""}
+          targetStatus={targetStatus}
+          onConfirm={async (payload) => {
+            if (selectedApplication) {
+              await handleUpdateStatus(selectedApplication.id, payload);
+            }
           }}
         />
       </div>

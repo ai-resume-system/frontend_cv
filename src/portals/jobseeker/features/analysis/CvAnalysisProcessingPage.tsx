@@ -21,6 +21,7 @@ import {
   fetchCvAnalysis,
   fetchCvPreview,
   queueCvAnalysis,
+  fetchCvDetail,
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 
@@ -150,8 +151,8 @@ export function CvAnalysisProcessingPage() {
     const id = cvId;
     async function loadCvInfo() {
       try {
-        const result = await fetchCvAnalysis(id);
-        setCvTitle(result.cvId.slice(0, 8) + "...");
+        const result = await fetchCvDetail(id);
+        setCvTitle(result.title ?? result.id.slice(0, 8) + "...");
       } catch {
         setCvTitle("CV đã chọn");
       }
@@ -199,9 +200,6 @@ export function CvAnalysisProcessingPage() {
             <div className="overflow-hidden rounded-[28px] border border-surface-container-high bg-surface-container-low">
               <div className="flex items-center justify-between border-b border-surface-container-high bg-white px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary">
-                    description
-                  </span>
                   <span className="text-sm font-semibold text-on-surface">
                     {cvTitle}
                   </span>
@@ -271,7 +269,7 @@ export function CvAnalysisProcessingPage() {
               <div className="mb-6 flex items-center gap-3">
                 <BrainCircuit className="h-6 w-6 text-primary" />
                 <h2 className="text-xl font-bold text-primary">
-                  Tiến trình phân tích
+                  Đang trong qua trình phân tích
                 </h2>
               </div>
 
@@ -350,20 +348,6 @@ export function CvAnalysisProcessingPage() {
                   );
                 })}
               </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/20 bg-white/70 p-6 shadow-sm backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-widest text-primary">
-                  FUSE AI
-                </span>
-              </div>
-              <p className="mt-3 text-xs leading-relaxed text-on-surface-variant">
-                AI đang phân tích cấu trúc CV, nhận diện kỹ năng, kinh nghiệm
-                làm việc và trình độ học vấn. Kết quả sẽ hiển thị ngay sau khi
-                hoàn tất.
-              </p>
             </div>
           </div>
         </div>

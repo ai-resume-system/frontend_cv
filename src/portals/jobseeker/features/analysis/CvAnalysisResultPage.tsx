@@ -2,11 +2,14 @@
 
 import {
   ArrowLeft,
+  ArrowRight,
   Bolt,
+  Bot,
   Download,
   Eye,
   FileText,
   Lightbulb,
+  RefreshCcw,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,21 +23,25 @@ import {
   fetchCvDownload,
   fetchCvPreview,
   fetchCvRecommendedJobs,
+  fetchCvDetail,
 } from "@/shared/services/cv.service";
 import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 import type { JobApiItem } from "@/shared/types/job";
 import { JobCard } from "@/shared/components/layouts/JobCard";
 import { ScoreGauge, getScoreLabel } from "@/shared/components/ui/ScoreGauge";
+import { BaseLoader } from "@/shared/components/ui/BaseLoader";
 
 interface CvAnalysisResultPageProps {
   cvId: string;
 }
 
 export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
 
   const [analysis, setAnalysis] = useState<CvAnalysisResponse | null>(null);
   const [cvTitle, setCvTitle] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileExtension, setFileExtension] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recommendedJobs, setRecommendedJobs] = useState<JobApiItem[]>([]);
@@ -47,20 +54,34 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
     async function load() {
       try {
         setIsLoading(true);
-        const result = await fetchCvAnalysis(cvId);
+        const [result, cvDetail] = await Promise.all([
+          fetchCvAnalysis(cvId),
+          fetchCvDetail(cvId).catch(() => null),
+        ]);
         if (cancelled) return;
         setAnalysis(result);
-        setCvTitle(result.cvId.slice(0, 12) + "...");
+        setCvTitle(cvDetail?.title ?? result.cvId.slice(0, 12) + "...");
+        const ext =
+          cvDetail?.fileExtension ||
+          (cvDetail?.title && cvDetail.title.split(".").pop()?.toLowerCase()) ||
+          null;
+        setFileExtension(ext);
 
         if (result.processingStatus === "completed") {
           setIsJobsLoading(true);
           try {
-            const jobs = await fetchCvRecommendedJobs(cvId);
+            const [jobs, previewData] = await Promise.all([
+              fetchCvRecommendedJobs(cvId).catch(() => []),
+              fetchCvPreview(cvId).catch(() => null),
+            ]);
             if (!cancelled) {
               setRecommendedJobs(jobs);
+              if (previewData) {
+                setPreviewUrl(previewData.previewUrl);
+              }
             }
           } catch (jobErr) {
-            console.error("Failed to load recommended jobs:", jobErr);
+            console.error("Failed to load recommended details:", jobErr);
           } finally {
             if (!cancelled) setIsJobsLoading(false);
           }
@@ -89,16 +110,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
     return (
       <section className="bg-surface px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center space-y-4">
-              <div className="animate-spin text-primary mx-auto">
-                <Sparkles className="h-8 w-8" />
-              </div>
-              <p className="text-sm text-on-surface-variant">
-                Đang tải kết quả phân tích...
-              </p>
-            </div>
-          </div>
+          <BaseLoader message="Đang tải kết quả phân tích..." />
         </div>
       </section>
     );
@@ -108,7 +120,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
     return (
       <section className="bg-surface px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex items-center justify-center min-h-100">
             <div className="text-center space-y-4">
               <p className="text-error font-semibold">
                 {error ?? "Không có dữ liệu phân tích."}
@@ -171,8 +183,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </>
             ) : null}
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Kết quả phân tích CV
+          <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-3xl">
+            Báo cáo Phân tích CV của bạn
           </h1>
         </header>
 
@@ -206,30 +218,67 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 </div>
               </div>
 
-              <div className="relative flex min-h-[500px] flex-col items-center justify-center bg-surface-dim p-10">
-                <div className="mx-auto w-full max-w-md space-y-6 opacity-50">
-                  <div className="h-10 w-3/4 rounded-xl bg-surface-container" />
-                  <div className="space-y-3">
-                    <div className="h-4 w-full rounded bg-surface-container" />
-                    <div className="h-4 w-full rounded bg-surface-container" />
-                    <div className="h-4 w-5/6 rounded bg-surface-container" />
+              {previewUrl ? (
+                fileExtension &&
+                ["docx", "doc"].includes(fileExtension.toLowerCase()) ? (
+                  <div className="bg-slate-100 p-8 h-[700px] flex items-center justify-center w-full">
+                    <div className="w-full max-w-sm bg-white shadow-lg p-8 rounded-[24px] border border-slate-200/60 text-center space-y-6">
+                      <div className="mx-auto w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100/50">
+                        <FileText className="h-8 w-8" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-base font-bold text-slate-800">
+                          Tệp Word (.docx) không hỗ trợ xem trực tiếp
+                        </h3>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          Trình duyệt không hỗ trợ xem trực tiếp định dạng Word.
+                          Bạn có thể tải tệp tin này xuống máy hoặc đổi sang
+                          định dạng PDF để xem trực tiếp tại đây.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleDownload}
+                        className="w-full py-3 px-4 bg-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                        type="button"
+                      >
+                        <Download className="h-4 w-4" />
+                        Tải xuống để xem
+                      </button>
+                    </div>
                   </div>
-                  <div className="h-8 w-1/2 rounded-xl bg-surface-container" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-24 rounded-xl bg-surface-container" />
-                    <div className="h-24 rounded-xl bg-surface-container" />
+                ) : (
+                  <iframe
+                    src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                    className="w-full h-[700px] border-none bg-white shadow-xs"
+                    title="Xem trước CV"
+                  />
+                )
+              ) : (
+                <div className="relative flex min-h-[500px] flex-col items-center justify-center bg-surface-dim p-10">
+                  <div className="mx-auto w-full max-w-md space-y-6 opacity-50">
+                    <div className="h-10 w-3/4 rounded-xl bg-surface-container" />
+                    <div className="space-y-3">
+                      <div className="h-4 w-full rounded bg-surface-container" />
+                      <div className="h-4 w-full rounded bg-surface-container" />
+                      <div className="h-4 w-5/6 rounded bg-surface-container" />
+                    </div>
+                    <div className="h-8 w-1/2 rounded-xl bg-surface-container" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-24 rounded-xl bg-surface-container" />
+                      <div className="h-24 rounded-xl bg-surface-container" />
+                    </div>
                   </div>
-                </div>
 
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/90 px-6 py-3 shadow-xl backdrop-blur-sm">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-primary">
-                      Đã phân tích bởi AI
-                    </span>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/90 px-6 py-3 shadow-xl backdrop-blur-sm">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      <span className="text-sm font-semibold text-primary">
+                        Đã phân tích bởi AI
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -237,8 +286,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
             <div className="rounded-[28px] bg-white p-8 shadow-sm border border-surface-container-high">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                    Phân tích phù hợp AI
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-2">
+                    <Bot className="h-5 w-5" /> Đánh giá từ AI
                   </span>
                   <h4
                     className={cn("text-2xl font-bold mt-1", scoreInfo.color)}
@@ -437,72 +486,70 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </div>
             </div>
 
-            {analysis.processingStatus === "completed" && (
-              <div className="space-y-4 pt-4 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h5 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                      Việc làm phù hợp nhất cho bạn
-                    </h5>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Dựa trên lịch sử tìm kiếm và phân tích năng lực cá nhân.
-                    </p>
-                  </div>
-                  <Link
-                    href={JOBSEEKER_ROUTES.JOBS}
-                    className="text-xs font-bold text-primary hover:underline"
-                  >
-                    Xem tất cả
-                  </Link>
-                </div>
-
-                {isJobsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="h-24 animate-pulse rounded-2xl bg-slate-100 border border-slate-200"
-                      />
-                    ))}
-                  </div>
-                ) : recommendedJobs.length > 0 ? (
-                  <div className="space-y-3">
-                    {recommendedJobs.slice(0, 3).map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={job as any}
-                        showSkills={true}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center bg-slate-50/50">
-                    <p className="text-xs text-slate-500">
-                      Chưa tìm thấy công việc phù hợp trực tiếp với CV này.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                href={ROUTES.JOB_SEEKER_CV}
+                href={`${JOBSEEKER_ROUTES.ANALYSIS_PROCESS}?cvId=${cvId}`}
                 className="flex-1 py-4 px-4 bg-white border border-surface-container-high rounded-xl text-on-surface font-bold text-sm hover:bg-surface-container transition-colors flex items-center justify-center gap-2"
               >
-                <FileText className="h-4 w-4" />
-                Chỉnh sửa CV ngay
+                <RefreshCcw className="h-4 w-4" />
+                Phân tích lại
               </Link>
               <Link
                 href={JOBSEEKER_ROUTES.JOBS}
                 className="flex-1 py-4 px-4 bg-linear-to-br from-primary to-primary-container rounded-xl text-white font-bold text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2"
               >
-                <Sparkles className="h-4 w-4" />
                 Tìm việc phù hợp
               </Link>
             </div>
           </div>
         </div>
+
+        {analysis.processingStatus === "completed" && (
+          <div className="mt-12 pt-10 border-t border-slate-200">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h5 className="text-lg font-extrabold text-slate-800 uppercase tracking-wider">
+                  Việc làm phù hợp cho bạn
+                </h5>
+                <p className="text-xs text-slate-400 mt-1">
+                  Dựa trên lịch sử tìm kiếm và phân tích năng lực cá nhân.
+                </p>
+              </div>
+              <Link
+                href={JOBSEEKER_ROUTES.JOBS}
+                className="text-sm font-bold text-primary flex items-center group"
+              >
+                Xem tất cả
+                <div className="flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[24px] group-hover:opacity-100">
+                  <ArrowRight className="h-4 w-4 ml-1.5 -translate-x-4 transition-transform duration-300 ease-out group-hover:translate-x-0" />
+                </div>
+              </Link>
+            </div>
+
+            {isJobsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-28 animate-pulse rounded-2xl bg-slate-100 border border-slate-200"
+                  />
+                ))}
+              </div>
+            ) : recommendedJobs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendedJobs.slice(0, 3).map((job) => (
+                  <JobCard key={job.id} job={job as any} showSkills={true} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50">
+                <p className="text-sm text-slate-500">
+                  Chưa tìm thấy công việc phù hợp trực tiếp với CV này.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

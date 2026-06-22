@@ -15,13 +15,14 @@ import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 import Link from "next/link";
 import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp";
 }
 
 function getAddress(job: Job): string {
-  return job.address ?? job.company?.address ?? "Đang cập nhật";
+  return formatBriefAddress(job.address ?? job.company?.address);
 }
 
 function formatSavedDate(job: Job): string {
@@ -91,7 +92,7 @@ function FavouriteJobRow({ job }: FavouriteJobRowProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between md:gap-4">
             <div className="min-w-0 flex-1">
-              <span className="inline-block text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-primary sm:text-xl">
+              <span className="inline-block text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-primary sm:text-xl line-clamp-1">
                 {job.title}
               </span>
               <p className="mt-1 text-sm font-semibold tracking-wide text-slate-500 uppercase">
@@ -209,7 +210,7 @@ export function FavouritesPage() {
         </div>
 
         {isLoading && !isLoaded ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-100 bg-white">
+          <div className="flex min-h-80 items-center justify-center rounded-2xl border border-slate-100 bg-white">
             <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : favouriteJobs.length > 0 ? (

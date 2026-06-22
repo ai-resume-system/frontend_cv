@@ -5,6 +5,9 @@ import {
   CircleX,
   Download,
   Eye,
+  Calendar,
+  Award,
+  UserCheck,
 } from "lucide-react";
 
 import {
@@ -14,8 +17,7 @@ import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 
 interface RecruiterApplicantRowProps {
   application: RecruiterApplicationApiItem;
-  onAccept: (id: string) => void;
-  onReject: (id: string) => void;
+  onUpdateStatusClick: (application: RecruiterApplicationApiItem, targetStatus: EJobApplicationStatus) => void;
   onViewCv: (id: string) => void;
   showJobColumn?: boolean;
 }
@@ -25,11 +27,11 @@ function getStatusLabel(status: EJobApplicationStatus): string {
     case EJobApplicationStatus.APPLIED:
       return "Mới ứng tuyển";
     case EJobApplicationStatus.REVIEWING:
-      return "Đang xem";
+      return "Đang xem xét";
     case EJobApplicationStatus.INTERVIEW:
-      return "Phỏng vấn";
+      return "Lịch phỏng vấn";
     case EJobApplicationStatus.REJECTED:
-      return "Từ chối";
+      return "Đã từ chối";
     case EJobApplicationStatus.OFFERED:
       return "Đã gửi offer";
     case EJobApplicationStatus.ACCEPTED:
@@ -58,8 +60,7 @@ function getStatusClass(status: EJobApplicationStatus): string {
 
 export function RecruiterApplicantRow({
   application,
-  onAccept,
-  onReject,
+  onUpdateStatusClick,
   onViewCv,
   showJobColumn = false,
 }: RecruiterApplicantRowProps) {
@@ -133,6 +134,7 @@ export function RecruiterApplicantRow({
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center gap-2">
+          {/* Nút Xem CV */}
           <button
             type="button"
             onClick={() => onViewCv(application.id)}
@@ -141,27 +143,96 @@ export function RecruiterApplicantRow({
           >
             <Eye className="h-4 w-4" />
           </button>
-          {application.status === EJobApplicationStatus.APPLIED ||
-          application.status === EJobApplicationStatus.REVIEWING ? (
+
+          {/* APPLIED: Duyệt sơ bộ / Từ chối */}
+          {application.status === EJobApplicationStatus.APPLIED && (
             <>
               <button
                 type="button"
-                onClick={() => onAccept(application.id)}
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REVIEWING)}
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-tertiary"
-                title="Chấp nhận"
+                title="Duyệt sơ bộ hồ sơ"
               >
                 <CircleCheck className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                onClick={() => onReject(application.id)}
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
-                title="Từ chối"
+                title="Từ chối hồ sơ"
               >
                 <CircleX className="h-4 w-4" />
               </button>
             </>
-          ) : null}
+          )}
+
+          {/* REVIEWING: Lên lịch phỏng vấn / Từ chối */}
+          {application.status === EJobApplicationStatus.REVIEWING && (
+            <>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.INTERVIEW)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
+                title="Lên lịch phỏng vấn"
+              >
+                <Calendar className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* INTERVIEW: Gửi Offer / Từ chối */}
+          {application.status === EJobApplicationStatus.INTERVIEW && (
+            <>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.OFFERED)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-tertiary"
+                title="Gửi Offer tuyển dụng"
+              >
+                <Award className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* OFFERED: Xác nhận nhận việc / Từ chối */}
+          {application.status === EJobApplicationStatus.OFFERED && (
+            <>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.ACCEPTED)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-tertiary"
+                title="Ứng viên đồng ý nhận việc"
+              >
+                <UserCheck className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* Nút Tải CV */}
           {application.cv?.fileUrl ? (
             <a
               href={application.cv.fileUrl}
@@ -178,3 +249,4 @@ export function RecruiterApplicantRow({
     </tr>
   );
 }
+

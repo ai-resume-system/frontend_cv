@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend CV - Cổng Người Dùng
 
-## Getting Started
+`frontend_cv` là frontend chính cho người tìm việc và nhà tuyển dụng trong hệ thống AI Resume System. Source này được xây dựng bằng Next.js, cung cấp giao diện xem việc làm, quản lý CV, phân tích CV, ứng tuyển và quản lý tin tuyển dụng.
 
-First, run the development server:
+## Mục Tiêu
+
+- Cho phép người tìm việc đăng ký, đăng nhập và quản lý tài khoản.
+- Cho phép người tìm việc tải CV, xem CV, phân tích CV bằng AI và nhận gợi ý cải thiện.
+- Hiển thị danh sách việc làm, chi tiết việc làm, công ty, danh mục nghề nghiệp và kỹ năng.
+- Hỗ trợ ứng tuyển bằng CV và theo dõi lịch sử ứng tuyển.
+- Cho phép nhà tuyển dụng quản lý công ty, tạo/sửa/đóng tin tuyển dụng và xem danh sách ứng viên.
+- Hiển thị điểm AI Match khi backend trả về dữ liệu phù hợp.
+
+## Kiến Trúc Hiện Tại
+
+Frontend dùng Next.js App Router, tổ chức theo hướng tách portal và shared layer:
+
+- `src/app`: route theo App Router.
+- `src/portals/jobseeker`: màn hình và luồng dành cho người tìm việc.
+- `src/portals/recruiter`: màn hình và luồng dành cho nhà tuyển dụng.
+- `src/shared`: service gọi API, type, hook, component, constants và utility dùng chung.
+- `src/shared/services`: các service kết nối API backend.
+- `src/shared/constants`: route, API endpoint và enum dùng ở FE.
+
+Luồng gọi API:
+
+```txt
+Page/Feature -> Hook/Service -> API Service -> backend_cv /api/v1
+```
+
+## Công Nghệ Sử Dụng
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Lucide React
+- Recharts
+- React Toastify
+- SweetAlert2
+- Leaflet
+
+## Yêu Cầu Cài Đặt
+
+- Node.js 20+ khuyến nghị
+- npm
+- Backend `backend_cv` đang chạy
+
+## Cấu Hình Môi Trường
+
+Tạo file `.env` từ `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Các biến thường dùng:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+NEXT_PUBLIC_APP_URL=http://localhost:3100
+NEXT_PUBLIC_JOBSEEKER_URL=http://localhost:3100
+NEXT_PUBLIC_RECRUITER_URL=http://localhost:3100/recruiter
+NEXT_PUBLIC_PORTAL_MODE=single-domain
+NEXT_PUBLIC_APP_NODE_ENV=development
+```
+
+Lưu ý:
+
+- `NEXT_PUBLIC_API_URL` trỏ tới backend và đã bao gồm `/api`.
+- API route trong code tự thêm `/v1`, ví dụ `/api/v1/jobs`.
+- Nếu backend đổi port theo `WEB_PORT`, cần đổi lại `NEXT_PUBLIC_API_URL`.
+
+## Cài Dependency
+
+```bash
+cd frontend_cv
+npm install
+```
+
+## Chạy Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ứng dụng chạy mặc định ở:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3100
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Lệnh Hữu Ích
 
-## Learn More
+```bash
+npm run build
+npm run start
+npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Luồng Chạy Với Toàn Hệ Thống
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Chạy hạ tầng PostgreSQL, Redis, MinIO.
+2. Chạy `ai_service` nếu cần phân tích CV.
+3. Chạy `backend_cv`.
+4. Chạy `frontend_cv`.
+5. Mở `http://localhost:3100`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Ghi Chú Vận Hành
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Nếu đăng nhập không giữ phiên, kiểm tra cookie, token và `NEXT_PUBLIC_API_URL`.
+- Nếu gọi API bị lỗi CORS, kiểm tra cấu hình CORS trong `backend_cv/.env`.
+- Nếu ảnh/media không hiển thị, kiểm tra MinIO và URL media trả từ backend.
+- Nếu phân tích CV không chạy, kiểm tra `ai_service`, Redis queue và cấu hình `AI_SERVICE_BASE_URL` bên backend.

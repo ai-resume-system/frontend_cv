@@ -57,7 +57,10 @@ export function FloatingFavouriteButton() {
         clearTimeout(timeoutId);
       }
 
-      window.removeEventListener(FAVOURITE_JOB_ADDED_EVENT, handleFavouriteAdded);
+      window.removeEventListener(
+        FAVOURITE_JOB_ADDED_EVENT,
+        handleFavouriteAdded,
+      );
     };
   }, []);
 
@@ -81,7 +84,7 @@ export function FloatingFavouriteButton() {
     <div className="fixed bottom-5 right-4 z-50 sm:bottom-6 sm:right-6 flex items-center">
       <div
         className={cn(
-          "hidden md:block absolute right-18 w-[330px] transition-all duration-300 opacity-0 translate-x-2",
+          "hidden md:block absolute right-18 w-82.5 transition-all duration-300 opacity-0 translate-x-2",
           showToast
             ? "opacity-100 translate-x-0 pointer-events-auto"
             : "pointer-events-none",
@@ -100,7 +103,7 @@ export function FloatingFavouriteButton() {
             , click vào đây!
           </p>
 
-          <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-slate-800/95" />
+          <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-slate-800/95" />
         </div>
       </div>
 
@@ -117,7 +120,9 @@ export function FloatingFavouriteButton() {
         <Heart
           className={cn(
             "h-6 w-6 transition-colors duration-300",
-            favouriteJobCount > 0 ? "fill-primary text-primary" : "text-primary",
+            favouriteJobCount > 0
+              ? "fill-primary text-primary"
+              : "text-primary",
           )}
         />
         <span className="absolute right-0 top-0 flex min-h-5 min-w-5 -translate-y-1/4 translate-x-1/4 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold leading-none text-white">

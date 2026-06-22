@@ -8,13 +8,12 @@ import {
   MapPinIcon,
   XIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
 import { BaseField } from "@/shared/components/ui/BaseField";
 import { BasePagination } from "@/shared/components/ui/BasePagination";
+import { HotJobSkeleton } from "@/shared/components/ui/CardSkelton";
 import {
   buildCategoryFilterOptions,
   HOT_JOB_FILTER_LABELS,
@@ -30,17 +29,18 @@ import { useJobs } from "@/shared/hooks/data/useJobs";
 import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
 import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
-import { JobCardLink } from "./JobCardSection";
-import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 import { StateLayout } from "@/shared/components/ui/StateLayout";
+import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
+import { JobCardLink } from "./JobCardSection";
 
 function getCompanyLabel(job: Job): string {
   return job.company?.name ?? "Doanh nghiệp đang cập nhật";
 }
 
 function getAddress(job: Job): string {
-  return job.address ?? job.company?.address ?? "Địa điểm đang cập nhật";
+  return formatBriefAddress(job.address ?? job.company?.address);
 }
 
 function getFilterOptions(
@@ -224,7 +224,7 @@ export function HotJobsSection() {
           : filters.address;
 
   return (
-    <section className="bg-surface-container-high px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <section className="bg-gray-300/30 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-end justify-between gap-6">
           <div className="flex flex-col gap-1.5">

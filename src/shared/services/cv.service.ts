@@ -108,6 +108,15 @@ export async function updateCv(
   return response.data;
 }
 
+export async function fetchCvDetail(id: string): Promise<CvItem> {
+  const response = await apiService.get<IResponseApiItem<CvItem>>(
+    API_ROUTES.CV.DETAIL(id),
+    { auth: true, cache: "no-store" },
+  );
+
+  return response.data;
+}
+
 export async function deleteCv(id: string): Promise<void> {
   await apiService.delete<void>(API_ROUTES.CV.DETAIL(id), { auth: true });
 }

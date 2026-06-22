@@ -80,8 +80,10 @@ export function ApplicationCard({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Chỉ cho phép rút đơn khi ở trạng thái APPLIED
-  const canWithdraw = status === EJobApplicationStatus.APPLIED;
+  // Chỉ cho phép rút đơn khi ở trạng thái APPLIED hoặc REVIEWING
+  const canWithdraw =
+    status === EJobApplicationStatus.APPLIED ||
+    status === EJobApplicationStatus.REVIEWING;
 
   return (
     <div className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-slate-300 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
@@ -205,7 +207,7 @@ export function ApplicationCard({
                 type="button"
                 title={
                   !canWithdraw
-                    ? "Chỉ có thể rút đơn khi đang chờ duyệt"
+                    ? "Chỉ có thể rút đơn khi chưa có lịch hẹn phỏng vấn"
                     : undefined
                 }
               >

@@ -8,7 +8,7 @@ import {
   fetchRecruiterInterviews,
   updateJobApplicationStatus,
 } from "@/shared/services/recruiter-job-application.service";
-import type { RecruiterApplicationApiItem } from "@/shared/types/application";
+import type { RecruiterApplicationApiItem, UpdateApplicationStatusPayload } from "@/shared/types/application";
 import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 
 interface UseRecruiterApplicationsOptions {
@@ -81,6 +81,20 @@ export function useRecruiterApplications({
     }
   }
 
+  async function handleUpdateStatus(
+    id: string,
+    payload: UpdateApplicationStatusPayload,
+  ) {
+    try {
+      const updatedApp = await updateJobApplicationStatus(id, payload);
+      setApplications((prev) =>
+        prev.map((app) => (app.id === id ? updatedApp : app)),
+      );
+    } catch (err) {
+      throw err;
+    }
+  }
+
   function handleViewCv(id: string) {
     const app = applications.find((a) => a.id === id);
     if (app?.cv?.fileUrl) {
@@ -95,6 +109,7 @@ export function useRecruiterApplications({
     reload: loadApplications,
     handleAccept,
     handleReject,
+    handleUpdateStatus,
     handleViewCv,
   };
 }

@@ -40,6 +40,7 @@ import { FAVOURITE_JOB_ADDED_EVENT } from "@/shared/constants/constants/favourit
 import { SESSION_STORAGE_KEYS } from "@/shared/constants/constants/local-storage";
 import { JobCard } from "@/shared/components/layouts/JobCard";
 import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 interface JobDetailPageProps {
   job: Job;
@@ -135,7 +136,11 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                       label: "Mức lương",
                       value: formatSalary(job.salaryMin, job.salaryMax),
                     },
-                    { icon: MapPin, label: "Địa điểm", value: getAddress(job) },
+                    {
+                      icon: MapPin,
+                      label: "Địa điểm",
+                      value: formatBriefAddress(getAddress(job)),
+                    },
                     {
                       icon: ClipboardClock,
                       label: "Kinh nghiệm",

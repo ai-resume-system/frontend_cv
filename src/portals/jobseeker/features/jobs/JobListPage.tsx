@@ -331,7 +331,7 @@ export function JobListPage() {
 
                   <button
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex min-w-[160px] cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="flex min-w-40 cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 focus:ring-2 focus:ring-primary/20 outline-none"
                   >
                     {JOB_SORT_OPTIONS.find((o) => o.value === filters.sort)
                       ?.label || "Chọn..."}

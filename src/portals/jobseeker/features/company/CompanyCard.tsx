@@ -6,6 +6,7 @@ import { resolveMediaUrl } from "@/shared/lib/utils/resolveMediaUrl";
 import { stripHtml } from "@/shared/lib/utils/stripHtml";
 import type { CompanyDto } from "@/shared/types/company";
 import { Badge } from "@/shared/components/ui/Badge";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 interface CompanyCardProps {
   company: CompanyDto;
@@ -42,7 +43,7 @@ export function CompanyCard({ company, layout = "grid" }: CompanyCardProps) {
             <div className="flex items-center gap-1.5 text-sm text-slate-500">
               <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
               <span className="truncate">
-                {company.address ?? "Địa chỉ đang cập nhật"}
+                {formatBriefAddress(company.address)}
               </span>
             </div>
             <p className="line-clamp-2 text-sm leading-relaxed text-slate-500 pt-0.5">
@@ -77,7 +78,7 @@ export function CompanyCard({ company, layout = "grid" }: CompanyCardProps) {
         </div>
 
         {/* Day */}
-        <div className="absolute top-[176px] left-6 -translate-y-1/2 z-10 rounded-2xl border-2 border-gray-300 bg-white shadow-md">
+        <div className="absolute top-44 left-6 -translate-y-1/2 z-10 rounded-2xl border-2 border-gray-300 bg-white shadow-md">
           <img
             alt={company.name ?? "Logo"}
             className="h-16 w-16 rounded-xl object-cover"
@@ -93,7 +94,7 @@ export function CompanyCard({ company, layout = "grid" }: CompanyCardProps) {
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <span className="truncate">
-                {company.address ?? "Địa chỉ đang cập nhật"}
+                {formatBriefAddress(company.address)}
               </span>
             </div>
           </div>
