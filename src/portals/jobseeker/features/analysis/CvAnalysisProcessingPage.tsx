@@ -223,7 +223,7 @@ export function CvAnalysisProcessingPage() {
                 </div>
               </div>
 
-              <div className="relative flex min-h-[500px] flex-col items-center justify-center bg-surface-dim p-10">
+              <div className="relative flex min-h-125 flex-col items-center justify-center bg-surface-dim p-10">
                 <div className="mx-auto w-full max-w-md space-y-6 opacity-50">
                   <div className="h-10 w-3/4 rounded-xl bg-surface-container" />
                   <div className="space-y-3">

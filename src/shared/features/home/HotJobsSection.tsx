@@ -249,7 +249,7 @@ export function HotJobsSection() {
             <button
               aria-expanded={isFilterMenuOpen}
               aria-haspopup="menu"
-              className="flex h-11 w-full min-w-[200px] items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-[240px]"
+              className="flex h-11 w-full min-w-50 items-center justify-between rounded-xl border border-primary/40 bg-white px-4 py-2 text-left shadow-sm transition-colors hover:border-primary md:w-60"
               onClick={() =>
                 setIsFilterMenuOpen((currentState) => !currentState)
               }

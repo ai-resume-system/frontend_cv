@@ -33,7 +33,7 @@ export const RECRUITER_NAV_ITEMS: RecruiterNavItem[] = [
   },
   {
     href: RECRUITER_ROUTES.INTERVIEWS,
-    label: "Phỏng vấn",
+    label: "Lịch phỏng vấn",
     icon: CalendarCheck,
   },
 ];

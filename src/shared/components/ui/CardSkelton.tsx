@@ -73,7 +73,7 @@ export function ApplicationCardSkeleton({
       {Array.from({ length }).map((_, index) => (
         <div
           key={index}
-          className="h-64 animate-pulse rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm"
+          className="h-64 animate-pulse rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
         >
           <div className="flex items-start justify-between">
             <div className="h-14 w-14 rounded-2xl bg-slate-100" />

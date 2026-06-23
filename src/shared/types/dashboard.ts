@@ -8,6 +8,7 @@ export interface RecruiterApplicationSummary {
   applicantName: string;
   applicantEmail?: string;
   applicantPhone?: string;
+  avatarUrl?: string | null;
   cvTitle?: string;
   matchingScore?: number;
   status: EJobApplicationStatus;
@@ -29,6 +30,8 @@ export interface RecruiterJobOverview {
   applicationCount: number;
   matchingAverage: number | null;
   createdAt: Date;
+  expiredAt?: Date | null;
+  vacancyCount?: number | null;
 }
 
 export interface RecruiterTrendPoint {

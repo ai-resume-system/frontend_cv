@@ -42,7 +42,7 @@ export function PreviewAnalysisModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-hidden">
-      <div className="w-full max-w-4xl rounded-[32px] bg-slate-50 p-6 sm:p-8 shadow-2xl border border-slate-300 flex flex-col my-8 max-h-[90vh]">
+      <div className="w-full max-w-4xl rounded-4xl bg-slate-50 p-6 sm:p-8 shadow-2xl border border-slate-300 flex flex-col my-8 max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export function PreviewAnalysisModal({
         <div className="flex-1 overflow-y-auto py-6 pr-1 space-y-6 custom-scroll">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Cột trái: Đánh giá tổng quan */}
-            <div className="md:col-span-5 rounded-[24px] bg-white p-6 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="md:col-span-5 rounded-3xl bg-white p-6 border border-slate-300 shadow-sm flex flex-col items-center justify-center text-center">
               <span className="text-sm font-bold text-slate-700 uppercase tracking-widest">
                 Đánh giá tổng quan
               </span>

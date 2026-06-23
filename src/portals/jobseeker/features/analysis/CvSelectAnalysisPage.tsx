@@ -29,7 +29,6 @@ import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 import { PreviewAnalysisModal } from "./PreviewAnalysisModal";
 import { StateLayout } from "@/shared/components/ui/StateLayout";
 
-
 const ACCEPTED_TYPES = [
   "application/pdf",
   "application/msword",
@@ -123,24 +122,18 @@ export function CvSelectAnalysisPage() {
     }
   }, [isLoggedIn, router]);
 
-  // Sort CVs: isDefault = true goes to top, then by updated date
-  const sortedCvs = [...cvList].sort((a, b) => {
-    if (a.isDefault && !b.isDefault) return -1;
-    if (!a.isDefault && b.isDefault) return 1;
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
-
   // Automatically select the default CV on load
+  // Backend already returns list with isDefault=true first, no client-side sort needed
   useEffect(() => {
-    if (sortedCvs.length > 0 && !selectedCvId) {
-      const defaultCv = sortedCvs.find((cv) => cv.isDefault);
+    if (cvList.length > 0 && !selectedCvId) {
+      const defaultCv = cvList.find((cv) => cv.isDefault);
       if (defaultCv) {
         setSelectedCvId(defaultCv.id);
       } else {
-        setSelectedCvId(sortedCvs[0].id);
+        setSelectedCvId(cvList[0].id);
       }
     }
-  }, [sortedCvs, selectedCvId]);
+  }, [cvList, selectedCvId]);
 
   function validateFile(file: File): boolean {
     setFileError(null);
@@ -282,7 +275,7 @@ export function CvSelectAnalysisPage() {
                       {/* Thông tin File */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-sm sm:text-base truncate max-w-[200px] sm:max-w-xs text-primary">
+                          <h3 className="font-bold text-sm sm:text-base truncate max-w-50 sm:max-w-xs text-primary">
                             {selectedUploadFile.name}
                           </h3>
                           <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -363,11 +356,12 @@ export function CvSelectAnalysisPage() {
                   />
                 ))}
               </div>
-            ) : sortedCvs.length > 0 ? (
+            ) : cvList.length > 0 ? (
               <div className="space-y-4">
-                <div className="max-h-[300px] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
-                  {sortedCvs.map((cv) => {
-                    const isSelected = cv.id === selectedCvId && !selectedUploadFile;
+                <div className="max-h-75 overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+                  {cvList.map((cv) => {
+                    const isSelected =
+                      cv.id === selectedCvId && !selectedUploadFile;
                     const fileExt = (
                       cv.fileExtension?.replace(".", "") || "PDF"
                     ).toUpperCase();
@@ -410,7 +404,7 @@ export function CvSelectAnalysisPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3
                                 className={cn(
-                                  "font-bold text-sm sm:text-base truncate max-w-[180px] sm:max-w-xs",
+                                  "font-bold text-sm sm:text-base truncate max-w-45 sm:max-w-xs",
                                   isSelected
                                     ? "text-primary"
                                     : "text-slate-800",
@@ -502,8 +496,8 @@ export function CvSelectAnalysisPage() {
         </div>
 
         {/* RIGHT CONTAINER */}
-        <div className="hidden md:flex md:w-[360px] lg:w-[400px] shrink-0">
-          <div className="w-full rounded-[28px] overflow-hidden shadow-xl relative flex flex-col justify-between p-8 text-white bg-slate-900 border border-slate-800 min-h-[460px]">
+        <div className="hidden md:flex md:w-90 lg:w-100 shrink-0">
+          <div className="w-full rounded-[28px] overflow-hidden shadow-xl relative flex flex-col justify-between p-8 text-white bg-slate-900 border border-slate-800 min-h-115">
             <img
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               src="/favourite_background.png"
@@ -512,26 +506,6 @@ export function CvSelectAnalysisPage() {
 
             <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-900/50 to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_60%)] z-10 pointer-events-none" />
-
-            {/* Bottom Content Description */}
-            <div className="relative z-20 flex flex-col">
-              <div className="mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-amber-300 fill-amber-300 animate-pulse" />
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/90">
-                  FUSE AI INSIGHT
-                </span>
-              </div>
-
-              <h2 className="text-xl font-bold leading-tight mb-2">
-                Phân tích chuyên sâu
-              </h2>
-
-              <p className="text-xs leading-relaxed text-white/80">
-                AI sẽ phân tích CV của bạn, nhận diện chuẩn xác các kỹ năng, số
-                năm kinh nghiệm và đưa ra các gợi ý tối ưu giúp hồ sơ của bạn
-                nổi bật hơn với nhà tuyển dụng.
-              </p>
-            </div>
           </div>
         </div>
       </div>

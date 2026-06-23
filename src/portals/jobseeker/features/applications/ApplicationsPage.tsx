@@ -185,7 +185,7 @@ export function ApplicationsPage() {
 
             <button
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex min-w-[150px] cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="flex min-w-37.5 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
               type="button"
             >
               {SORT_OPTIONS.find((o) => o.value === sort)?.label || "Chọn..."}
@@ -260,7 +260,7 @@ export function ApplicationsPage() {
       {/* Modal 1: Chi tiết lịch hẹn phỏng vấn */}
       {activeInterviewApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md overflow-hidden rounded-[24px] border border-slate-100 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             {/* Close Button */}
             <button
               onClick={() => setActiveInterviewApp(null)}
@@ -355,7 +355,7 @@ export function ApplicationsPage() {
       {/* Modal 2: Xác nhận rút đơn */}
       {withdrawAppId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[24px] border border-slate-100 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 className="text-base font-bold text-slate-800">
               Xác nhận rút đơn ứng tuyển?
             </h3>

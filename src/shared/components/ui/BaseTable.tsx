@@ -37,7 +37,7 @@ export function BaseTable<T>({
     if (!pagination) return [];
     const { page, totalPages } = pagination;
     const pages = [];
-    
+
     // Luôn hiển thị trang đầu, trang cuối, trang hiện tại và các trang lân cận
     const start = Math.max(1, page - 1);
     const end = Math.min(totalPages, page + 1);
@@ -53,7 +53,7 @@ export function BaseTable<T>({
   return (
     <div className="flex flex-col w-full">
       {/* Bọc bảng trong thẻ có bo góc và shadow mềm mại */}
-      <div className="overflow-hidden rounded-[24px] border border-outline-variant/15 bg-white/90 shadow-sm transition">
+      <div className="overflow-hidden rounded-3xl border border-outline-variant/15 bg-white/90 shadow-sm transition">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
@@ -71,19 +71,29 @@ export function BaseTable<T>({
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-20 text-center">
+                  <td
+                    colSpan={columns.length}
+                    className="px-6 py-20 text-center"
+                  >
                     <div className="flex flex-col items-center justify-center gap-2">
                       <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      <span className="text-xs text-on-surface-variant font-medium">Đang tải dữ liệu...</span>
+                      <span className="text-xs text-on-surface-variant font-medium">
+                        Đang tải dữ liệu...
+                      </span>
                     </div>
                   </td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-16 text-center">
+                  <td
+                    colSpan={columns.length}
+                    className="px-6 py-16 text-center"
+                  >
                     <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
                       <Inbox className="h-10 w-10 stroke-[1.5]" />
-                      <span className="text-sm font-medium text-slate-500">{emptyMessage}</span>
+                      <span className="text-sm font-medium text-slate-500">
+                        {emptyMessage}
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -114,11 +124,21 @@ export function BaseTable<T>({
         {pagination && pagination.totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-outline-variant/10 bg-slate-50/40 px-6 py-4">
             <div className="text-xs text-on-surface-variant font-medium">
-              Hiển thị trang <span className="font-bold text-on-surface">{pagination.page}</span> /{" "}
-              <span className="font-bold text-on-surface">{pagination.totalPages}</span> (Tổng số{" "}
-              <span className="font-bold text-on-surface">{pagination.total}</span> bản ghi)
+              Hiển thị trang{" "}
+              <span className="font-bold text-on-surface">
+                {pagination.page}
+              </span>{" "}
+              /{" "}
+              <span className="font-bold text-on-surface">
+                {pagination.totalPages}
+              </span>{" "}
+              (Tổng số{" "}
+              <span className="font-bold text-on-surface">
+                {pagination.total}
+              </span>{" "}
+              bản ghi)
             </div>
-            
+
             <div className="flex items-center gap-1.5">
               {/* Nút lùi trang */}
               <button
@@ -144,7 +164,9 @@ export function BaseTable<T>({
                   >
                     1
                   </button>
-                  {pagination.page > 3 && <span className="text-xs text-slate-400 px-1">...</span>}
+                  {pagination.page > 3 && (
+                    <span className="text-xs text-slate-400 px-1">...</span>
+                  )}
                 </>
               )}
 
@@ -170,7 +192,9 @@ export function BaseTable<T>({
                   )}
                   <button
                     type="button"
-                    onClick={() => pagination.onPageChange(pagination.totalPages)}
+                    onClick={() =>
+                      pagination.onPageChange(pagination.totalPages)
+                    }
                     className={`h-8 px-3 text-xs font-bold rounded-xl transition ${
                       pagination.page === pagination.totalPages
                         ? "bg-primary text-on-primary shadow-sm"

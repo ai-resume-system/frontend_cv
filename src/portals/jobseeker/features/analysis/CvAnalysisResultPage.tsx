@@ -221,8 +221,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               {previewUrl ? (
                 fileExtension &&
                 ["docx", "doc"].includes(fileExtension.toLowerCase()) ? (
-                  <div className="bg-slate-100 p-8 h-[700px] flex items-center justify-center w-full">
-                    <div className="w-full max-w-sm bg-white shadow-lg p-8 rounded-[24px] border border-slate-200/60 text-center space-y-6">
+                  <div className="bg-slate-100 p-8 h-175 flex items-center justify-center w-full">
+                    <div className="w-full max-w-sm bg-white shadow-lg p-8 rounded-3xl border border-slate-200/60 text-center space-y-6">
                       <div className="mx-auto w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100/50">
                         <FileText className="h-8 w-8" />
                       </div>
@@ -249,12 +249,12 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 ) : (
                   <iframe
                     src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                    className="w-full h-[700px] border-none bg-white shadow-xs"
+                    className="w-full h-175 border-none bg-white shadow-xs"
                     title="Xem trước CV"
                   />
                 )
               ) : (
-                <div className="relative flex min-h-[500px] flex-col items-center justify-center bg-surface-dim p-10">
+                <div className="relative flex min-h-125 flex-col items-center justify-center bg-surface-dim p-10">
                   <div className="mx-auto w-full max-w-md space-y-6 opacity-50">
                     <div className="h-10 w-3/4 rounded-xl bg-surface-container" />
                     <div className="space-y-3">
@@ -520,7 +520,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 className="text-sm font-bold text-primary flex items-center group"
               >
                 Xem tất cả
-                <div className="flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[24px] group-hover:opacity-100">
+                <div className="flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-6 group-hover:opacity-100">
                   <ArrowRight className="h-4 w-4 ml-1.5 -translate-x-4 transition-transform duration-300 ease-out group-hover:translate-x-0" />
                 </div>
               </Link>

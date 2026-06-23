@@ -69,6 +69,7 @@ function mapApplicationSummary(
       application.contactEmail ?? application.user?.email ?? undefined,
     applicantPhone:
       application.contactPhone ?? application.user?.phone ?? undefined,
+    avatarUrl: application.user?.avatarUrl ?? null,
     cvTitle: application.cv?.title ?? undefined,
     matchingScore: application.matchingScore ?? undefined,
     status: application.status,
@@ -204,6 +205,8 @@ export function useRecruiterDashboard() {
                 scores.length
               : null,
             createdAt: snapshot.job.createdAt,
+            expiredAt: snapshot.job.expiredAt ?? null,
+            vacancyCount: snapshot.job.vacancyCount ?? null,
           };
         });
 

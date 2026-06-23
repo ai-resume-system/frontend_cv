@@ -142,7 +142,7 @@ export function RecruiterInterviewPage() {
         }
         return (
           <span
-            className="text-xs text-on-surface-variant flex items-center gap-1 max-w-[200px] truncate"
+            className="text-xs text-on-surface-variant flex items-center gap-1 max-w-50 truncate"
             title={app.scheduleLocation ?? ""}
           >
             <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />

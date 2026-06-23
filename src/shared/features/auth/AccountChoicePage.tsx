@@ -72,7 +72,7 @@ export function AccountChoicePage({
   ];
 
   const content = (
-    <div className="relative z-10 w-full max-w-[860px] overflow-hidden rounded-[24px] border border-border bg-surface shadow-2xl">
+    <div className="relative z-10 w-full max-w-215 overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl">
       <header className="pt-6 pb-3 text-center sm:pt-8 sm:pb-4">
         <h1 className="font-display text-xl font-extrabold leading-tight text-foreground">
           Chào mừng bạn đến với FUSE
@@ -92,7 +92,7 @@ export function AccountChoicePage({
           <br /> vui lòng lựa chọn nhóm phù hợp nhất với bạn?
         </p>
 
-        <div className="mx-auto mt-8 grid max-w-[680px] gap-8 sm:grid-cols-2 sm:gap-12">
+        <div className="mx-auto mt-8 grid max-w-170 gap-8 sm:grid-cols-2 sm:gap-12">
           {roleOptions.map((option) => {
             const href = getTargetHref(resolvedMode, option.role);
             const isJobSeeker = option.role === "job_seeker";

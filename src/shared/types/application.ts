@@ -32,6 +32,7 @@ export interface ApplicationUserRef {
   id: string;
   email: string;
   phone: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface BaseApplicationApiItem {
