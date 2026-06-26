@@ -1,18 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { UsersRound } from "lucide-react";
+import {
+  UsersRound,
+  Eye,
+  CircleX,
+  Download,
+  Calendar,
+  Award,
+  UserCheck,
+} from "lucide-react";
 import Link from "next/link";
 
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
-import { RecruiterApplicantRow } from "@/portals/recruiter/features/applicants/RecruiterApplicantRow";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
+import { BaseTable, BaseTableColumn } from "@/shared/components/ui/BaseTable";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 import { StatusUpdateModal } from "./components/StatusUpdateModal";
+
+function getStatusLabel(status: EJobApplicationStatus): string {
+  switch (status) {
+    case EJobApplicationStatus.APPLIED:
+      return "Mới ứng tuyển";
+    case EJobApplicationStatus.INTERVIEW:
+      return "Lịch phỏng vấn";
+    case EJobApplicationStatus.REJECTED:
+      return "Đã từ chối";
+    case EJobApplicationStatus.ACCEPTED:
+      return "Nhận việc";
+    case EJobApplicationStatus.WITHDRAWN:
+      return "Đã rút";
+  }
+}
+
+function getStatusClass(status: EJobApplicationStatus): string {
+  switch (status) {
+    case EJobApplicationStatus.APPLIED:
+      return "bg-warning/15 text-warning";
+    case EJobApplicationStatus.INTERVIEW:
+      return "bg-primary-soft text-primary";
+    case EJobApplicationStatus.REJECTED:
+      return "bg-error/10 text-error";
+    case EJobApplicationStatus.ACCEPTED:
+      return "bg-tertiary-soft text-tertiary";
+    case EJobApplicationStatus.WITHDRAWN:
+      return "bg-outline/10 text-on-surface-variant";
+  }
+}
 
 export function RecruiterApplicantsPage() {
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
@@ -20,27 +58,226 @@ export function RecruiterApplicantsPage() {
   );
 
   const { jobs } = useRecruiterJobList();
-  const {
-    applications,
-    loading,
-    error,
-    handleUpdateStatus,
-    handleViewCv,
-  } = useRecruiterApplications({ jobId: selectedJobId });
+  const { applications, loading, error, handleUpdateStatus, handleViewCv } =
+    useRecruiterApplications({ jobId: selectedJobId });
+
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  // Reset page khi thay đổi bộ lọc công việc
+  const handleJobFilterChange = (jobId: string | undefined) => {
+    setSelectedJobId(jobId);
+    setPage(1);
+  };
 
   // State quản lý Modal cập nhật trạng thái
-  const [selectedApplication, setSelectedApplication] = useState<RecruiterApplicationApiItem | null>(null);
-  const [targetStatus, setTargetStatus] = useState<EJobApplicationStatus | null>(null);
+  const [selectedApplication, setSelectedApplication] =
+    useState<RecruiterApplicationApiItem | null>(null);
+  const [targetStatus, setTargetStatus] =
+    useState<EJobApplicationStatus | null>(null);
 
-  const handleUpdateStatusClick = (app: RecruiterApplicationApiItem, status: EJobApplicationStatus) => {
+  const handleUpdateStatusClick = (
+    app: RecruiterApplicationApiItem,
+    status: EJobApplicationStatus,
+  ) => {
     setSelectedApplication(app);
     setTargetStatus(status);
   };
 
+  // Phân trang
+  const startIndex = (page - 1) * limit;
+  const pagedApplications = applications.slice(startIndex, startIndex + limit);
+
+  // Định nghĩa các cột cho BaseTable
+  const columns: BaseTableColumn<RecruiterApplicationApiItem>[] = [
+    {
+      key: "applicant",
+      header: "Ứng viên",
+      render: (app) => (
+        <div>
+          <p className="font-bold text-on-surface">
+            {app.fullName ?? "Chưa có tên"}
+          </p>
+          <p className="mt-0.5 text-xs text-on-surface-variant">
+            {app.contactEmail ?? app.user?.email ?? ""}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "job",
+      header: "Công việc",
+      render: (app) => (
+        <span className="text-sm text-on-surface-variant font-medium">
+          {app.job?.title ?? "---"}
+        </span>
+      ),
+    },
+    {
+      key: "matchingScore",
+      header: "Độ phù hợp",
+      render: (app) => (
+        <div className="flex items-center gap-3">
+          {app.matchingScore != null && app.matchingScore > 0 ? (
+            <svg className="h-9 w-9 shrink-0" viewBox="0 0 36 36">
+              <circle
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="3"
+              />
+              <circle
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                stroke={
+                  app.matchingScore >= 70
+                    ? "#10b981"
+                    : app.matchingScore >= 40
+                      ? "#eab308"
+                      : "#ef4444"
+                }
+                strokeWidth="3"
+                strokeDasharray={`${app.matchingScore > 100 ? 100 : app.matchingScore} 100`}
+                strokeLinecap="round"
+                transform="rotate(-90 18 18)"
+              />
+              <text
+                x="18"
+                y="18"
+                textAnchor="middle"
+                dominantBaseline="central"
+                className="text-[9px] font-extrabold"
+                fill="currentColor"
+              >
+                {Math.round(app.matchingScore)}%
+              </text>
+            </svg>
+          ) : (
+            <span className="text-xs font-semibold text-slate-400">
+              Chưa có điểm
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      header: "Trạng thái",
+      render: (app) => (
+        <span
+          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusClass(
+            app.status,
+          )}`}
+        >
+          {getStatusLabel(app.status)}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Ngày ứng tuyển",
+      render: (app) => (
+        <span className="text-xs text-on-surface-variant font-medium">
+          {new Intl.DateTimeFormat("vi-VN").format(new Date(app.createdAt))}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Thao tác",
+      className: "text-right",
+      render: (app) => (
+        <div className="flex items-center justify-end gap-2">
+          {/* Nút Xem CV */}
+          <button
+            type="button"
+            onClick={() => handleViewCv(app.id)}
+            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary cursor-pointer"
+            title="Xem CV"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+
+          {/* APPLIED: Lên lịch phỏng vấn / Từ chối */}
+          {app.status === EJobApplicationStatus.APPLIED && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.INTERVIEW);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary cursor-pointer"
+                title="Lên lịch phỏng vấn"
+              >
+                <Calendar className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error cursor-pointer"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* INTERVIEW: Nhận việc / Từ chối */}
+          {app.status === EJobApplicationStatus.INTERVIEW && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.ACCEPTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary cursor-pointer"
+                title="Đồng ý tuyển - Nhận việc"
+              >
+                <UserCheck className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApplication(app);
+                  setTargetStatus(EJobApplicationStatus.REJECTED);
+                }}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error cursor-pointer"
+                title="Từ chối hồ sơ"
+              >
+                <CircleX className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
+          {/* Nút Tải CV */}
+          {app.cv?.fileUrl && (
+            <a
+              href={app.cv.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-secondary-soft hover:text-secondary cursor-pointer"
+              title="Tải tệp CV"
+            >
+              <Download className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <RecruiterWorkspaceShell
-      heading="Ứng viên"
-      subheading="Xem tất cả ứng viên đã ứng tuyển vào các tin tuyển dụng."
+      heading="Danh sách ứng viên ứng tuyển"
       action={
         selectedJobId ? (
           <Link href={RECRUITER_ROUTES.APPLICANTS_BY_JOB(selectedJobId)}>
@@ -58,74 +295,19 @@ export function RecruiterApplicantsPage() {
           </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setSelectedJobId(undefined)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              selectedJobId === undefined
-                ? "bg-primary text-on-primary shadow-lg shadow-primary/15"
-                : "bg-white text-on-surface-variant hover:bg-primary-soft/60"
-            }`}
-          >
-            Tất cả công việc
-          </button>
-          {jobs.map((job) => (
-            <button
-              key={job.id}
-              type="button"
-              onClick={() => setSelectedJobId(job.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                selectedJobId === job.id
-                  ? "bg-primary text-on-primary shadow-lg shadow-primary/15"
-                  : "bg-white text-on-surface-variant hover:bg-primary-soft/60"
-              }`}
-            >
-              {job.title}
-            </button>
-          ))}
-        </div>
-
-        <div className="rounded-[28px] border border-white/80 bg-white/85 shadow-sm">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <p className="text-sm text-on-surface-variant">Đang tải...</p>
-            </div>
-          ) : applications.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-20">
-              <UsersRound className="h-12 w-12 text-outline" />
-              <p className="text-sm text-on-surface-variant">
-                Chưa có ứng viên nào cho tin tuyển dụng này.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant/20 text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-                    <th className="px-6 py-4">Ứng viên</th>
-                    <th className="px-6 py-4">Công việc</th>
-                    <th className="px-6 py-4">AI Match</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4">Ngày ứng tuyển</th>
-                    <th className="px-6 py-4">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map((app) => (
-                    <RecruiterApplicantRow
-                      key={app.id}
-                      application={app}
-                      onUpdateStatusClick={handleUpdateStatusClick}
-                      onViewCv={handleViewCv}
-                      showJobColumn
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <BaseTable
+          columns={columns}
+          data={pagedApplications}
+          loading={loading}
+          emptyMessage="Chưa có ứng viên nào cho tin tuyển dụng này."
+          pagination={{
+            page,
+            limit,
+            total: applications.length,
+            totalPages: Math.ceil(applications.length / limit),
+            onPageChange: (newPage) => setPage(newPage),
+          }}
+        />
 
         <StatusUpdateModal
           isOpen={Boolean(selectedApplication && targetStatus)}

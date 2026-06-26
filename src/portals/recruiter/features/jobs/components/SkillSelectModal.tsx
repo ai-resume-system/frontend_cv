@@ -68,7 +68,7 @@ export function SkillSelectModal({
         const matchedChildren = (parent.children ?? []).filter(
           (child) =>
             child.name.toLowerCase().includes(query) ||
-            (child.slug ?? "").toLowerCase().includes(query)
+            (child.slug ?? "").toLowerCase().includes(query),
         );
 
         // Nếu kỹ năng cha khớp từ khóa, giữ nguyên cả cha và con
@@ -99,14 +99,14 @@ export function SkillSelectModal({
     setTempSelectedIds((prev) =>
       prev.includes(skillId)
         ? prev.filter((id) => id !== skillId)
-        : [...prev, skillId]
+        : [...prev, skillId],
     );
   };
 
   const handleConfirm = () => {
     // Thu thập thông tin đầy đủ { id, name } của các kỹ năng đã chọn
     const selectedSkillsData: { id: string; name: string }[] = [];
-    
+
     skills.forEach((parent) => {
       // Check kỹ năng cha
       if (tempSelectedIds.includes(parent.id)) {
@@ -131,10 +131,10 @@ export function SkillSelectModal({
         <div className="flex items-center justify-between pb-4 border-b border-outline-variant/15">
           <div>
             <h3 className="text-lg font-bold text-on-surface">
-              Chọn kỹ năng từ hệ thống
+              Kỹ năng từ hệ thống
             </h3>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Chọn các kỹ năng chuyên môn phù hợp để công cụ AI matching so khớp tốt nhất.
+              Chọn các kỹ năng chuyên môn phù hợp với công việc của bạn
             </p>
           </div>
           <button
@@ -181,7 +181,7 @@ export function SkillSelectModal({
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   {parent.name}
                 </h4>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(parent.children ?? []).map((child) => {
                     const isChecked = tempSelectedIds.includes(child.id);

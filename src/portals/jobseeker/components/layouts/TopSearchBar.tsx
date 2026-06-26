@@ -1,6 +1,16 @@
 "use client";
 
-import { Check, ChevronRight, List, MapPin, Search, X, Folder, Briefcase, Tag } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  List,
+  MapPin,
+  Search,
+  X,
+  Folder,
+  Briefcase,
+  Tag,
+} from "lucide-react";
 
 import { useSearch } from "@/shared/hooks/ui/useSearch";
 import { cn } from "@/shared/lib/utils/cn";
@@ -178,8 +188,12 @@ export function TopSearchBar({
                   <div className="p-3 rounded-full bg-slate-100 text-slate-300">
                     <Search className="h-6 w-6" />
                   </div>
-                  <span className="font-semibold text-xs text-center">Không tìm thấy kết quả nào khớp với "{searchTerm}"</span>
-                  <span className="text-[10px] text-slate-400 text-center">Vui lòng thử từ khóa khác hoặc duyệt danh sách bên dưới.</span>
+                  <span className="font-semibold text-xs text-center">
+                    Không tìm thấy kết quả nào khớp với "{searchTerm}"
+                  </span>
+                  <span className="text-[10px] text-slate-400 text-center">
+                    Vui lòng thử từ khóa khác hoặc duyệt danh sách bên dưới.
+                  </span>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -187,17 +201,19 @@ export function TopSearchBar({
                     Kết quả gợi ý ({searchSuggestions.length})
                   </p>
                   {searchSuggestions.map((suggestion) => {
-                    const IconComponent = suggestion.type === "category" 
-                      ? Folder 
-                      : suggestion.type === "skill-parent" 
-                        ? Briefcase 
-                        : Tag;
+                    const IconComponent =
+                      suggestion.type === "category"
+                        ? Folder
+                        : suggestion.type === "skill-parent"
+                          ? Briefcase
+                          : Tag;
 
-                    const iconColor = suggestion.type === "category"
-                      ? "text-emerald-500 bg-emerald-50"
-                      : suggestion.type === "skill-parent"
-                        ? "text-amber-500 bg-amber-50"
-                        : "text-blue-500 bg-blue-50";
+                    const iconColor =
+                      suggestion.type === "category"
+                        ? "text-emerald-500 bg-emerald-50"
+                        : suggestion.type === "skill-parent"
+                          ? "text-amber-500 bg-amber-50"
+                          : "text-blue-500 bg-blue-50";
 
                     return (
                       <button
@@ -207,25 +223,39 @@ export function TopSearchBar({
                         type="button"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${iconColor}`}>
+                          <div
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${iconColor}`}
+                          >
                             <IconComponent className="h-4 w-4" />
                           </div>
-                          
+
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-slate-700 truncate group-hover:text-blue-600 transition-colors">
                               {suggestion.name}
                             </span>
-                            
+
                             <span className="text-[10px] text-slate-400 truncate mt-0.5 font-medium">
                               {suggestion.type === "category" ? (
                                 <span>Danh mục ngành nghề</span>
                               ) : (
                                 <>
-                                  {suggestion.type === "skill-child" && suggestion.parentName && (
-                                    <>Nhóm: <strong className="text-slate-500 font-semibold">{suggestion.parentName}</strong> • </>
-                                  )}
+                                  {suggestion.type === "skill-child" &&
+                                    suggestion.parentName && (
+                                      <>
+                                        Nhóm:{" "}
+                                        <strong className="text-slate-500 font-semibold">
+                                          {suggestion.parentName}
+                                        </strong>{" "}
+                                        •{" "}
+                                      </>
+                                    )}
                                   {suggestion.categoryName && (
-                                    <>Ngành: <strong className="text-slate-500 font-semibold">{suggestion.categoryName}</strong></>
+                                    <>
+                                      Ngành:{" "}
+                                      <strong className="text-slate-500 font-semibold">
+                                        {suggestion.categoryName}
+                                      </strong>
+                                    </>
                                   )}
                                 </>
                               )}
@@ -250,35 +280,37 @@ export function TopSearchBar({
                 </p>
                 <div className="h-[240px] space-y-1 overflow-y-auto pr-1 text-sm">
                   {categoriesLoading ? (
-                    <p className="text-sm text-slate-500">Đang tải danh mục...</p>
+                    <p className="text-sm text-slate-500">
+                      Đang tải danh mục...
+                    </p>
                   ) : (
-                     filteredCategories.map((item) => {
-                        const isActive = item.id === activeCategory?.id;
-                       const isSelected = isCategoryFullySelected(
-                         item.id,
-                         draftSkillSlugs,
-                       );
+                    filteredCategories.map((item) => {
+                      const isActive = item.id === activeCategory?.id;
+                      const isSelected = isCategoryFullySelected(
+                        item.id,
+                        draftSkillSlugs,
+                      );
 
-                       return (
-                         <button
+                      return (
+                        <button
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left transition",
                             isActive
                               ? "bg-blue-50 font-medium text-primary"
                               : "text-slate-700 hover:bg-slate-50",
-                           )}
-                           key={item.id}
-                           onClick={() =>
-                             item.slug
-                               ? toggleDraftCategory({
-                                   id: item.id,
-                                   slug: item.slug,
-                                 })
-                               : undefined
-                           }
-                           onMouseEnter={() => setActiveCategoryId(item.id)}
-                           type="button"
-                         >
+                          )}
+                          key={item.id}
+                          onClick={() =>
+                            item.slug
+                              ? toggleDraftCategory({
+                                  id: item.id,
+                                  slug: item.slug,
+                                })
+                              : undefined
+                          }
+                          onMouseEnter={() => setActiveCategoryId(item.id)}
+                          type="button"
+                        >
                           <span className="flex min-w-0 items-center gap-2.5">
                             <span
                               className={cn(
@@ -288,7 +320,9 @@ export function TopSearchBar({
                                   : "border-slate-300 bg-white",
                               )}
                             >
-                              {isSelected ? <Check className="h-3 w-3" /> : null}
+                              {isSelected ? (
+                                <Check className="h-3 w-3" />
+                              ) : null}
                             </span>
                             <span className="truncate">{item.name}</span>
                           </span>
@@ -306,20 +340,22 @@ export function TopSearchBar({
                 </p>
                 <div className="h-[300px] space-y-1 overflow-y-auto pr-1 text-sm">
                   {skillsLoading ? (
-                    <p className="text-sm text-slate-500">Đang tải kỹ năng...</p>
+                    <p className="text-sm text-slate-500">
+                      Đang tải kỹ năng...
+                    </p>
                   ) : skillsError ? (
                     <p className="p-3 text-xs italic text-error">
                       {skillsError}
                     </p>
                   ) : visibleParentSkills.length ? (
-                     visibleParentSkills.map((item) => {
-                       const isSelected = isParentSkillFullySelected(
-                         item,
-                         draftSkillSlugs,
-                       );
-                       const isActive = item.id === activeParentSkill?.id;
+                    visibleParentSkills.map((item) => {
+                      const isSelected = isParentSkillFullySelected(
+                        item,
+                        draftSkillSlugs,
+                      );
+                      const isActive = item.id === activeParentSkill?.id;
 
-                       return (
+                      return (
                         <button
                           className={cn(
                             "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition",
@@ -327,12 +363,12 @@ export function TopSearchBar({
                               ? "bg-slate-100 font-medium text-slate-900"
                               : "text-slate-700 hover:bg-slate-50",
                           )}
-                           key={item.id}
-                           onClick={() => {
-                             toggleDraftParentSkill(item);
-                            }}
-                           type="button"
-                         >
+                          key={item.id}
+                          onClick={() => {
+                            toggleDraftParentSkill(item);
+                          }}
+                          type="button"
+                        >
                           <span
                             className={cn(
                               "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",

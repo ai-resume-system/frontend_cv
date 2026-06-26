@@ -46,15 +46,19 @@ export function CompanyLocationMap({
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      // Icon tròn xanh dương hiện đại đồng bộ màu FUSE
+      // Icon hình kim ghim bản đồ (Map Pin) màu đỏ sắc nét
       const customIcon = L.divIcon({
         className: "custom-marker-icon",
-        html: `<div class="relative flex h-6 w-6 items-center justify-center">
-                 <div class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/30 opacity-75"></div>
-                 <div class="relative h-3 w-3 rounded-full border border-white bg-primary shadow-sm ring-2 ring-primary/45"></div>
+        html: `<div class="relative -top-2 flex items-center justify-center">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" class="drop-shadow-md">
+                   <!-- Thân kim ghim (Màu đỏ chính) -->
+                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ef4444" stroke="#b91c1c" stroke-width="0.5" />
+                   <!-- Nhụy tròn bên trong (Màu đỏ đậm) -->
+                   <circle cx="12" cy="9" r="3" fill="#7f1d1d" />
+                 </svg>
                </div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+        iconSize: [36, 36],
+        iconAnchor: [18, 34], // Đặt neo vào đúng điểm nhọn phía dưới cùng của kim ghim
       });
 
       // Tạo marker

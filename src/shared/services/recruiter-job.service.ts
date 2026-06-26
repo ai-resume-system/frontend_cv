@@ -26,7 +26,8 @@ export interface FetchRecruiterJobsParams {
   address?: string;
   salaryMin?: number;
   salaryMax?: number;
-  experienceYears?: number;
+  experienceYearsMin?: number;
+  experienceYearsMax?: number;
   careerCategoryId?: string;
   careerCategorySlug?: string;
   status?: EJobStatus;
@@ -51,7 +52,8 @@ function buildRecruiterJobsPath({
   address,
   salaryMin,
   salaryMax,
-  experienceYears,
+  experienceYearsMin,
+  experienceYearsMax,
   careerCategoryId,
   careerCategorySlug,
   status,
@@ -74,8 +76,11 @@ function buildRecruiterJobsPath({
     searchParams.set("salaryMin", `${salaryMin}`);
   if (typeof salaryMax === "number")
     searchParams.set("salaryMax", `${salaryMax}`);
-  if (typeof experienceYears === "number") {
-    searchParams.set("experienceYears", `${experienceYears}`);
+  if (typeof experienceYearsMin === "number") {
+    searchParams.set("experienceYearsMin", `${experienceYearsMin}`);
+  }
+  if (typeof experienceYearsMax === "number") {
+    searchParams.set("experienceYearsMax", `${experienceYearsMax}`);
   }
   if (careerCategoryId) searchParams.set("careerCategoryId", careerCategoryId);
   if (careerCategorySlug) {

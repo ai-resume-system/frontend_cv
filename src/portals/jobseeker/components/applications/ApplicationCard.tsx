@@ -13,6 +13,7 @@ import {
 import { ROUTES } from "@/shared/constants/constants/routes";
 import type { JobSeekerApplicationApiItem } from "@/shared/types/application";
 import { cn } from "@/shared/lib/utils/cn";
+import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 interface ApplicationCardProps {
   application: JobSeekerApplicationApiItem;
@@ -34,18 +35,40 @@ function formatAppliedDate(dateStr?: string | null): string {
   }
 }
 
+// Hàm format lịch hẹn thu gọn hiển thị trên card: "08:30 - Thứ Ba, 30/06"
+function formatInterviewCompact(timeStr?: string | null): string {
+  if (!timeStr) return "Đang cập nhật";
+  try {
+    const date = new Date(timeStr);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const weekdays = [
+      "Chủ Nhật",
+      "Thứ Hai",
+      "Thứ Ba",
+      "Thứ Tư",
+      "Thứ Năm",
+      "Thứ Sáu",
+      "Thứ Bảy",
+    ];
+    const weekday = weekdays[date.getDay()];
+    return `${hours}:${minutes} - ${weekday}, ${day}/${month}`;
+  } catch {
+    return "Đang cập nhật";
+  }
+}
+
 // Hàm lấy classes màu sắc cho status badge
 function getStatusBadgeClass(status: EJobApplicationStatus): string {
   switch (status) {
     case EJobApplicationStatus.APPLIED:
       return "bg-amber-100 text-amber-900 border border-amber-300 text-xs py-0.5 px-3 font-bold rounded-full";
-    case EJobApplicationStatus.REVIEWING:
-      return "bg-sky-100 text-sky-900 border border-sky-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.INTERVIEW:
       return "bg-blue-100 text-blue-900 border border-blue-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.REJECTED:
       return "bg-red-100 text-red-950 border border-red-300 text-xs py-0.5 px-3 font-bold rounded-full";
-    case EJobApplicationStatus.OFFERED:
     case EJobApplicationStatus.ACCEPTED:
       return "bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-0.5 px-3 font-bold rounded-full";
     case EJobApplicationStatus.WITHDRAWN:
@@ -67,7 +90,7 @@ export function ApplicationCard({
   const company = job?.company;
   const jobTitle = job?.title ?? "Vị trí tuyển dụng";
   const companyName = company?.name ?? "Doanh nghiệp tuyển dụng";
-  const address = job?.address ?? "Đang cập nhật";
+  const address = formatBriefAddress(job?.address);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -80,10 +103,8 @@ export function ApplicationCard({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Chỉ cho phép rút đơn khi ở trạng thái APPLIED hoặc REVIEWING
-  const canWithdraw =
-    status === EJobApplicationStatus.APPLIED ||
-    status === EJobApplicationStatus.REVIEWING;
+  // Chỉ cho phép rút đơn khi đơn vẫn ở trạng thái vừa ứng tuyển.
+  const canWithdraw = status === EJobApplicationStatus.APPLIED;
 
   return (
     <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-300 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
@@ -128,25 +149,96 @@ export function ApplicationCard({
               <span className="truncate max-w-37.5">{address}</span>
             </Badge>
 
-            {matchingScore !== null && matchingScore !== undefined && (
+            {matchingScore !== null &&
+            matchingScore !== undefined &&
+            matchingScore > 0 ? (
               <Badge className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-xl px-2.5 py-1 shadow-2xs">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-600 fill-emerald-250 shrink-0" />
-                <span>AI Match: {matchingScore}%</span>
+                <span>Phù hợp {matchingScore}%</span>
+              </Badge>
+            ) : (
+              <Badge className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 border border-slate-350 rounded-xl px-2.5 py-1 shadow-2xs">
+                <span>Chưa có điểm phù hợp</span>
               </Badge>
             )}
           </div>
         </div>
 
         {/* Date Info */}
-        <div className="mt-6 flex items-center gap-2 text-xs font-medium text-slate-600">
-          <Calendar className="h-4 w-4 text-slate-500 shrink-0" />
-          <span>Đã ứng tuyển: {formatAppliedDate(createdAt)}</span>
+        <div className="mt-6 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+            <Calendar className="h-4 w-4 text-slate-500 shrink-0" />
+            <span>Đã ứng tuyển: {formatAppliedDate(createdAt)}</span>
+          </div>
+
+          {status === EJobApplicationStatus.INTERVIEW &&
+            application.scheduleTime && (
+              <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-3 shadow-2xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                  Lịch phỏng vấn sắp tới
+                </p>
+                <div className="mt-1 flex items-center gap-2 text-xs font-extrabold text-blue-950">
+                  <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
+                  <span>
+                    {formatInterviewCompact(application.scheduleTime)}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {application.scheduleLink ? (
+                    <span>Phỏng vấn trực tuyến (Online)</span>
+                  ) : (
+                    <span>Phỏng vấn trực tiếp (Offline)</span>
+                  )}
+                </p>
+                {application.interviewNotes && (
+                  <div className="mt-2 pt-2 border-t border-blue-250/30">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Lời nhắn từ nhà tuyển dụng:
+                    </p>
+                    <div
+                      className="text-[11px] text-slate-700 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                      dangerouslySetInnerHTML={{
+                        __html: application.interviewNotes,
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+          {status === EJobApplicationStatus.ACCEPTED &&
+            application.onboardingNotes && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3 shadow-2xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1">
+                  Dặn dò chuẩn bị đi làm:
+                </p>
+                <div
+                  className="text-[11px] text-emerald-950 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                  dangerouslySetInnerHTML={{
+                    __html: application.onboardingNotes,
+                  }}
+                />
+              </div>
+            )}
+
+          {status === EJobApplicationStatus.REJECTED &&
+            application.rejectionReason && (
+              <div className="rounded-2xl border border-red-200 bg-red-50/50 p-3 shadow-2xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-700 mb-1">
+                  Phản hồi từ nhà tuyển dụng:
+                </p>
+                <div
+                  className="text-[11px] text-red-950 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                  dangerouslySetInnerHTML={{
+                    __html: application.rejectionReason,
+                  }}
+                />
+              </div>
+            )}
         </div>
       </div>
 
-      {/* Footer: Action Buttons */}
       <div className="mt-6 flex items-center gap-3">
-        {/* Nút hành động chính */}
         {status === EJobApplicationStatus.INTERVIEW ? (
           <BaseButton
             variant="primary"
@@ -154,16 +246,7 @@ export function ApplicationCard({
             onClick={() => onViewInterviewDetails(application)}
             className="flex-1 rounded-2xl text-xs font-bold"
           >
-            Xem tiến trình
-          </BaseButton>
-        ) : status === EJobApplicationStatus.OFFERED ? (
-          <BaseButton
-            variant="ai"
-            size="sm"
-            href={job?.slug ? ROUTES.JOB_SEEKER_JOB_DETAIL(job.slug) : "#"}
-            className="flex-1 rounded-2xl text-xs font-bold"
-          >
-            Xem đề nghị
+            Xem lịch phỏng vấn
           </BaseButton>
         ) : (
           <BaseButton

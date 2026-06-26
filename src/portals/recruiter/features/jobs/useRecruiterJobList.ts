@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-import { EJobStatus } from "@/shared/constants/enums/job.enum";
+import {
+  EJobStatus,
+  EJobType,
+  EJobEducationLevel,
+  EJobWorkArrangement,
+} from "@/shared/constants/enums/job.enum";
 import {
   fetchRecruiterJobs,
   deleteRecruiterJob,
@@ -33,6 +38,13 @@ export function useRecruiterJobList() {
     limit: number;
     q?: string;
     status?: EJobStatus;
+    jobType?: EJobType;
+    educationLevel?: EJobEducationLevel;
+    workArrangement?: EJobWorkArrangement;
+    experienceYearsMin?: number;
+    experienceYearsMax?: number;
+    salaryMin?: number;
+    salaryMax?: number;
   }) => {
     setLoading(true);
     setError(null);
@@ -42,6 +54,13 @@ export function useRecruiterJobList() {
         limit: params.limit,
         q: params.q || undefined,
         status: params.status || undefined,
+        jobType: params.jobType || undefined,
+        educationLevel: params.educationLevel || undefined,
+        workArrangement: params.workArrangement || undefined,
+        experienceYearsMin: params.experienceYearsMin,
+        experienceYearsMax: params.experienceYearsMax,
+        salaryMin: params.salaryMin,
+        salaryMax: params.salaryMax,
       });
       setJobs(result.jobs);
       if (result.pagination) {

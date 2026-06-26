@@ -28,6 +28,7 @@ import { useCareerCategories } from "@/shared/hooks/data/useCareerCategories";
 import { useJobs } from "@/shared/hooks/data/useJobs";
 import { useJobFilters } from "@/shared/hooks/ui/useJobFilters";
 import Image from "next/image";
+import { StateLayout } from "@/shared/components/ui/StateLayout";
 
 function formatDate(value?: Date): string {
   if (!value) return "Đang cập nhật";
@@ -392,24 +393,12 @@ export function JobListPage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                  <div className="flex items-center justify-center">
-                    <Image
-                      alt="Không có dữ liệu"
-                      height={100}
-                      priority
-                      src="/no_data.png"
-                      width={100}
-                    />
-                  </div>
-                  <h2 className="mt-4 text-lg font-semibold text-slate-800">
-                    Không có công việc phù hợp
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Thử thay đổi từ khóa hoặc bộ lọc để mở rộng kết quả tìm
-                    kiếm.
-                  </p>
-                </div>
+                <StateLayout
+                  type="empty"
+                  title="Không có công việc phù hợp"
+                  description="Thử thay đổi từ khóa hoặc bộ lọc để mở rộng kết quả tìm
+                    kiếm."
+                />
               )}
 
               {totalPages > 1 && (

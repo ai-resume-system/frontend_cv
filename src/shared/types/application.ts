@@ -1,5 +1,9 @@
 import type { EProcessingStatus } from "@/shared/constants/enums/cv.enum";
-import type { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import type {
+  EJobApplicationStatus,
+  EInterviewType,
+  EInterviewStatus,
+} from "@/shared/constants/enums/job-application.enum";
 import type { IResponseApiList } from "@/shared/types/api";
 
 // Chú ý sau
@@ -44,11 +48,16 @@ export interface BaseApplicationApiItem {
   contactEmail: string | null;
   contactPhone: string | null;
   coverLetter: string | null;
-  matchingScore: number | null;
+  matchingScore: number;
   status: EJobApplicationStatus;
   scheduleTime: string | null;
   scheduleLocation: string | null;
   scheduleLink: string | null;
+  interviewType: EInterviewType | null;
+  interviewStatus: EInterviewStatus | null;
+  interviewNotes: string | null;
+  rejectionReason: string | null;
+  onboardingNotes: string | null;
   createdAt: string;
   updatedAt: string;
   cv?: ApplicationCvRef | null;
@@ -87,8 +96,12 @@ export interface CreateApplicationPayload {
 
 export interface UpdateApplicationStatusPayload {
   status: EJobApplicationStatus;
-  notes?: string;
+  interviewType?: EInterviewType;
   scheduleTime?: string;
   scheduleLocation?: string;
   scheduleLink?: string;
+  interviewNotes?: string;
+  rejectionReason?: string;
+  onboardingNotes?: string;
 }
+

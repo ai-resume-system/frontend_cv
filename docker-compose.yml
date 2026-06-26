@@ -1,0 +1,18 @@
+services:
+  frontend_cv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3003
+        NEXT_PUBLIC_APP_NODE_ENV: production
+    container_name: frontend_cv_app
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:3003
+      NEXT_PUBLIC_APP_NODE_ENV: production
+    ports:
+      - "3100:3100"

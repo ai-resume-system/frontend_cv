@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   UsersRound,
   Eye,
-  CircleCheck,
   CircleX,
   Download,
   Calendar,
@@ -13,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterApplications } from "@/portals/recruiter/features/applicants/useRecruiterApplications";
@@ -28,14 +28,10 @@ function getStatusLabel(status: EJobApplicationStatus): string {
   switch (status) {
     case EJobApplicationStatus.APPLIED:
       return "Mới ứng tuyển";
-    case EJobApplicationStatus.REVIEWING:
-      return "Đang xem xét";
     case EJobApplicationStatus.INTERVIEW:
       return "Lịch phỏng vấn";
     case EJobApplicationStatus.REJECTED:
       return "Đã từ chối";
-    case EJobApplicationStatus.OFFERED:
-      return "Đã gửi offer";
     case EJobApplicationStatus.ACCEPTED:
       return "Nhận việc";
     case EJobApplicationStatus.WITHDRAWN:
@@ -46,13 +42,11 @@ function getStatusLabel(status: EJobApplicationStatus): string {
 function getStatusClass(status: EJobApplicationStatus): string {
   switch (status) {
     case EJobApplicationStatus.APPLIED:
-    case EJobApplicationStatus.REVIEWING:
       return "bg-warning/15 text-warning";
     case EJobApplicationStatus.INTERVIEW:
       return "bg-primary-soft text-primary";
     case EJobApplicationStatus.REJECTED:
       return "bg-error/10 text-error";
-    case EJobApplicationStatus.OFFERED:
     case EJobApplicationStatus.ACCEPTED:
       return "bg-tertiary-soft text-tertiary";
     case EJobApplicationStatus.WITHDRAWN:
@@ -69,20 +63,20 @@ export function RecruiterApplicantsByJobPage({
 }: RecruiterApplicantsByJobPageProps) {
   const { jobs } = useRecruiterJobList();
   const job = jobs.find((j) => j.id === jobId);
-  const {
-    applications,
-    loading,
-    error,
-    handleUpdateStatus,
-    handleViewCv,
-  } = useRecruiterApplications({ jobId });
+  const { applications, loading, error, handleUpdateStatus, handleViewCv } =
+    useRecruiterApplications({ jobId });
+
+  const searchParams = useSearchParams();
+  const backUrl = searchParams.get("backUrl") || RECRUITER_ROUTES.JOBS;
 
   const [page, setPage] = useState(1);
   const limit = 10;
 
   // State quản lý Modal cập nhật trạng thái
-  const [selectedApplication, setSelectedApplication] = useState<RecruiterApplicationApiItem | null>(null);
-  const [targetStatus, setTargetStatus] = useState<EJobApplicationStatus | null>(null);
+  const [selectedApplication, setSelectedApplication] =
+    useState<RecruiterApplicationApiItem | null>(null);
+  const [targetStatus, setTargetStatus] =
+    useState<EJobApplicationStatus | null>(null);
 
   // Phân trang
   const startIndex = (page - 1) * limit;
@@ -106,48 +100,52 @@ export function RecruiterApplicantsByJobPage({
     },
     {
       key: "matchingScore",
-      header: "AI Match",
+      header: "Độ phù hợp",
       render: (app) => (
         <div className="flex items-center gap-3">
-          <svg className="h-9 w-9 shrink-0" viewBox="0 0 36 36">
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke="#e2e8f0"
-              strokeWidth="3"
-            />
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke={
-                app.matchingScore != null && app.matchingScore >= 70
-                  ? "#10b981"
-                  : app.matchingScore != null && app.matchingScore >= 40
-                    ? "#eab308"
-                    : "#ef4444"
-              }
-              strokeWidth="3"
-              strokeDasharray={`${(app.matchingScore ?? 0) > 100 ? 100 : (app.matchingScore ?? 0)} 100`}
-              strokeLinecap="round"
-              transform="rotate(-90 18 18)"
-            />
-            <text
-              x="18"
-              y="18"
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="text-[9px] font-extrabold"
-              fill="currentColor"
-            >
-              {app.matchingScore != null
-                ? `${Math.round(app.matchingScore)}%`
-                : "N/A"}
-            </text>
-          </svg>
+          {app.matchingScore != null && app.matchingScore > 0 ? (
+            <svg className="h-9 w-9 shrink-0" viewBox="0 0 36 36">
+              <circle
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="3"
+              />
+              <circle
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                stroke={
+                  app.matchingScore >= 70
+                    ? "#10b981"
+                    : app.matchingScore >= 40
+                      ? "#eab308"
+                      : "#ef4444"
+                }
+                strokeWidth="3"
+                strokeDasharray={`${app.matchingScore > 100 ? 100 : app.matchingScore} 100`}
+                strokeLinecap="round"
+                transform="rotate(-90 18 18)"
+              />
+              <text
+                x="18"
+                y="18"
+                textAnchor="middle"
+                dominantBaseline="central"
+                className="text-[9px] font-extrabold"
+                fill="currentColor"
+              >
+                {Math.round(app.matchingScore)}%
+              </text>
+            </svg>
+          ) : (
+            <span className="text-xs font-semibold text-slate-400">
+              Chưa có điểm
+            </span>
+          )}
         </div>
       ),
     },
@@ -186,36 +184,8 @@ export function RecruiterApplicantsByJobPage({
             <Eye className="h-4 w-4" />
           </button>
 
-          {/* APPLIED: Duyệt sơ bộ / Từ chối */}
+          {/* APPLIED: Lên lịch phỏng vấn / Từ chối */}
           {app.status === EJobApplicationStatus.APPLIED && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedApplication(app);
-                  setTargetStatus(EJobApplicationStatus.REVIEWING);
-                }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
-                title="Duyệt sơ bộ hồ sơ"
-              >
-                <CircleCheck className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedApplication(app);
-                  setTargetStatus(EJobApplicationStatus.REJECTED);
-                }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
-                title="Từ chối hồ sơ"
-              >
-                <CircleX className="h-4 w-4" />
-              </button>
-            </>
-          )}
-
-          {/* REVIEWING: Lên lịch phỏng vấn / Từ chối */}
-          {app.status === EJobApplicationStatus.REVIEWING && (
             <>
               <button
                 type="button"
@@ -242,36 +212,8 @@ export function RecruiterApplicantsByJobPage({
             </>
           )}
 
-          {/* INTERVIEW: Gửi Offer / Từ chối */}
+          {/* INTERVIEW: Nhận việc / Từ chối */}
           {app.status === EJobApplicationStatus.INTERVIEW && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedApplication(app);
-                  setTargetStatus(EJobApplicationStatus.OFFERED);
-                }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
-                title="Gửi Offer tuyển dụng"
-              >
-                <Award className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedApplication(app);
-                  setTargetStatus(EJobApplicationStatus.REJECTED);
-                }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
-                title="Từ chối hồ sơ"
-              >
-                <CircleX className="h-4 w-4" />
-              </button>
-            </>
-          )}
-
-          {/* OFFERED: Xác nhận nhận việc / Từ chối */}
-          {app.status === EJobApplicationStatus.OFFERED && (
             <>
               <button
                 type="button"
@@ -279,8 +221,8 @@ export function RecruiterApplicantsByJobPage({
                   setSelectedApplication(app);
                   setTargetStatus(EJobApplicationStatus.ACCEPTED);
                 }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary"
-                title="Ứng viên đồng ý nhận việc"
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary cursor-pointer"
+                title="Đồng ý tuyển - Nhận việc"
               >
                 <UserCheck className="h-4 w-4" />
               </button>
@@ -290,7 +232,7 @@ export function RecruiterApplicantsByJobPage({
                   setSelectedApplication(app);
                   setTargetStatus(EJobApplicationStatus.REJECTED);
                 }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error cursor-pointer"
                 title="Từ chối hồ sơ"
               >
                 <CircleX className="h-4 w-4" />
@@ -324,13 +266,13 @@ export function RecruiterApplicantsByJobPage({
           : "Chi tiết ứng viên theo chiến dịch tuyển dụng"
       }
       action={
-        <Link href={RECRUITER_ROUTES.APPLICANTS}>
+        <Link href={backUrl}>
           <BaseButton
             variant="secondary"
             startIcon={<ArrowLeft className="h-4 w-4" />}
             size="sm"
           >
-            Tất cả ứng viên
+            Quay lại
           </BaseButton>
         </Link>
       }

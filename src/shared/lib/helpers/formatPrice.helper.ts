@@ -34,3 +34,13 @@ export function formatSalary(min?: number, max?: number): string | undefined {
 
   return "Thỏa thuận";
 }
+
+/**
+ * Định dạng số tiền thành chuỗi tiền tệ (VD: 15.000.000 VNĐ)
+ */
+export function formatCurrency(value?: number | null, suffix = "VNĐ"): string {
+  if (value == null) return "";
+  const formatted = new Intl.NumberFormat("vi-VN").format(value);
+  return suffix ? `${formatted} ${suffix}` : formatted;
+}
+

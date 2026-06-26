@@ -8,7 +8,7 @@ import {
   setCachedUser,
 } from "@/shared/services/account.service";
 import type { AuthUser } from "@/shared/types/account";
-import { JOBSEEKER_ROUTES } from "@/shared/constants/constants/routes";
+import { JOBSEEKER_ROUTES, RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 
 export function useCurrentUser() {
   const [user, setUser] = useState<AuthUser | null>(() => getCachedUser());
@@ -52,9 +52,14 @@ export function useCurrentUser() {
   }, []);
 
   const logout = useCallback(async () => {
+    const isRecruiterPath = typeof window !== "undefined" && window.location.pathname.startsWith("/recruiter");
     await logoutUser();
     setUser(null);
-    window.location.href = JOBSEEKER_ROUTES.HOME;
+    if (isRecruiterPath) {
+      window.location.href = RECRUITER_ROUTES.LOGIN;
+    } else {
+      window.location.href = JOBSEEKER_ROUTES.HOME;
+    }
   }, []);
 
   return { user, loading, logout, refreshUser, setUser };

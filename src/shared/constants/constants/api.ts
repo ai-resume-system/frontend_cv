@@ -83,5 +83,7 @@ export const API_ROUTES = {
       `${API_PREFIX}/recruiter/job-applications/${applicationId}/cv`,
     STATUS: (id: string) =>
       `${API_PREFIX}/recruiter/job-applications/${id}/status`,
+    INTERVIEW_STATUS: (id: string) =>
+      `${API_PREFIX}/recruiter/job-applications/${id}/interview-status`,
   },
 };

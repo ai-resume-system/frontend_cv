@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Calendar, MapPin, Link as LinkIcon, FileText } from "lucide-react";
-import { EJobApplicationStatus, EJobApplicationStatusLabels } from "@/shared/constants/enums/job-application.enum";
+import {
+  X,
+  Calendar,
+  MapPin,
+  Link as LinkIcon,
+  FileText,
+  Video,
+} from "lucide-react";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
+import { EInterviewType } from "@/shared/constants/enums/job-application.enum";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
+import { RichTextEditor } from "@/portals/recruiter/components/ui/RichTextEditor";
 import type { UpdateApplicationStatusPayload } from "@/shared/types/application";
 
 interface StatusUpdateModalProps {
@@ -25,7 +34,12 @@ export function StatusUpdateModal({
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleLocation, setScheduleLocation] = useState("");
   const [scheduleLink, setScheduleLink] = useState("");
-  const [notes, setNotes] = useState("");
+  const [interviewType, setInterviewType] = useState<EInterviewType>(
+    EInterviewType.OFFLINE,
+  );
+  const [interviewNotes, setInterviewNotes] = useState("");
+  const [onboardingNotes, setOnboardingNotes] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -36,7 +50,10 @@ export function StatusUpdateModal({
       setScheduleTime("");
       setScheduleLocation("");
       setScheduleLink("");
-      setNotes("");
+      setInterviewType(EInterviewType.OFFLINE);
+      setInterviewNotes("");
+      setOnboardingNotes("");
+      setRejectionReason("");
       setErrors({});
       setGeneralError(null);
     }
@@ -48,48 +65,14 @@ export function StatusUpdateModal({
 
   const getModalTitle = () => {
     switch (targetStatus) {
-      case EJobApplicationStatus.REVIEWING:
-        return "Duyệt sơ bộ hồ sơ";
       case EJobApplicationStatus.INTERVIEW:
         return "Lên lịch phỏng vấn";
-      case EJobApplicationStatus.OFFERED:
-        return "Gửi lời mời làm việc (Offer)";
       case EJobApplicationStatus.ACCEPTED:
-        return "Xác nhận nhận việc";
+        return "Thông báo trúng tuyển";
       case EJobApplicationStatus.REJECTED:
         return "Từ chối hồ sơ ứng viên";
       default:
         return "Cập nhật trạng thái hồ sơ";
-    }
-  };
-
-  const getNotesLabel = () => {
-    switch (targetStatus) {
-      case EJobApplicationStatus.REJECTED:
-        return "Lý do từ chối";
-      case EJobApplicationStatus.REVIEWING:
-        return "Ghi chú đánh giá sơ bộ";
-      case EJobApplicationStatus.OFFERED:
-        return "Ghi chú điều kiện / Lời nhắn mời làm việc";
-      case EJobApplicationStatus.ACCEPTED:
-        return "Ghi chú nhận việc";
-      case EJobApplicationStatus.INTERVIEW:
-        return "Ghi chú phỏng vấn (Lời nhắn cho ứng viên)";
-      default:
-        return "Ghi chú";
-    }
-  };
-
-  const getNotesPlaceholder = () => {
-    switch (targetStatus) {
-      case EJobApplicationStatus.REJECTED:
-        return "Nhập lý do từ chối hồ sơ này (ví dụ: Chưa phù hợp với yêu cầu kinh nghiệm)...";
-      case EJobApplicationStatus.INTERVIEW:
-        return "Nhập lời nhắn hoặc ghi chú phỏng vấn gửi đến ứng viên...";
-      case EJobApplicationStatus.OFFERED:
-        return "Nhập chi tiết về mức lương đề xuất, ngày bắt đầu công việc...";
-      default:
-        return "Nhập ghi chú hoặc đánh giá thêm...";
     }
   };
 
@@ -103,8 +86,34 @@ export function StatusUpdateModal({
       if (!scheduleTime) {
         validationErrors.scheduleTime = "Vui lòng chọn thời gian phỏng vấn.";
       }
-      if (!scheduleLocation.trim()) {
-        validationErrors.scheduleLocation = "Vui lòng nhập địa điểm hoặc nền tảng phỏng vấn.";
+      if (
+        interviewType === EInterviewType.OFFLINE &&
+        !scheduleLocation.trim()
+      ) {
+        validationErrors.scheduleLocation = "Vui lòng nhập địa điểm phỏng vấn.";
+      }
+      if (interviewType === EInterviewType.ONLINE && !scheduleLink.trim()) {
+        validationErrors.scheduleLink =
+          "Vui lòng nhập link phỏng vấn trực tuyến.";
+      }
+    }
+
+    if (targetStatus === EJobApplicationStatus.ACCEPTED) {
+      if (
+        !onboardingNotes.trim() ||
+        onboardingNotes.replace(/<[^>]*>/g, "").trim() === ""
+      ) {
+        validationErrors.onboardingNotes =
+          "Vui lòng nhập thông tin nhắc nhở chuẩn bị đi làm.";
+      }
+    }
+
+    if (targetStatus === EJobApplicationStatus.REJECTED) {
+      if (
+        !rejectionReason.trim() ||
+        rejectionReason.replace(/<[^>]*>/g, "").trim() === ""
+      ) {
+        validationErrors.rejectionReason = "Vui lòng nhập lý do từ chối hồ sơ.";
       }
     }
 
@@ -119,22 +128,31 @@ export function StatusUpdateModal({
         status: targetStatus,
       };
 
-      if (notes.trim()) {
-        payload.notes = notes.trim();
-      }
-
       if (isInterview) {
+        payload.interviewType = interviewType;
         payload.scheduleTime = new Date(scheduleTime).toISOString();
-        payload.scheduleLocation = scheduleLocation.trim();
-        if (scheduleLink.trim()) {
+        if (interviewType === EInterviewType.OFFLINE) {
+          payload.scheduleLocation = scheduleLocation.trim();
+        } else {
           payload.scheduleLink = scheduleLink.trim();
         }
+        if (interviewNotes.trim()) {
+          payload.interviewNotes = interviewNotes.trim();
+        }
+      } else if (targetStatus === EJobApplicationStatus.ACCEPTED) {
+        payload.onboardingNotes = onboardingNotes.trim();
+      } else if (targetStatus === EJobApplicationStatus.REJECTED) {
+        payload.rejectionReason = rejectionReason.trim();
       }
 
       await onConfirm(payload);
       onClose();
     } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : "Đã xảy ra lỗi khi cập nhật trạng thái.");
+      setGeneralError(
+        err instanceof Error
+          ? err.message
+          : "Đã xảy ra lỗi khi cập nhật trạng thái.",
+      );
     } finally {
       setLoading(false);
     }
@@ -150,7 +168,10 @@ export function StatusUpdateModal({
               {getModalTitle()}
             </h3>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Ứng viên: <span className="font-semibold text-primary">{candidateName}</span>
+              Ứng viên:{" "}
+              <span className="font-semibold text-primary">
+                {candidateName}
+              </span>
             </p>
           </div>
           <button
@@ -173,6 +194,45 @@ export function StatusUpdateModal({
 
           {isInterview && (
             <>
+              {/* Chọn hình thức phỏng vấn */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">
+                  Hình thức phỏng vấn
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInterviewType(EInterviewType.OFFLINE);
+                      setErrors((prev) => ({ ...prev, scheduleLocation: "" }));
+                    }}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer ${
+                      interviewType === EInterviewType.OFFLINE
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span>Trực tiếp (Offline)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInterviewType(EInterviewType.ONLINE);
+                      setErrors((prev) => ({ ...prev, scheduleLink: "" }));
+                    }}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer ${
+                      interviewType === EInterviewType.ONLINE
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Video className="h-4 w-4" />
+                    <span>Trực tuyến (Online)</span>
+                  </button>
+                </div>
+              </div>
+
               <BaseField
                 id="scheduleTime"
                 type="datetime-local"
@@ -184,40 +244,86 @@ export function StatusUpdateModal({
                 leadingIcon={<Calendar className="h-5 w-5" />}
               />
 
-              <BaseField
-                id="scheduleLocation"
-                type="text"
-                label="Địa điểm phỏng vấn"
-                placeholder="Ví dụ: Tầng 5, Tòa nhà A hoặc Google Meet"
-                required
-                value={scheduleLocation}
-                onChange={(e) => setScheduleLocation(e.target.value)}
-                error={errors.scheduleLocation}
-                leadingIcon={<MapPin className="h-5 w-5" />}
-              />
+              {interviewType === EInterviewType.OFFLINE ? (
+                <BaseField
+                  id="scheduleLocation"
+                  type="text"
+                  label="Địa điểm phỏng vấn"
+                  placeholder="Ví dụ: Tòa nhà FUSE, phòng họp 301, tầng 3"
+                  required
+                  value={scheduleLocation}
+                  onChange={(e) => setScheduleLocation(e.target.value)}
+                  error={errors.scheduleLocation}
+                  leadingIcon={<MapPin className="h-5 w-5" />}
+                />
+              ) : (
+                <BaseField
+                  id="scheduleLink"
+                  type="text"
+                  label="Link phỏng vấn trực tuyến"
+                  placeholder="Ví dụ: https://meet.google.com/abc-xyz"
+                  required
+                  value={scheduleLink}
+                  onChange={(e) => setScheduleLink(e.target.value)}
+                  error={errors.scheduleLink}
+                  leadingIcon={<LinkIcon className="h-5 w-5" />}
+                />
+              )}
 
-              <BaseField
-                id="scheduleLink"
-                type="text"
-                label="Link phỏng vấn trực tuyến (nếu có)"
-                placeholder="Ví dụ: https://meet.google.com/abc-xyz"
-                value={scheduleLink}
-                onChange={(e) => setScheduleLink(e.target.value)}
-                leadingIcon={<LinkIcon className="h-5 w-5" />}
-              />
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">
+                  Quy định phỏng vấn
+                </label>
+                <RichTextEditor
+                  value={interviewNotes}
+                  onChange={(val) => setInterviewNotes(val)}
+                  placeholder="Nhập quy định cho buổi phỏng vấn..."
+                />
+              </div>
             </>
           )}
 
-          <BaseField
-            id="notes"
-            as="textarea"
-            label={getNotesLabel()}
-            placeholder={getNotesPlaceholder()}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            leadingIcon={<FileText className="h-5 w-5" />}
-            inputClassName="resize-none min-h-24 py-2"
-          />
+          {targetStatus === EJobApplicationStatus.ACCEPTED && (
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">
+                Yêu cầu chuẩn bị nhận việc <span className="text-error">*</span>
+              </label>
+              <RichTextEditor
+                value={onboardingNotes}
+                onChange={(val) => {
+                  setOnboardingNotes(val);
+                  setErrors((prev) => ({ ...prev, onboardingNotes: "" }));
+                }}
+                placeholder="Nhập hướng dẫn chuẩn bị đi làm (thời gian, địa điểm, hồ sơ cần mang theo)..."
+              />
+              {errors.onboardingNotes && (
+                <p className="text-xs text-error mt-1">
+                  {errors.onboardingNotes}
+                </p>
+              )}
+            </div>
+          )}
+
+          {targetStatus === EJobApplicationStatus.REJECTED && (
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">
+                Lý do từ chối hồ sơ <span className="text-error">*</span>
+              </label>
+              <RichTextEditor
+                value={rejectionReason}
+                onChange={(val) => {
+                  setRejectionReason(val);
+                  setErrors((prev) => ({ ...prev, rejectionReason: "" }));
+                }}
+                placeholder="Nhập chi tiết lý do từ chối hồ sơ ứng viên..."
+              />
+              {errors.rejectionReason && (
+                <p className="text-xs text-error mt-1">
+                  {errors.rejectionReason}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

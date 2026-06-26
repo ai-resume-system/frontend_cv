@@ -103,3 +103,33 @@ export interface CreateJobPayload {
 }
 
 export type UpdateJobPayload = Partial<CreateJobPayload>;
+
+export type JobMatchResponse = {
+  cvId: string;
+  jobId: string;
+  jobSlug: string;
+  matchScore: number;
+  breakdown: {
+    skillMatch: number;
+    careerCategoryMatch: number;
+    experienceMatch: number;
+    titleKeywordSimilarity: number;
+    preferenceMatch: number;
+  };
+  matchedSkills: Array<{
+    name: string;
+    normalizedName: string;
+    systemSkillSlug?: string;
+    confidence?: number;
+  }>;
+  missingSkills: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    weight?: number;
+  }>;
+  strengths: string[];
+  risks: string[];
+  improvementSuggestions: string[];
+  computedAt: string;
+};

@@ -83,13 +83,29 @@ function validateForm(
     errors.careerCategoryId = "Vui lòng cấu hình lĩnh vực cho công ty trước.";
   }
 
-  if (!values.description.trim()) {
-    errors.description = "Vui lòng nhập mô tả công việc.";
-  }
+  // description, expiredAt, vacancyCount chỉ bắt buộc khi action === EJobAction.SUBMIT
+  if (values.action === EJobAction.SUBMIT) {
+    if (!values.description.trim()) {
+      errors.description = "Vui lòng nhập mô tả công việc.";
+    }
 
-  // Nếu là gửi đăng tin tuyển dụng thì bắt buộc nhập hạn chót
-  if (values.action === EJobAction.SUBMIT && !values.expiredAt) {
-    errors.expiredAt = "Vui lòng chọn hạn chót ứng tuyển.";
+    if (!values.expiredAt) {
+      errors.expiredAt = "Vui lòng nhập ngày hết hạn tin tuyển dụng.";
+    }
+
+    const vacancyCount = toOptionalNumber(values.vacancyCount);
+    if (vacancyCount === undefined || vacancyCount < 1) {
+      errors.vacancyCount = "Số lượng cần tuyển phải lớn hơn hoặc bằng 1.";
+    }
+  } else {
+    // Nếu là DRAFT, chỉ check vacancyCount nếu có giá trị nhập vào
+    const vacancyCount = toOptionalNumber(values.vacancyCount);
+    if (
+      values.vacancyCount.trim() &&
+      (vacancyCount === undefined || vacancyCount < 1)
+    ) {
+      errors.vacancyCount = "Số lượng cần tuyển phải lớn hơn hoặc bằng 1.";
+    }
   }
 
   const salaryMin = toOptionalNumber(values.salaryMin);
@@ -109,14 +125,6 @@ function validateForm(
     salaryMin > salaryMax
   ) {
     errors.salaryMax = "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.";
-  }
-
-  const vacancyCount = toOptionalNumber(values.vacancyCount);
-  if (
-    values.vacancyCount.trim() &&
-    (vacancyCount === undefined || vacancyCount < 1)
-  ) {
-    errors.vacancyCount = "Số lượng cần tuyển phải lớn hơn hoặc bằng 1.";
   }
 
   return errors;

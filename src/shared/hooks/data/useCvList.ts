@@ -62,7 +62,7 @@ function triggerFileDownload(url: string) {
   anchor.remove();
 }
 
-export function useCvList(): UseCvListReturn {
+export function useCvList(options?: { enabled?: boolean }): UseCvListReturn {
   const [cvList, setCvList] = useState<CvItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -126,8 +126,12 @@ export function useCvList(): UseCvListReturn {
   }, [page, limit, sortBy, sortOrder, q]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (options?.enabled !== false) {
+      void refresh();
+    } else {
+      setIsLoading(false);
+    }
+  }, [refresh, options?.enabled]);
 
   const handleUpload = useCallback(
     async (file: File) => {

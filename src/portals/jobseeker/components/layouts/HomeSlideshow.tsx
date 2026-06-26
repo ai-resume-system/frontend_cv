@@ -41,7 +41,7 @@ const defaultSlides: Slide[] = [
     title: "Nhà tuyển dụng tìm ứng viên",
     subtitle: "Ưu tiên ứng viên theo điểm AI phù hợp chính xác nhất",
     ctaText: "Đăng tin tuyển dụng",
-    ctaLink: ROUTES.RECRUITER_REGISTER,
+    ctaLink: ROUTES.RECRUITER_LOGIN,
     image: "/recruite-ai.webp",
   },
 ];

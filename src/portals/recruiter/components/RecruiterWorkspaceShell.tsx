@@ -38,7 +38,7 @@ export function RecruiterWorkspaceShell({
         isOpen={isMobileOpen}
         onClose={() => setIsMobileOpen(false)}
       />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen flex-1 flex-col min-w-0">
         {/* Header */}
         <RecruiterHeader
           onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
@@ -46,7 +46,7 @@ export function RecruiterWorkspaceShell({
         />
 
         {/* Vùng nội dung chính */}
-        <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8 min-w-0">
           {(heading || subheading || action) && (
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>

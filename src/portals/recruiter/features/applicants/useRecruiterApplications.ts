@@ -55,19 +55,6 @@ export function useRecruiterApplications({
     void loadApplications();
   }, [jobId, status]);
 
-  async function handleAccept(id: string) {
-    try {
-      await updateJobApplicationStatus(id, { status: EJobApplicationStatus.REVIEWING });
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === id ? { ...app, status: EJobApplicationStatus.REVIEWING } : app,
-        ),
-      );
-    } catch (err) {
-      throw err;
-    }
-  }
-
   async function handleReject(id: string) {
     try {
       await updateJobApplicationStatus(id, { status: EJobApplicationStatus.REJECTED });
@@ -107,7 +94,6 @@ export function useRecruiterApplications({
     loading,
     error,
     reload: loadApplications,
-    handleAccept,
     handleReject,
     handleUpdateStatus,
     handleViewCv,

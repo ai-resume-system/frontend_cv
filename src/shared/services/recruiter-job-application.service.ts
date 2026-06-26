@@ -42,8 +42,10 @@ export interface FetchRecruiterInterviewsParams {
   limit?: number;
   from?: string; // ISO datetime
   to?: string; // ISO datetime
-  jobId?: string;
+  q?: string;
+  sortBy?: "createdAt" | "matchingScore" | "scheduleTime";
   sortOrder?: "ASC" | "DESC";
+  jobId?: string;
 }
 
 function buildRecruiterJobApplicationsPath(
@@ -109,8 +111,10 @@ function buildRecruiterInterviewsPath({
   limit = 20,
   from,
   to,
-  jobId,
+  q,
+  sortBy,
   sortOrder,
+  jobId,
 }: FetchRecruiterInterviewsParams = {}): string {
   const searchParams = new URLSearchParams({
     page: `${page}`,
@@ -119,8 +123,10 @@ function buildRecruiterInterviewsPath({
 
   if (from) searchParams.set("from", from);
   if (to) searchParams.set("to", to);
-  if (jobId) searchParams.set("jobId", jobId);
+  if (q) searchParams.set("q", q);
+  if (sortBy) searchParams.set("sortBy", sortBy);
   if (sortOrder) searchParams.set("sortOrder", sortOrder);
+  if (jobId) searchParams.set("jobId", jobId);
 
   return `${API_ROUTES.RECRUITER_JOB_APPLICATION.INTERVIEWS}?${searchParams.toString()}`;
 }
@@ -227,6 +233,24 @@ export async function updateJobApplicationStatus(
   >(API_ROUTES.RECRUITER_JOB_APPLICATION.STATUS(id), payload, {
     auth: true,
   });
+
+  return response.data;
+}
+
+export async function updateInterviewStatus(
+  id: string,
+  interviewStatus: "scheduled" | "completed",
+): Promise<RecruiterApplicationApiItem> {
+  const response = await apiService.patch<
+    IResponseApiItem<RecruiterApplicationApiItem>,
+    { interviewStatus: "scheduled" | "completed" }
+  >(
+    API_ROUTES.RECRUITER_JOB_APPLICATION.INTERVIEW_STATUS(id),
+    { interviewStatus },
+    {
+      auth: true,
+    },
+  );
 
   return response.data;
 }

@@ -4,7 +4,7 @@ import type {
   IResponseApiItem,
   IResponseApiPagination,
 } from "@/shared/types/api";
-import type { Job, JobApiItem, JobListResponse } from "@/shared/types/job";
+import type { Job, JobApiItem, JobListResponse, JobMatchResponse } from "@/shared/types/job";
 
 export interface FetchJobsParams {
   page?: number;
@@ -262,4 +262,48 @@ export async function fetchRelatedJobs(
   );
 
   return response.data.map(mapJobApiItemToJob);
+}
+
+export async function fetchJobMatch(
+  slug: string,
+  cvId: string,
+): Promise<JobMatchResponse | null> {
+  try {
+    const response = await apiService.get<IResponseApiItem<JobMatchResponse | Record<string, unknown>[]>>(
+      `${API_ROUTES.JOB_PUBLIC.DETAIL(slug)}/match?cvId=${cvId}`,
+      {
+        auth: true,
+        cache: "no-store",
+      },
+    );
+    const data = response?.data;
+    if (!data || Array.isArray(data) || !("matchScore" in data)) {
+      return null;
+    }
+    return data as JobMatchResponse;
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number };
+    if (err.statusCode === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function calculateJobMatch(
+  slug: string,
+  cvId: string,
+): Promise<JobMatchResponse> {
+  const response = await apiService.post<IResponseApiItem<JobMatchResponse>>(
+    `${API_ROUTES.JOB_PUBLIC.DETAIL(slug)}/match`,
+    { cvId },
+    {
+      auth: true,
+    },
+  );
+  const data = response?.data;
+  if (!data || !("matchScore" in data)) {
+    throw new Error("Không thể tính toán điểm phù hợp từ kết quả trả về.");
+  }
+  return data;
 }

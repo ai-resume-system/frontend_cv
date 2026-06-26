@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   BriefcaseBusiness,
   Eye,
@@ -12,6 +13,7 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import { showSuccessToast, showErrorToast } from "@/shared/lib/ui/toast";
@@ -22,10 +24,19 @@ import { RecruiterJobPreviewModal } from "@/portals/recruiter/features/jobs/Recr
 import {
   EJobStatus,
   EJobStatusLabels,
+  EJobType,
+  EJobEducationLevel,
+  EJobWorkArrangement,
 } from "@/shared/constants/enums/job.enum";
+import {
+  JOB_TYPE_OPTIONS,
+  JOB_WORK_ARRANGEMENT_OPTIONS,
+  JOB_EDUCATION_LEVEL_OPTIONS,
+} from "@/shared/constants/constants/filter.constants";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseSearch } from "@/shared/components/ui/BaseSearch";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
+import { cn } from "@/shared/lib/utils/cn";
 import type { Job } from "@/shared/types/job";
 
 function formatSalary(value?: number): string {
@@ -62,30 +73,205 @@ export function RecruiterJobListPage() {
     handleClose,
   } = useRecruiterJobList();
 
-  // State bộ lọc và tìm kiếm
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
-  const [page, setPage] = useState(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Đọc các giá trị bộ lọc hiện tại từ URL Search Params làm Source of Truth
+  const page = Number(searchParams.get("page") ?? "1");
+  const limit = Number(searchParams.get("limit") ?? "10");
+  const searchQuery = searchParams.get("q") ?? "";
+  const selectedStatus = searchParams.get("status") ?? "ALL";
+  const selectedJobType = searchParams.get("jobType") ?? "ALL";
+  const selectedWorkArrangement = searchParams.get("workArrangement") ?? "ALL";
+  const selectedEducationLevel = searchParams.get("educationLevel") ?? "ALL";
+  const experienceYearsMin = searchParams.get("experienceYearsMin") ?? "";
+  const experienceYearsMax = searchParams.get("experienceYearsMax") ?? "";
+  const salaryMin = searchParams.get("salaryMin") ?? "";
+  const salaryMax = searchParams.get("salaryMax") ?? "";
+
   const [previewJob, setPreviewJob] = useState<Job | null>(null);
 
-  const limit = 8;
+  // State cục bộ cho ô tìm kiếm chữ (để debounce tránh giật lag khi gõ)
+  const [tempSearchQuery, setTempSearchQuery] = useState(searchQuery);
 
-  // Lọc và phân trang ở Server-side qua useEffect
+  // Đồng bộ lại ô tìm kiếm khi URL thay đổi (như khi bấm Back/Forward trình duyệt)
+  useEffect(() => {
+    setTempSearchQuery(searchQuery);
+  }, [searchQuery]);
+
+  // Quản lý đóng mở Dropdown Lọc
+  const [showFilters, setShowFilters] = useState(false);
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  // State tạm thời trong Hộp thoại lọc (chỉ áp dụng khi người dùng bấm OK/Áp dụng)
+  const [pendingJobType, setPendingJobType] = useState("ALL");
+  const [pendingWorkArrangement, setPendingWorkArrangement] = useState("ALL");
+  const [pendingEducationLevel, setPendingEducationLevel] = useState("ALL");
+  const [pendingExperienceMin, setPendingExperienceMin] = useState("");
+  const [pendingExperienceMax, setPendingExperienceMax] = useState("");
+  const [pendingSalaryMin, setPendingSalaryMin] = useState("");
+  const [pendingSalaryMax, setPendingSalaryMax] = useState("");
+
+  // Đồng bộ lại các bộ lọc tạm thời với URL params khi mở Dropdown
+  useEffect(() => {
+    if (showFilters) {
+      setPendingJobType(selectedJobType);
+      setPendingWorkArrangement(selectedWorkArrangement);
+      setPendingEducationLevel(selectedEducationLevel);
+      setPendingExperienceMin(experienceYearsMin);
+      setPendingExperienceMax(experienceYearsMax);
+      setPendingSalaryMin(salaryMin);
+      setPendingSalaryMax(salaryMax);
+    }
+  }, [
+    showFilters,
+    selectedJobType,
+    selectedWorkArrangement,
+    selectedEducationLevel,
+    experienceYearsMin,
+    experienceYearsMax,
+    salaryMin,
+    salaryMax,
+  ]);
+
+  // Click ra ngoài để tự động đóng Dropdown Lọc
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Hàm cập nhật URL Search Params
+  const updateUrl = (
+    newParams: Record<string, string | number | undefined | null>,
+  ) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (
+        value === undefined ||
+        value === null ||
+        value === "" ||
+        value === "ALL"
+      ) {
+        params.delete(key);
+      } else {
+        params.set(key, value.toString());
+      }
+    });
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // Tự động cập nhật từ khóa lên URL sau 500ms khi người dùng dừng gõ phím (Debounce)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (tempSearchQuery !== searchQuery) {
+        updateUrl({ q: tempSearchQuery, page: 1 });
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [tempSearchQuery, searchQuery]);
+
+  // Lọc và phân trang ở Server-side qua useEffect khi URL thay đổi
   useEffect(() => {
     void loadJobs({
       page,
       limit,
       q: searchQuery,
-      status: selectedStatus === "ALL" ? undefined : (selectedStatus as EJobStatus),
+      status:
+        selectedStatus === "ALL" ? undefined : (selectedStatus as EJobStatus),
+      jobType:
+        selectedJobType === "ALL" ? undefined : (selectedJobType as EJobType),
+      workArrangement:
+        selectedWorkArrangement === "ALL"
+          ? undefined
+          : (selectedWorkArrangement as EJobWorkArrangement),
+      educationLevel:
+        selectedEducationLevel === "ALL"
+          ? undefined
+          : (selectedEducationLevel as EJobEducationLevel),
+      experienceYearsMin: experienceYearsMin
+        ? parseInt(experienceYearsMin, 10)
+        : undefined,
+      experienceYearsMax: experienceYearsMax
+        ? parseInt(experienceYearsMax, 10)
+        : undefined,
+      salaryMin: salaryMin ? parseInt(salaryMin, 10) : undefined,
+      salaryMax: salaryMax ? parseInt(salaryMax, 10) : undefined,
     });
-  }, [page, searchQuery, selectedStatus, limit, loadJobs]);
+  }, [
+    page,
+    searchQuery,
+    selectedStatus,
+    selectedJobType,
+    selectedWorkArrangement,
+    selectedEducationLevel,
+    experienceYearsMin,
+    experienceYearsMax,
+    salaryMin,
+    salaryMax,
+    limit,
+    loadJobs,
+  ]);
+
+  // Số lượng bộ lọc nâng cao đang hoạt động để hiển thị số badge đỏ
+  const activeFiltersCount = [
+    selectedJobType !== "ALL",
+    selectedWorkArrangement !== "ALL",
+    selectedEducationLevel !== "ALL",
+    Boolean(experienceYearsMin),
+    Boolean(experienceYearsMax),
+    Boolean(salaryMin),
+    Boolean(salaryMax),
+  ].filter(Boolean).length;
+
+  const handleToggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const handleApplyFilters = () => {
+    updateUrl({
+      jobType: pendingJobType,
+      workArrangement: pendingWorkArrangement,
+      educationLevel: pendingEducationLevel,
+      experienceYearsMin: pendingExperienceMin,
+      experienceYearsMax: pendingExperienceMax,
+      salaryMin: pendingSalaryMin,
+      salaryMax: pendingSalaryMax,
+      page: 1,
+    });
+    setShowFilters(false);
+  };
+
+  const handleResetFilters = () => {
+    setPendingJobType("ALL");
+    setPendingWorkArrangement("ALL");
+    setPendingEducationLevel("ALL");
+    setPendingExperienceMin("");
+    setPendingExperienceMax("");
+    setPendingSalaryMin("");
+    setPendingSalaryMax("");
+  };
 
   // Số lượng tin theo từng trạng thái để hiển thị lên 3 Card từ allJobsForCounts
-  const countOpen = allJobsForCounts.filter((j) => j.status === EJobStatus.OPEN).length;
+  const countOpen = allJobsForCounts.filter(
+    (j) => j.status === EJobStatus.OPEN,
+  ).length;
   const countPending = allJobsForCounts.filter(
     (j) => j.status === EJobStatus.PENDING,
   ).length;
-  const countClosed = allJobsForCounts.filter((j) => j.status === EJobStatus.CLOSED).length;
+  const countClosed = allJobsForCounts.filter(
+    (j) => j.status === EJobStatus.CLOSED,
+  ).length;
 
   // Định nghĩa các cột của BaseTable
   const columns: BaseTableColumn<Job>[] = [
@@ -145,9 +331,13 @@ export function RecruiterJobListPage() {
       className: "text-right",
       render: (job) => (
         <div className="flex items-center justify-end gap-2">
-          {/* Nút Xem ứng viên */}
+          {/* Nút Xem ứng viên - Truyền kèm backUrl chứa đầy đủ các bộ lọc hiện tại */}
           <Link
-            href={RECRUITER_ROUTES.APPLICANTS_BY_JOB(job.id)}
+            href={`${RECRUITER_ROUTES.APPLICANTS_BY_JOB(job.id)}?backUrl=${encodeURIComponent(
+              searchParams.toString()
+                ? `${pathname}?${searchParams.toString()}`
+                : pathname,
+            )}`}
             className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
             title="Danh sách ứng viên"
           >
@@ -158,22 +348,23 @@ export function RecruiterJobListPage() {
           <button
             type="button"
             onClick={() => setPreviewJob(job)}
-            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
             title="Xem bài đăng"
           >
             <BriefcaseBusiness className="h-4 w-4" />
           </button>
 
           {/* Nút Chỉnh sửa */}
-          {job.status !== EJobStatus.CLOSED && job.status !== EJobStatus.REJECTED && (
-            <Link
-              href={RECRUITER_ROUTES.JOB_EDIT(job.slug ?? job.id)}
-              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
-              title="Chỉnh sửa tin"
-            >
-              <Pencil className="h-4 w-4" />
-            </Link>
-          )}
+          {job.status !== EJobStatus.CLOSED &&
+            job.status !== EJobStatus.REJECTED && (
+              <Link
+                href={RECRUITER_ROUTES.JOB_EDIT(job.slug ?? job.id)}
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
+                title="Chỉnh sửa tin"
+              >
+                <Pencil className="h-4 w-4" />
+              </Link>
+            )}
 
           {/* Nút Đóng tin */}
           {job.status === EJobStatus.OPEN && (
@@ -197,7 +388,7 @@ export function RecruiterJobListPage() {
                   );
                 }
               }}
-              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-warning/10 hover:text-warning"
+              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-warning/10 hover:text-warning cursor-pointer"
               title="Đóng tuyển dụng"
             >
               <SquareX className="h-4 w-4" />
@@ -210,7 +401,9 @@ export function RecruiterJobListPage() {
               type="button"
               onClick={async () => {
                 if (
-                  window.confirm("Bạn có chắc chắn muốn xóa tin tuyển dụng này?")
+                  window.confirm(
+                    "Bạn có chắc chắn muốn xóa tin tuyển dụng này?",
+                  )
                 ) {
                   try {
                     await handleDelete(job.id);
@@ -224,7 +417,7 @@ export function RecruiterJobListPage() {
                   }
                 }
               }}
-              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
+              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error cursor-pointer"
               title="Xóa tin"
             >
               <Trash2 className="h-4 w-4" />
@@ -237,8 +430,7 @@ export function RecruiterJobListPage() {
 
   return (
     <RecruiterWorkspaceShell
-      heading="Tin tuyển dụng"
-      subheading="Quản lý các chiến dịch tuyển dụng và tin đăng của doanh nghiệp."
+      heading="Danh sách tin tuyển dụng"
       action={
         <Link href={RECRUITER_ROUTES.JOB_CREATE}>
           <BaseButton startIcon={<Plus className="h-4 w-4" />}>
@@ -300,40 +492,207 @@ export function RecruiterJobListPage() {
         </section>
 
         {/* Bộ lọc và Tìm kiếm */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-sm p-4 rounded-3xl border border-outline-variant/15 shadow-sm">
-          <BaseSearch
-            placeholder="Tìm tin tuyển dụng, ngành nghề..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            onClear={() => {
-              setSearchQuery("");
-              setPage(1);
-            }}
-            containerClassName="flex-1 max-w-md"
-            inputClassName="border-outline-variant/35 bg-surface focus:border-primary"
-          />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/80 backdrop-blur-sm p-4 rounded-3xl border border-outline-variant/15 shadow-sm">
+          <div className="flex flex-1 items-center gap-3 w-full lg:max-w-xl">
+            <BaseSearch
+              placeholder="Tìm tin tuyển dụng, ngành nghề..."
+              value={tempSearchQuery}
+              onChange={(e) => {
+                setTempSearchQuery(e.target.value);
+              }}
+              onClear={() => {
+                setTempSearchQuery("");
+                updateUrl({ q: "", page: 1 });
+              }}
+              containerClassName="flex-1"
+              inputClassName="border-outline-variant/35 bg-surface focus:border-primary"
+            />
 
-          <div className="flex flex-wrap gap-2">
+            {/* Hộp lọc Dropdown Popover */}
+            <div className="relative shrink-0" ref={filterDropdownRef}>
+              <button
+                type="button"
+                onClick={handleToggleFilters}
+                className={cn(
+                  "flex items-center gap-2 rounded-2xl border px-4 py-2 text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer h-10 select-none",
+                  activeFiltersCount > 0
+                    ? "border-primary bg-primary-soft text-primary shadow-xs"
+                    : "border-outline-variant/35 bg-surface text-slate-600 hover:bg-slate-50",
+                )}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>Bộ lọc</span>
+                {activeFiltersCount > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-white font-extrabold">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+
+              {showFilters && (
+                <div className="absolute left-0 lg:left-auto lg:right-0 top-full mt-2 w-80 sm:w-105 rounded-3xl border border-outline-variant/15 bg-white p-5 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
+                  {/* Grid các trường lọc */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-87.5 overflow-y-auto pr-1">
+                    {/* Job Type Filter */}
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Loại hình công việc
+                      </label>
+                      <select
+                        value={pendingJobType}
+                        onChange={(e) => setPendingJobType(e.target.value)}
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200 cursor-pointer"
+                      >
+                        {JOB_TYPE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value || "ALL"}>
+                            {opt.label || "Tất cả loại hình"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Work Arrangement Filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Hình thức làm việc
+                      </label>
+                      <select
+                        value={pendingWorkArrangement}
+                        onChange={(e) =>
+                          setPendingWorkArrangement(e.target.value)
+                        }
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200 cursor-pointer"
+                      >
+                        {JOB_WORK_ARRANGEMENT_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value || "ALL"}>
+                            {opt.label || "Tất cả hình thức"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Education Level Filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Trình độ học vấn
+                      </label>
+                      <select
+                        value={pendingEducationLevel}
+                        onChange={(e) =>
+                          setPendingEducationLevel(e.target.value)
+                        }
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200 cursor-pointer"
+                      >
+                        {JOB_EDUCATION_LEVEL_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value || "ALL"}>
+                            {opt.label || "Tất cả trình độ"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Experience Years Filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Kinh nghiệm tối thiểu (năm)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ví dụ: 1, 2..."
+                        value={pendingExperienceMin}
+                        onChange={(e) =>
+                          setPendingExperienceMin(e.target.value)
+                        }
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Kinh nghiệm tối đa (năm)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ví dụ: 3, 5..."
+                        value={pendingExperienceMax}
+                        onChange={(e) =>
+                          setPendingExperienceMax(e.target.value)
+                        }
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200"
+                      />
+                    </div>
+
+                    {/* Salary Range Filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Lương tối thiểu (VND)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ví dụ: 10000000"
+                        value={pendingSalaryMin}
+                        onChange={(e) => setPendingSalaryMin(e.target.value)}
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Lương tối đa (VND)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ví dụ: 20000000"
+                        value={pendingSalaryMax}
+                        onChange={(e) => setPendingSalaryMax(e.target.value)}
+                        className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-xs md:text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Chân hộp thoại Dropdown */}
+                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="text-xs font-bold text-slate-400 hover:text-slate-700 transition cursor-pointer select-none"
+                    >
+                      Bỏ chọn tất cả
+                    </button>
+                    <BaseButton
+                      size="sm"
+                      onClick={handleApplyFilters}
+                      className="px-5 py-1.5 text-xs font-bold rounded-full h-8"
+                    >
+                      Áp dụng
+                    </BaseButton>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             {[
               { label: "Tất cả", value: "ALL" },
               { label: "Đang mở", value: EJobStatus.OPEN },
               { label: "Chờ duyệt", value: EJobStatus.PENDING },
-              { label: "Bản nháp", value: EJobStatus.DRAFT },
               { label: "Từ chối", value: EJobStatus.REJECTED },
               { label: "Đã đóng", value: EJobStatus.CLOSED },
               { label: "Hết hạn", value: EJobStatus.EXPIRED },
+              { label: "Bản nháp", value: EJobStatus.DRAFT },
             ].map((tab) => (
               <button
                 key={tab.value}
                 type="button"
                 onClick={() => {
-                  setSelectedStatus(tab.value);
-                  setPage(1);
+                  updateUrl({ status: tab.value, page: 1 });
                 }}
-                className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
+                className={`rounded-full px-4 py-1.5 text-xs font-bold transition cursor-pointer ${
                   selectedStatus === tab.value
                     ? "bg-primary text-on-primary shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -351,12 +710,15 @@ export function RecruiterJobListPage() {
           data={jobs}
           loading={loading}
           emptyMessage="Doanh nghiệp của bạn chưa có tin tuyển dụng nào phù hợp bộ lọc."
+          itemName="tin tuyển dụng"
           pagination={{
             page,
             limit,
             total: pagination?.totalItems ?? 0,
             totalPages: pagination?.totalPages ?? 1,
-            onPageChange: (newPage) => setPage(newPage),
+            onPageChange: (newPage) => updateUrl({ page: newPage }),
+            onLimitChange: (newLimit) =>
+              updateUrl({ limit: newLimit, page: 1 }),
           }}
         />
       </div>

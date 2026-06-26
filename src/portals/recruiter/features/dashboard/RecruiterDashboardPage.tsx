@@ -75,6 +75,7 @@ export function RecruiterDashboardPage() {
   const {
     applications,
     error,
+    jobs,
     jobOverviews,
     loading,
     metrics,
@@ -438,9 +439,10 @@ export function RecruiterDashboardPage() {
                         {/* Nút xem chi tiết */}
                         <button
                           type="button"
-                          onClick={() =>
-                            setPreviewJob(jobOverviewToJobShape(job))
-                          }
+                          onClick={() => {
+                            const fullJob = jobs?.find((j) => j.id === job.id);
+                            setPreviewJob(fullJob || jobOverviewToJobShape(job));
+                          }}
                           className="shrink-0 rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
                           title="Xem bài đăng"
                         >

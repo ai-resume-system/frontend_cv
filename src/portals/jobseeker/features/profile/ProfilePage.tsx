@@ -268,7 +268,7 @@ export function ProfilePage() {
               className="scroll-mt-28 rounded-xl border-2 border-muted-foreground/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8"
             >
               <div className="flex flex-col xl:gap-6 xl:flex-row xl:items-start">
-                <div className="xl:w-[280px] xl:shrink-0 flex flex-col items-center text-center p-6">
+                <div className="xl:w-70 xl:shrink-0 flex flex-col items-center text-center p-6">
                   <div className="relative shrink-0">
                     <img
                       alt="Ảnh đại diện"

@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   User,
   X,
+  RefreshCw,
 } from "lucide-react";
+import { fetchJobMatch } from "@/shared/services/job.service";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +31,9 @@ import type { CvItem } from "@/shared/types/cv";
 import { formatSalary } from "@/shared/lib/helpers/formatPrice.helper";
 import { cn } from "@/shared/lib/utils/cn";
 import { BaseField } from "@/shared/components/ui/BaseField";
+import { Badge } from "@/shared/components/ui/Badge";
+
+const MAX_FILE_SIZE_MB = 10;
 
 interface JobApplyPageProps {
   job: Job;
@@ -157,6 +162,8 @@ interface CvSelectionSectionProps {
   setUploadedFile: (file: File | null) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   isLoadingCvList: boolean;
+  matchingScore: number;
+  isMatchingLoading: boolean;
 }
 
 function CvSelectionSection({
@@ -167,15 +174,17 @@ function CvSelectionSection({
   setUploadedFile,
   fileInputRef,
   isLoadingCvList,
+  matchingScore,
+  isMatchingLoading,
 }: CvSelectionSectionProps) {
-  const cvToShow = cvList.find((cv) => cv.isDefault) ?? cvList[0];
+  const [showCvModal, setShowCvModal] = useState(false);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      void showErrorAlert("File CV không được vượt quá 10MB.");
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      void showErrorAlert(`File CV không được vượt quá ${MAX_FILE_SIZE_MB}MB.`);
       return;
     }
 
@@ -188,80 +197,140 @@ function CvSelectionSection({
 
   function handleRemoveUploadedFile() {
     setUploadedFile(null);
-    if (cvToShow) {
-      setSelectedCvId(cvToShow.id);
+    const defaultCv = cvList.find((cv) => cv.isDefault) ?? cvList[0];
+    if (defaultCv) {
+      setSelectedCvId(defaultCv.id);
     } else {
       setSelectedCvId("");
     }
   }
 
+  const selectedSystemCv =
+    cvList.find((cv) => cv.id === selectedCvId) ??
+    cvList.find((cv) => cv.isDefault) ??
+    cvList[0];
+
   return (
-    <section>
-      <h3 className="mb-6 text-xl font-bold text-on-surface">
-        Chọn CV ứng tuyển
-      </h3>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold text-on-surface">Chọn CV ứng tuyển</h3>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {isLoadingCvList ? (
-          <div className="col-span-full rounded-2xl bg-surface-container-low p-5 text-sm text-on-surface-variant">
+          <div className="col-span-full rounded-2xl bg-slate-50 border border-slate-200 p-5 text-sm text-slate-500 flex items-center justify-center">
+            <RefreshCw className="h-5 w-5 text-primary animate-spin mr-2" />
             Đang tải danh sách CV...
           </div>
         ) : (
           <>
-            {cvToShow ? (
+            {/* Cột 1: CV trên hệ thống */}
+            {selectedSystemCv ? (
               <label
                 className="group relative cursor-pointer"
                 onClick={() => {
-                  setSelectedCvId(cvToShow.id);
+                  setSelectedCvId(selectedSystemCv.id);
                   setUploadedFile(null);
                 }}
               >
                 <input
-                  checked={selectedCvId === cvToShow.id}
+                  checked={selectedCvId === selectedSystemCv.id}
                   className="peer sr-only"
                   name="cv_selection"
                   type="radio"
-                  value={cvToShow.id}
+                  value={selectedSystemCv.id}
                   onChange={() => {}}
                 />
                 <div
                   className={cn(
-                    "flex h-full flex-col rounded-2xl border-2 bg-surface-container-low p-5 transition-all duration-300 group-hover:bg-surface-container-high",
-                    selectedCvId === cvToShow.id
-                      ? "border-primary bg-white shadow-sm"
-                      : "border-transparent",
+                    "flex h-full flex-col rounded-2xl border-2 bg-white p-5 transition-all duration-300",
+                    selectedCvId === selectedSystemCv.id
+                      ? "border-primary shadow-sm"
+                      : "border-slate-200 hover:bg-slate-50",
                   )}
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <div
                       className={cn(
                         "flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all",
-                        selectedCvId === cvToShow.id
+                        selectedCvId === selectedSystemCv.id
                           ? "border-primary bg-primary"
-                          : "border-outline-variant",
+                          : "border-slate-350",
                       )}
                     >
                       <div
                         className={cn(
                           "h-2 w-2 rounded-full bg-white transition-opacity",
-                          selectedCvId === cvToShow.id
+                          selectedCvId === selectedSystemCv.id
                             ? "opacity-100"
                             : "opacity-0",
                         )}
                       />
                     </div>
+
+                    {/* Badge match score */}
+                    <div className="shrink-0">
+                      {isMatchingLoading &&
+                      selectedCvId === selectedSystemCv.id ? (
+                        <Badge className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+                          <RefreshCw className="h-3 w-3 animate-spin" /> Đang
+                          tính...
+                        </Badge>
+                      ) : selectedCvId === selectedSystemCv.id &&
+                        matchingScore > 0 ? (
+                        <Badge className="inline-flex items-center rounded-full bg-[#5af5b7]/15 border border-[#5af5b7]/40 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                          Phù hợp {matchingScore}%
+                        </Badge>
+                      ) : (
+                        <Badge className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">
+                          {selectedCvId === selectedSystemCv.id
+                            ? "Chưa có điểm"
+                            : "Hệ thống"}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <p className="mb-1 font-bold text-on-surface">
-                    {cvToShow.title ?? "CV không tiêu đề"}
-                  </p>
-                  <p className="text-xs text-on-surface-variant">
-                    {cvToShow.createdAt &&
-                      `Tải lên ${new Intl.DateTimeFormat("vi-VN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }).format(new Date(cvToShow.createdAt))}`}
-                  </p>
+
+                  <div className="flex items-start justify-between gap-2 overflow-hidden mb-3">
+                    <div className="overflow-hidden">
+                      <p
+                        className="font-bold text-on-surface text-base truncate"
+                        title={selectedSystemCv.title ?? "CV không tiêu đề"}
+                      >
+                        {selectedSystemCv.title ?? "CV không tiêu đề"}
+                      </p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">
+                        {selectedSystemCv.createdAt &&
+                          `Tải lên ${new Intl.DateTimeFormat("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          }).format(new Date(selectedSystemCv.createdAt))}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto flex items-center w-full gap-2">
+                    {selectedSystemCv.isDefault && (
+                      <span className="inline-flex items-center rounded-md bg-blue-50 border border-blue-100 px-2 py-0.5 text-[10px] font-bold text-primary">
+                        Mặc định
+                      </span>
+                    )}
+
+                    {cvList.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowCvModal(true);
+                        }}
+                        className="ml-auto inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer select-none"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Đổi CV
+                      </button>
+                    )}
+                  </div>
                 </div>
               </label>
             ) : (
@@ -270,9 +339,10 @@ function CvSelectionSection({
               </div>
             )}
 
+            {/* Cột 2: Tải CV mới lên hoặc CV tạm đã tải lên */}
             {uploadedFile ? (
               <label
-                key="uploaded-cv-radio-label"
+                key="uploaded-cv-radio"
                 className="group relative cursor-pointer"
                 onClick={() => setSelectedCvId("new_upload")}
               >
@@ -286,10 +356,10 @@ function CvSelectionSection({
                 />
                 <div
                   className={cn(
-                    "flex h-full flex-col rounded-2xl border-2 bg-surface-container-low p-5 transition-all duration-300 group-hover:bg-surface-container-high",
+                    "flex h-full flex-col rounded-2xl border-2 bg-white p-5 transition-all duration-300",
                     selectedCvId === "new_upload"
-                      ? "border-primary bg-white shadow-sm"
-                      : "border-transparent",
+                      ? "border-primary shadow-sm"
+                      : "border-slate-200 hover:bg-slate-50",
                   )}
                 >
                   <div className="mb-3 flex items-center justify-between">
@@ -298,7 +368,7 @@ function CvSelectionSection({
                         "flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all",
                         selectedCvId === "new_upload"
                           ? "border-primary bg-primary"
-                          : "border-outline-variant",
+                          : "border-slate-350",
                       )}
                     >
                       <div
@@ -316,24 +386,34 @@ function CvSelectionSection({
                         e.stopPropagation();
                         handleRemoveUploadedFile();
                       }}
-                      className="rounded-full bg-error/10 p-1 text-xs font-bold text-error hover:bg-error/20 active:scale-95 transition-all cursor-pointer"
+                      className="rounded-full bg-red-50 hover:bg-red-100 border border-red-200 p-1 text-xs font-bold text-red-600 transition cursor-pointer"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <p
-                    className="mb-1 font-bold text-on-surface line-clamp-1"
-                    title={uploadedFile.name}
-                  >
-                    {uploadedFile.name}
-                  </p>
-                  <p className="text-xs text-on-surface-variant">
-                    {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
-                  </p>
+                  <div className="overflow-hidden mr-2 mb-3">
+                    <p
+                      className="font-bold text-on-surface text-base truncate"
+                      title={uploadedFile.name}
+                    >
+                      {uploadedFile.name}
+                    </p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  </div>
+                  <div className="mt-auto">
+                    <span className="inline-flex items-center rounded-md bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                      Hồ sơ tạm thời
+                    </span>
+                  </div>
                 </div>
               </label>
             ) : (
-              <label key="upload-cv-file-label" className="group relative cursor-pointer">
+              <label
+                key="upload-cv-file"
+                className="group relative cursor-pointer"
+              >
                 <input
                   accept=".pdf,.docx"
                   className="hidden"
@@ -341,13 +421,13 @@ function CvSelectionSection({
                   type="file"
                   onChange={handleFileChange}
                 />
-                <div className="flex h-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant bg-transparent p-5 text-center transition-all duration-300 hover:border-primary hover:bg-surface-container-low">
-                  <FileUp className="mb-2 h-8 w-8 text-primary" />
+                <div className="flex h-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant bg-transparent p-5 text-center transition-all duration-300 hover:border-primary hover:bg-slate-50">
+                  <FileUp className="mb-2 h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold text-on-surface">
                     Tải CV mới lên
                   </p>
                   <p className="mt-1 text-[10px] text-on-surface-variant">
-                    PDF, DOCX (Max 10MB)
+                    PDF, DOCX (Max {MAX_FILE_SIZE_MB}MB)
                   </p>
                 </div>
               </label>
@@ -356,21 +436,72 @@ function CvSelectionSection({
         )}
       </div>
 
-      {selectedCvId && selectedCvId !== "new_upload" && cvToShow ? (
-        <p className="mt-3 text-xs text-on-surface-variant">
-          Đã chọn:{" "}
-          <span className="font-semibold text-on-surface">
-            {cvToShow.title ?? "CV không tiêu đề"}
-          </span>
-        </p>
-      ) : uploadedFile ? (
-        <p className="mt-3 text-xs text-on-surface-variant">
-          Đã chọn:{" "}
-          <span className="font-semibold text-on-surface">
-            {uploadedFile.name} (Hồ sơ tạm)
-          </span>
-        </p>
-      ) : null}
+      {/* Modal chọn CV */}
+      {showCvModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-xl space-y-4 animate-scale-in">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-lg">
+                Chọn CV ứng tuyển
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCvModal(false)}
+                className="text-slate-400 hover:text-slate-655 p-1 rounded-full hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {cvList.map((cv) => (
+                <button
+                  key={cv.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCvId(cv.id);
+                    setUploadedFile(null);
+                    setShowCvModal(false);
+                  }}
+                  className={cn(
+                    "w-full text-left p-3.5 rounded-2xl border-2 transition-all flex items-start gap-3 hover:bg-slate-50 cursor-pointer",
+                    selectedCvId === cv.id
+                      ? "border-primary bg-blue-50/10"
+                      : "border-slate-200",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all mt-0.5",
+                      selectedCvId === cv.id
+                        ? "border-primary bg-primary"
+                        : "border-slate-350",
+                    )}
+                  >
+                    {selectedCvId === cv.id && (
+                      <div className="h-2 w-2 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-850 text-sm leading-tight">
+                      {cv.title || "CV không tiêu đề"}
+                    </p>
+                    <p className="text-[11px] text-slate-455 mt-1">
+                      {cv.isDefault && (
+                        <span className="font-bold text-primary mr-2">
+                          Mặc định
+                        </span>
+                      )}
+                      {cv.createdAt &&
+                        `Tải lên ${new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(cv.createdAt))}`}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -402,6 +533,10 @@ export function JobApplyPage({ job }: JobApplyPageProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isAgreed, setIsAgreed] = useState(false);
 
+  // States for matching score integration
+  const [matchingScore, setMatchingScore] = useState<number>(0);
+  const [isMatchingLoading, setIsMatchingLoading] = useState(false);
+
   const [coverLetter, setCoverLetter] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -410,11 +545,40 @@ export function JobApplyPage({ job }: JobApplyPageProps) {
 
   const cvToShow = cvList.find((cv) => cv.isDefault) ?? cvList[0];
 
+  // Sắp xếp CV của user: đưa isDefault lên đầu
+  const sortedCvList = [...cvList].sort((a, b) => {
+    if (a.isDefault && !b.isDefault) return -1;
+    if (!a.isDefault && b.isDefault) return 1;
+    return 0;
+  });
+
   useEffect(() => {
     if (cvToShow && !selectedCvId && !uploadedFile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCvId(cvToShow.id);
     }
   }, [cvToShow, selectedCvId, uploadedFile]);
+
+  // Tải điểm match của CV được chọn
+  useEffect(() => {
+    if (selectedCvId && selectedCvId !== "new_upload") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsMatchingLoading(true);
+      fetchJobMatch(job.slug ?? job.id, selectedCvId)
+        .then((res) => {
+          setMatchingScore(res?.matchScore || 0);
+        })
+        .catch((err) => {
+          console.error("Fetch job match failed in apply page:", err);
+          setMatchingScore(0);
+        })
+        .finally(() => {
+          setIsMatchingLoading(false);
+        });
+    } else {
+      setMatchingScore(0);
+    }
+  }, [selectedCvId, job.slug, job.id]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -519,13 +683,15 @@ export function JobApplyPage({ job }: JobApplyPageProps) {
           <div className="rounded-[28px] bg-white p-8 shadow-md border border-gray-300 lg:col-span-8">
             <form className="space-y-8" onSubmit={handleSubmit}>
               <CvSelectionSection
-                cvList={cvList}
+                cvList={sortedCvList}
                 selectedCvId={selectedCvId}
                 setSelectedCvId={setSelectedCvId}
                 uploadedFile={uploadedFile}
                 setUploadedFile={setUploadedFile}
                 fileInputRef={fileInputRef}
                 isLoadingCvList={isLoadingCvList}
+                matchingScore={matchingScore}
+                isMatchingLoading={isMatchingLoading}
               />
 
               <section className="border-t border-outline-variant pt-8">
