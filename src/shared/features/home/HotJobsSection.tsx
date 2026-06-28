@@ -224,7 +224,7 @@ export function HotJobsSection() {
           : filters.address;
 
   return (
-    <section className="bg-gray-300/30 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <section className="bg-gray-300/30 px-4 pt-18 pb-6 sm:px-6 lg:px-8 lg:pt-26 lg:pb-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-end justify-between gap-6">
           <div className="flex flex-col gap-1.5">

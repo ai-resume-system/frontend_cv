@@ -70,7 +70,7 @@ export function HomeSlideshow() {
   const slide = slides[current];
 
   return (
-    <section className="relative h-[500px] w-full overflow-hidden bg-secondary">
+    <section className="relative h-120 w-full overflow-hidden bg-secondary">
       <div className="absolute inset-0 transition-opacity duration-1000">
         <Image
           alt={slide.title}
@@ -79,15 +79,15 @@ export function HomeSlideshow() {
           priority
           src={slide.image}
         />
-        <div className="absolute inset-0 bg-foreground/60" />
+        <div className="absolute inset-0 bg-linear-to-r from-slate-900/90 via-slate-900/40 to-transparent" />
       </div>
 
-      <div className="relative z-10 flex h-full items-center justify-center px-8 py-20 text-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-center text-center">
-          <h1 className="text-4xl font-extrabold drop-shadow-lg md:text-6xl">
+      <div className="relative z-10 flex h-full items-center justify-start px-8 sm:px-12 py-20 text-white max-w-7xl mx-auto w-full">
+        <div className="flex flex-col items-start text-left max-w-2xl font-sans">
+          <h1 className="text-4xl font-bold drop-shadow-lg md:text-5xl lg:text-6xl text-white leading-tight">
             {slide.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-white/90 drop-shadow-md md:text-xl">
+          <p className="mt-4 text-lg text-white/95 drop-shadow-md md:text-xl leading-relaxed">
             {slide.subtitle}
           </p>
           <Link
@@ -117,7 +117,7 @@ export function HomeSlideshow() {
 
       <button
         aria-label="Slide trước"
-        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-foreground/30 p-3 text-white transition-colors hover:bg-foreground/50"
+        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-foreground/30 p-3 text-white transition-colors hover:bg-foreground/50 cursor-pointer"
         onClick={goPrev}
         type="button"
       >
@@ -125,7 +125,7 @@ export function HomeSlideshow() {
       </button>
       <button
         aria-label="Slide tiếp theo"
-        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-foreground/30 p-3 text-white transition-colors hover:bg-foreground/50"
+        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-foreground/30 p-3 text-white transition-colors hover:bg-foreground/50 cursor-pointer"
         onClick={goNext}
         type="button"
       >

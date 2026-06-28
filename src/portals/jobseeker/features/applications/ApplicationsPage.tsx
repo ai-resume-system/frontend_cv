@@ -511,7 +511,7 @@ export function ApplicationsPage() {
                         Lời nhắn từ nhà tuyển dụng:
                       </p>
                       <div
-                        className="text-xs text-slate-700 prose prose-sm max-w-none wrap-wrap-break-words"
+                        className="text-xs text-slate-700 prose prose-sm max-w-none wrap-wrap-wrap-break-words"
                         dangerouslySetInnerHTML={{
                           __html: activeInterviewApp.interviewNotes,
                         }}

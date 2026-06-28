@@ -182,7 +182,7 @@ export function TopSearchBar({
           </div>
 
           {searchTerm ? (
-            <div className="h-[300px] overflow-y-auto border border-slate-100 rounded-xl bg-slate-50/50 p-2 text-sm shadow-inner">
+            <div className="h-75 overflow-y-auto border border-slate-100 rounded-xl bg-slate-50/50 p-2 text-sm shadow-inner">
               {searchSuggestions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
                   <div className="p-3 rounded-full bg-slate-100 text-slate-300">
@@ -276,12 +276,12 @@ export function TopSearchBar({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="flex flex-col border-b border-slate-100 pb-4 md:border-b-0 md:border-r md:pb-0 md:pr-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Nhóm nghề
+                  Lĩnh vực nghề nghiệp
                 </p>
-                <div className="h-[240px] space-y-1 overflow-y-auto pr-1 text-sm">
+                <div className="h-60 space-y-1 overflow-y-auto pr-1 text-sm">
                   {categoriesLoading ? (
                     <p className="text-sm text-slate-500">
-                      Đang tải danh mục...
+                      Đang tải lĩnh vực nghề nghiệp...
                     </p>
                   ) : (
                     filteredCategories.map((item) => {
@@ -336,12 +336,12 @@ export function TopSearchBar({
 
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Nghề
+                  Nhóm Kỹ Năng Chuyên Môn
                 </p>
-                <div className="h-[300px] space-y-1 overflow-y-auto pr-1 text-sm">
+                <div className="h-75 space-y-1 overflow-y-auto pr-1 text-sm">
                   {skillsLoading ? (
                     <p className="text-sm text-slate-500">
-                      Đang tải kỹ năng...
+                      Đang tải nhóm kỹ năng chuyên môn...
                     </p>
                   ) : skillsError ? (
                     <p className="p-3 text-xs italic text-error">
@@ -385,7 +385,8 @@ export function TopSearchBar({
                     })
                   ) : (
                     <p className="p-3 text-xs italic text-slate-400">
-                      Chưa có nghề phù hợp với nhóm nghề này.
+                      Chưa có kỹ năng chuyên môn phù hợp với lĩnh vực nghề ngiệp
+                      này.
                     </p>
                   )}
                 </div>
@@ -393,9 +394,9 @@ export function TopSearchBar({
 
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Vị trí chuyên môn
+                  Kỹ Năng
                 </p>
-                <div className="h-[300px] overflow-y-auto pr-1">
+                <div className="h-75 overflow-y-auto pr-1">
                   {skillsError ? (
                     <p className="p-3 text-xs italic text-error">
                       {skillsError}
@@ -430,7 +431,7 @@ export function TopSearchBar({
                     </div>
                   ) : (
                     <p className="p-3 text-xs italic text-slate-400">
-                      Chọn một nghề tuyển dụng để hiển thị chuyên môn chi tiết.
+                      Chưa có kỹ năng phù hợp với nhóm kỹ năng chuyên môn này.
                     </p>
                   )}
                 </div>
@@ -440,7 +441,7 @@ export function TopSearchBar({
 
           {/* Danh sách Badge/Chip các kỹ năng đã chọn */}
           {draftSkillSlugs.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-100 rounded-xl max-h-[85px] overflow-y-auto">
+            <div className="mb-4 flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-100 rounded-xl max-h-21.25 overflow-y-auto">
               {draftSkillSlugs.map((slug) => {
                 const skillItem = allSkills.find((s) => s.slug === slug);
                 if (!skillItem) return null;

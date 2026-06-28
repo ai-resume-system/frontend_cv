@@ -1,17 +1,17 @@
 import {
+  ArrowRight,
   BriefcaseBusiness,
-  Phone,
-  FileUp,
-  BrainCircuit,
-  Sparkles,
-  Zap,
-  ShieldCheck,
   Building,
+  Rocket,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 
 import { HomeSlideshow } from "@/portals/jobseeker/components/layouts/HomeSlideshow";
+import { CompanyCard } from "@/portals/jobseeker/features/company/CompanyCard";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
+import { ROUTES } from "@/shared/constants/constants/routes";
 import {
   fetchCareerCategories,
   fetchTopCareerCategories,
@@ -19,11 +19,9 @@ import {
 import { fetchCompanies } from "@/shared/services/company.service";
 import { fetchJobs } from "@/shared/services/job.service";
 import { SearchStatsDashboard } from "./SearchStatsDashboard";
-import { CompanyCard } from "@/portals/jobseeker/features/company/CompanyCard";
 
 import { HotJobsSection } from "./HotJobsSection";
 
-//fetchTopCareerCategories
 export default async function HomePage() {
   const [
     jobsResult,
@@ -56,7 +54,7 @@ export default async function HomePage() {
 
   const stats = [
     {
-      label: "Việc làm đang mở",
+      label: "Việc làm đang tuyển",
       value: `${totalJobs}+`,
     },
     {
@@ -78,176 +76,29 @@ export default async function HomePage() {
       <HomeSlideshow />
 
       {/* FUSE Blue Gradient Search Stats Dashboard */}
-      <SearchStatsDashboard
-        categories={categoriesResult.categories}
-        totalJobs={totalJobs}
-      />
+      <SearchStatsDashboard totalJobs={totalJobs} stats={stats} />
 
-      {/* Original Global Statistics Section */}
-      <section className="bg-surface px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-          {stats.map((stat) => (
-            <div
-              className="rounded-xl border border-border bg-muted px-5 py-6 text-center shadow-sm transition-transform hover:-translate-y-1"
-              key={stat.label}
+      {/* Adding padding-top to HotJobsSection because of overlapping stats */}
+      <div className="bg-[#f8fafc]/30">
+        <HotJobsSection />
+      </div>
+
+      {/* Top ngành nghề nổi bật (Moved up) */}
+      <section className="bg-background px-4 py-16 sm:px-8 border-t border-slate-100">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex items-end justify-between gap-6 border-b border-slate-100 pb-4">
+            <div className="text-left">
+              <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
+                Top ngành nghề nổi bật
+              </h2>
+            </div>
+            <Link
+              href={ROUTES.JOBS}
+              className="text-[#103580] hover:underline font-bold text-sm flex items-center gap-1 shrink-0"
             >
-              <p className="mb-1 text-4xl font-extrabold text-primary">
-                {stat.value}
-              </p>
-              <p className="text-sm font-medium text-muted-foreground">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <HotJobsSection />
-
-      {/* Featured Companies Section */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-8 border-t border-b border-gray-200">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 text-center">
-            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
-              Nhà tuyển dụng nổi bật
-            </h2>
-            <p className="mt-2 text-sm text-gray-500 font-semibold">
-              Những doanh nghiệp hàng đầu đang mở rộng tuyển dụng nhân tài cùng FUSE
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {companiesResult.companies.slice(0, 6).map((company) => (
-              <CompanyCard key={company.id} company={company} layout="grid" />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* AI Process Steps Section */}
-      <section className="bg-white px-4 py-16 sm:px-8 border-b border-gray-100">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12 text-center">
-            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
-              Quy trình Phân tích CV & Tìm việc bằng AI
-            </h2>
-            <p className="mt-2 text-sm text-gray-500 font-semibold">
-              Chỉ với 3 bước đơn giản để tối ưu hóa cơ hội nghề nghiệp của bạn cùng trí tuệ nhân tạo
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {/* Step 1 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-gray-150 pt-8">
-              <div className="absolute top-[-20px] flex h-10 w-10 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-md">
-                1
-               </div>
-              <div className="my-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-[#103580]">
-                <FileUp className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-base font-bold text-gray-800">Tải lên hồ sơ (CV)</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Tải lên CV của bạn ở định dạng PDF hoặc Word. Hệ thống FUSE AI sẽ tự động phân tích và trích xuất dữ liệu.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-gray-150 pt-8">
-              <div className="absolute top-[-20px] flex h-10 w-10 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-md">
-                2
-              </div>
-              <div className="my-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-[#103580]">
-                <BrainCircuit className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-base font-bold text-gray-800">AI chấm điểm & Đánh giá</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                AI tiến hành chấm điểm chất lượng hồ sơ, liệt kê kỹ năng cốt lõi và đưa ra những gợi ý chi tiết để tối ưu hóa CV.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-gray-150 pt-8">
-              <div className="absolute top-[-20px] flex h-10 w-10 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-md">
-                3
-              </div>
-              <div className="my-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-[#103580]">
-                <Sparkles className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-base font-bold text-gray-800">Gợi ý việc làm phù hợp</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Hệ thống tự động so khớp kỹ năng và đề xuất những tin tuyển dụng phù hợp với tỷ lệ trùng khớp lên tới 99%.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose FUSE Section */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-8 border-b border-gray-200">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12 text-center">
-            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
-              Tại sao lựa chọn FUSE?
-            </h2>
-            <p className="mt-2 text-sm text-gray-500 font-semibold">
-              Những thế mạnh vượt trội giúp bạn chinh phục nhà tuyển dụng trong kỷ nguyên số
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Card 1 */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-              <div className="mb-4 text-[#103580]">
-                <Sparkles className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-sm font-bold text-gray-900">Gợi ý AI thông minh</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                So khớp sâu các kỹ năng ẩn và chuyên môn để đề xuất công việc có độ tương thích tốt nhất.
-              </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-              <div className="mb-4 text-[#103580]">
-                <Zap className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-sm font-bold text-gray-900">Tối ưu hóa thời gian</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Không cần duyệt tìm thủ công hàng ngàn tin tuyển dụng. AI làm điều đó thay bạn chỉ trong vài giây.
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-              <div className="mb-4 text-[#103580]">
-                <ShieldCheck className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-sm font-bold text-gray-900">Bảo mật tuyệt đối</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Hồ sơ và thông tin cá nhân của bạn được bảo mật an toàn, chỉ tiết lộ khi bạn nộp hồ sơ.
-              </p>
-            </div>
-
-            {/* Card 4 */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-              <div className="mb-4 text-[#103580]">
-                <Building className="h-8 w-8" />
-              </div>
-              <h3 className="font-sans text-sm font-bold text-gray-900">Nhà tuyển dụng xác thực</h3>
-              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Tất cả các tin tuyển dụng và công ty trên FUSE đều qua quy trình xác minh chặt chẽ.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background px-4 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10">
-            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
-              Top ngành nghề nổi bật
-            </h2>
+              Xem tất cả các ngành nghề
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
           {topCategoriesResult.length > 0 ? (
@@ -278,25 +129,291 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative">
-        <div className="relative mx-auto overflow-hidden bg-gradient-to-r from-blue-800 via-blue-900 to-[#103580] px-6 py-12 sm:px-8 md:px-10 md:py-16">
-          <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:justify-between">
-            <div className="text-center md:text-left">
-              <h2 className="text-4xl font-extrabold text-white">
+      {/* Featured Companies Section (Moved down below Top Categories) */}
+      <section className="bg-slate-50 px-4 py-16 sm:px-8 border-t border-b border-gray-200">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex items-end justify-between gap-6 border-b border-slate-100 pb-4">
+            <h2 className="text-left font-display text-2xl font-bold sm:text-3xl text-[#103580]">
+              Nhà tuyển dụng nổi bật
+            </h2>
+
+            <Link
+              href={ROUTES.JOB_SEEKER_COMPANY}
+              className="text-[#103580] hover:underline font-bold text-sm flex items-center gap-1 shrink-0"
+            >
+              Xem tất cả công ty
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {companiesResult.companies.slice(0, 6).map((company) => (
+              <CompanyCard key={company.id} company={company} layout="simple" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Process Steps Section */}
+      <section className="bg-white px-4 py-16 sm:px-8 border-b border-gray-100">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-left">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
+              Quy trình phân tích CV và gợi ý việc làm
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-3 relative">
+            {/* Step 1 */}
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
+                1
+              </div>
+              <div
+                className="w-full h-44 flex items-center justify-center mb-6 overflow-visible"
+                style={{ perspective: "1000px" }}
+              >
+                <div
+                  className="relative w-[90%] h-full transition-all duration-500 hover:scale-105"
+                  style={{
+                    transform: "rotateY(15deg) rotateX(5deg) rotateZ(-2deg)",
+                    transformStyle: "preserve-3d",
+                  }}
+                >
+                  <img
+                    src="/upload_cv.png"
+                    alt="Tải CV"
+                    className="h-full w-full object-contain pointer-events-none drop-shadow-[12px_16px_16px_rgba(16,53,128,0.12)]"
+                  />
+                </div>
+              </div>
+              <div className="text-center px-4 space-y-2.5">
+                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
+                  Tải CV của bạn lên
+                </h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Tải lên CV hoặc tạo CV mới trên FUSE một cách nhanh chóng và
+                  dễ dàng.
+                </p>
+              </div>
+              {/* Step Connector */}
+              <div className="hidden md:flex absolute top-[30%] left-full w-12 items-center justify-center z-20 pointer-events-none -translate-x-1">
+                <svg
+                  className="w-10 h-6 text-[#103580]/60"
+                  fill="none"
+                  viewBox="0 0 40 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    d="M2 12H32"
+                    strokeDasharray="4 4"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M28 7l5 5-5 5"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
+                2
+              </div>
+              <div
+                className="w-full h-44 flex items-center justify-center mb-6 overflow-visible"
+                style={{ perspective: "1000px" }}
+              >
+                <div
+                  className="relative w-[90%] h-full transition-all duration-500 hover:scale-105"
+                  style={{
+                    transform: "rotateY(15deg) rotateX(5deg) rotateZ(-2deg)",
+                    transformStyle: "preserve-3d",
+                  }}
+                >
+                  <img
+                    src="/analysis_cv.png"
+                    alt="Phân tích CV"
+                    className="h-full w-full object-contain pointer-events-none drop-shadow-[12px_16px_16px_rgba(16,53,128,0.12)]"
+                  />
+                </div>
+              </div>
+              <div className="text-center px-4 space-y-2.5">
+                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
+                  AI phân tích và chấm điểm
+                </h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  AI phân tích kỹ năng, kinh nghiệm và chấm điểm mức độ phù hợp
+                  của bạn với thị trường.
+                </p>
+              </div>
+              {/* Step Connector */}
+              <div className="hidden md:flex absolute top-[30%] left-full w-12 items-center justify-center z-20 pointer-events-none -translate-x-1">
+                <svg
+                  className="w-10 h-6 text-[#103580]/60"
+                  fill="none"
+                  viewBox="0 0 40 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    d="M2 12H32"
+                    strokeDasharray="4 4"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M28 7l5 5-5 5"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
+                3
+              </div>
+              <div
+                className="w-full h-44 flex items-center justify-center mb-6 overflow-visible"
+                style={{ perspective: "1000px" }}
+              >
+                <div
+                  className="relative w-[90%] h-full transition-all duration-500 hover:scale-105"
+                  style={{
+                    transform: "rotateY(15deg) rotateX(5deg) rotateZ(-2deg)",
+                    transformStyle: "preserve-3d",
+                  }}
+                >
+                  <img
+                    src="/suggestion_job.png"
+                    alt="Gợi ý việc làm"
+                    className="h-full w-full object-contain pointer-events-none drop-shadow-[12px_16px_16px_rgba(16,53,128,0.12)]"
+                  />
+                </div>
+              </div>
+              <div className="text-center px-4 space-y-2.5">
+                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
+                  Gợi ý việc làm phù hợp
+                </h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Nhận danh sách việc làm phù hợp nhất với hồ sơ và mục tiêu của
+                  bạn.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose FUSE Section */}
+      <section className="bg-slate-50 px-4 py-16 sm:px-8 border-b border-gray-200">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
+              Tại sao lựa chọn FUSE?
+            </h2>
+            <p className="mt-2 text-sm text-gray-500 font-semibold">
+              Những thế mạnh vượt trội giúp bạn chinh phục nhà tuyển dụng trong
+              kỷ nguyên số
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Card 1 */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="mb-4 text-[#103580]">
+                <Rocket className="h-8 w-8" />
+              </div>
+              <h3 className="font-sans text-sm font-bold text-gray-900">
+                Gợi ý AI thông minh
+              </h3>
+              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
+                So khớp sâu các kỹ năng ẩn và chuyên môn để đề xuất công việc có
+                độ tương thích tốt nhất.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="mb-4 text-[#103580]">
+                <Zap className="h-8 w-8" />
+              </div>
+              <h3 className="font-sans text-sm font-bold text-gray-900">
+                Tối ưu hóa thời gian
+              </h3>
+              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
+                Không cần duyệt tìm thủ công hàng ngàn tin tuyển dụng. AI làm
+                điều đó thay bạn chỉ trong vài giây.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="mb-4 text-[#103580]">
+                <ShieldCheck className="h-8 w-8" />
+              </div>
+              <h3 className="font-sans text-sm font-bold text-gray-900">
+                Bảo mật tuyệt đối
+              </h3>
+              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
+                Hồ sơ và thông tin cá nhân của bạn được bảo mật an toàn, chỉ
+                tiết lộ khi bạn nộp hồ sơ.
+              </p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="mb-4 text-[#103580]">
+                <Building className="h-8 w-8" />
+              </div>
+              <h3 className="font-sans text-sm font-bold text-gray-900">
+                Nhà tuyển dụng xác thực
+              </h3>
+              <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
+                Tất cả các tin tuyển dụng và công ty trên FUSE đều qua quy trình
+                xác minh chặt chẽ.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bạn cần tư vấn nghề nghiệp? */}
+      <section className="relative w-full bg-linear-to-r from-[#103580] via-blue-900 to-blue-700 py-8 md:py-10 overflow-visible">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 md:grid-cols-12 items-center gap-8 overflow-visible">
+          {/* Văn bản & Nút liên kết */}
+          <div className="md:col-span-8 flex flex-col items-start space-y-6 z-10">
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white font-display leading-tight">
                 Bạn cần tư vấn nghề nghiệp?
               </h2>
-              <p className="mt-4 text-lg text-white/80">
+              <p className="text-base md:text-lg w-full md:w-2/3 text-white/80 font-sans leading-relaxed">
                 Trao đổi với chuyên gia tư vấn để nhận định hướng cá nhân hóa
                 cho bước đi nghề nghiệp tiếp theo.
               </p>
             </div>
+
             <Link
-              className="flex items-center gap-4 rounded-2xl bg-surface px-10 py-5 text-2xl font-semibold text-[#103580] transition-transform hover:scale-105"
               href={`tel:${INFOMATION_WEB.PHONE}`}
+              className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-[#103580] shadow-md transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
             >
-              <Phone aria-hidden="true" className="h-6 w-6" />
-              {INFOMATION_WEB.PHONE}
+              Nhận tư vấn ngay
+              <ArrowRight className="h-5 w-5 text-[#103580]" />
             </Link>
+          </div>
+
+          <div className="absolute right-0 bottom-0 top-0 hidden md:block w-200 lg:w-full h-full z-10">
+            <img
+              src="/contact_me.png"
+              alt="Tư vấn nghề nghiệp"
+              className="absolute -bottom-18 right-0 h-100 max-w-none object-contain object-bottom pointer-events-none"
+            />
           </div>
         </div>
       </section>

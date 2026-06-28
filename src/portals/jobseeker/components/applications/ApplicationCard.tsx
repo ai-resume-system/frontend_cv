@@ -196,7 +196,7 @@ export function ApplicationCard({
                       Lời nhắn từ nhà tuyển dụng:
                     </p>
                     <div
-                      className="text-[11px] text-slate-700 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                      className="text-[11px] text-slate-700 prose prose-sm max-w-none wrap-wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
                       dangerouslySetInnerHTML={{
                         __html: application.interviewNotes,
                       }}
@@ -213,7 +213,7 @@ export function ApplicationCard({
                   Dặn dò chuẩn bị đi làm:
                 </p>
                 <div
-                  className="text-[11px] text-emerald-950 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                  className="text-[11px] text-emerald-950 prose prose-sm max-w-none wrap-wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
                   dangerouslySetInnerHTML={{
                     __html: application.onboardingNotes,
                   }}
@@ -228,7 +228,7 @@ export function ApplicationCard({
                   Phản hồi từ nhà tuyển dụng:
                 </p>
                 <div
-                  className="text-[11px] text-red-950 prose prose-sm max-w-none wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
+                  className="text-[11px] text-red-950 prose prose-sm max-w-none wrap-wrap-break-words max-h-20 overflow-y-auto custom-scroll pr-1"
                   dangerouslySetInnerHTML={{
                     __html: application.rejectionReason,
                   }}

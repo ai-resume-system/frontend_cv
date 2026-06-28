@@ -1,0 +1,16 @@
+export const VIETNAM_PROVINCES = [
+  "Hà Nội",
+  "Hồ Chí Minh",
+  "Hải Dương",
+  "Bình Dương",
+  "Bắc Ninh",
+  "Đồng Nai",
+  "Hưng Yên",
+  "Đà Nẵng",
+  "Hải Phòng",
+  "Cần Thơ",
+  "Khánh Hòa",
+  "Long An",
+  "Quảng Ninh",
+  "Điện Biên",
+];

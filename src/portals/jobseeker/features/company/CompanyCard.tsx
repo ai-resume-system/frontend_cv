@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { MapPin, BriefcaseBusiness, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { ROUTES } from "@/shared/constants/constants/routes";
@@ -10,12 +10,62 @@ import { formatBriefAddress } from "@/shared/lib/utils/formatAddress";
 
 interface CompanyCardProps {
   company: CompanyDto;
-  layout?: "grid" | "list";
+  layout?: "grid" | "list" | "simple";
 }
 
 export function CompanyCard({ company, layout = "grid" }: CompanyCardProps) {
   const bannerUrl = resolveMediaUrl(company.bannerUrl);
   const logoUrl = resolveMediaUrl(company.logoUrl);
+
+  if (layout === "simple") {
+    return (
+      <article className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#103580]/40 hover:shadow-lg">
+        <Link
+          className="flex flex-col h-full justify-between gap-5 focus-visible:outline-none font-sans"
+          href={
+            company.slug
+              ? ROUTES.JOB_SEEKER_COMPANY_DETAIL(company.slug)
+              : ROUTES.JOB_SEEKER_COMPANY
+          }
+        >
+          <div className="flex gap-5 items-start">
+            <div className="relative h-20 w-20 shrink-0 rounded-2xl border border-slate-100 bg-slate-50 overflow-hidden shadow-sm flex items-center justify-center">
+              <img
+                alt={company.name ?? "Logo công ty"}
+                className="h-full w-full object-cover p-1"
+                src={logoUrl ?? "/logo.png"}
+              />
+            </div>
+            <div className="flex-1 min-w-0 space-y-2 text-left">
+              <h3 className="line-clamp-2 text-xl font-bold text-slate-800 transition-colors group-hover:text-[#103580] leading-snug">
+                {company.name ?? "Công ty đang cập nhật"}
+              </h3>
+              <p className="text-base font-semibold text-slate-500 truncate">
+                {company.careerCategory?.name ?? "Ngành nghề đang cập nhật"}
+              </p>
+              <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                <span className="truncate">
+                  {formatBriefAddress(company.address)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 bg-[#103580]/10 px-3 py-1 rounded-full text-[#103580] text-xs font-bold shrink-0">
+              <BriefcaseBusiness className="h-3.5 w-3.5 text-[#103580]" />
+              <span>{company.openJobCount ?? 0} việc làm</span>
+            </div>
+            <span className="text-sm font-bold text-[#103580] group-hover:underline flex items-center gap-1">
+              Xem công ty
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </Link>
+      </article>
+    );
+  }
 
   if (layout === "list") {
     return (
