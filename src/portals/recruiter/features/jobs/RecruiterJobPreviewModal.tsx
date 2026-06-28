@@ -155,7 +155,11 @@ export function RecruiterJobPreviewModal({
                     {
                       icon: Coins,
                       label: "Mức lương",
-                      value: formatSalary(job.salaryMin ?? undefined, job.salaryMax ?? undefined) ?? "Thỏa thuận",
+                      value:
+                        formatSalary(
+                          job.salaryMin ?? undefined,
+                          job.salaryMax ?? undefined,
+                        ) ?? "Thỏa thuận",
                     },
                     {
                       icon: MapPin,
@@ -426,7 +430,7 @@ export function RecruiterJobPreviewModal({
                 {job.skills?.length ? (
                   <div className="mt-5 pt-5 border-t border-slate-100">
                     <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary/70 mb-2.5">
-                      Kỹ năng nổi bật
+                      Kỹ năng cần thiết
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {job.skills.map((skill) => {
@@ -438,7 +442,7 @@ export function RecruiterJobPreviewModal({
                               "inline-flex items-center justify-center rounded-full transition-all duration-200",
                               isMainSkill
                                 ? "bg-blue-100/80 border border-blue-200/80 px-2.5 py-1 text-[11px] font-bold text-primary shadow-3xs hover:bg-blue-100"
-                                : "bg-slate-50 text-slate-500 border border-slate-200 px-2.5 py-1 text-[11px] font-bold hover:bg-slate-100"
+                                : "bg-slate-50 text-slate-500 border border-slate-200 px-2.5 py-1 text-[11px] font-bold hover:bg-slate-100",
                             )}
                           >
                             {skill.name}

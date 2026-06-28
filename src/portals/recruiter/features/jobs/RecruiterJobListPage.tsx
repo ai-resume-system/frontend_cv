@@ -341,7 +341,7 @@ export function RecruiterJobListPage() {
             className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
             title="Danh sách ứng viên"
           >
-            <Eye className="h-4 w-4" />
+            <BriefcaseBusiness className="h-4 w-4" />
           </Link>
 
           {/* Nút Xem preview bài đăng */}
@@ -351,7 +351,7 @@ export function RecruiterJobListPage() {
             className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
             title="Xem bài đăng"
           >
-            <BriefcaseBusiness className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
           </button>
 
           {/* Nút Chỉnh sửa */}

@@ -637,7 +637,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                 {job.skills?.length ? (
                   <div className="mt-6 pt-6 border-t border-slate-100">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/70 mb-3">
-                      Kỹ năng nổi bật
+                      Kỹ năng cần thiết
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {job.skills.map((skill) => {
@@ -790,11 +790,8 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                                 />
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center text-center">
-                                <span className="text-3xl font-extrabold text-slate-805 tracking-tight leading-none">
+                                <span className="text-xl font-bold text-slate-700 tracking-tight leading-none">
                                   {matchResult.matchScore}%
-                                </span>
-                                <span className="text-[10px] font-bold text-slate-500 tracking-wider mt-1 uppercase">
-                                  MATCH SCORE
                                 </span>
                               </div>
                             </div>
@@ -855,13 +852,9 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                                     val: matchResult.breakdown.experienceMatch,
                                   },
                                   {
-                                    label: "Tương thích chức danh",
+                                    label: "Từ khóa liên quan",
                                     val: matchResult.breakdown
                                       .titleKeywordSimilarity,
-                                  },
-                                  {
-                                    label: "Nguyện vọng công việc",
-                                    val: matchResult.breakdown.preferenceMatch,
                                   },
                                 ].map((item, idx) => (
                                   <div key={idx} className="space-y-1">

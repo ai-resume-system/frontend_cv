@@ -155,17 +155,17 @@ export default async function HomePage() {
       </section>
 
       {/* AI Process Steps Section */}
-      <section className="bg-white px-4 py-16 sm:px-8 border-b border-gray-100">
-        <div className="mx-auto max-w-5xl">
+      <section className="bg-white py-16 border-b border-gray-100">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-left">
-            <h2 className="font-display text-2xl font-bold sm:text-3xl text-[#103580]">
+            <h2 className="text-left font-display text-2xl font-bold sm:text-3xl text-[#103580]">
               Quy trình phân tích CV và gợi ý việc làm
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-3 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 lg:gap-20 relative w-full items-stretch">
             {/* Step 1 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 1
               </div>
@@ -187,40 +187,37 @@ export default async function HomePage() {
                   />
                 </div>
               </div>
-              <div className="text-center px-4 space-y-2.5">
-                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
-                  Tải CV của bạn lên
-                </h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Tải lên CV hoặc tạo CV mới trên FUSE một cách nhanh chóng và
-                  dễ dàng.
-                </p>
+              <div className="text-center px-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug mb-2">
+                    Tải hồ sơ của bạn
+                  </h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    Tải lên hồ sơ trên FUSE một cách nhanh chóng và dễ dàng.
+                  </p>
+                </div>
               </div>
-              {/* Step Connector */}
-              <div className="hidden md:flex absolute top-[30%] left-full w-12 items-center justify-center z-20 pointer-events-none -translate-x-1">
+
+              {/* Mobile Connector 1 */}
+              <div className="flex md:hidden absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-20 items-center justify-center pointer-events-none">
                 <svg
-                  className="w-10 h-6 text-[#103580]/60"
+                  className="w-6 h-6 text-[#103580]"
                   fill="none"
-                  viewBox="0 0 40 24"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={2.5}
+                  strokeWidth={3}
                 >
                   <path
                     strokeLinecap="round"
-                    d="M2 12H32"
-                    strokeDasharray="4 4"
-                  />
-                  <path
-                    strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M28 7l5 5-5 5"
+                    d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
                   />
                 </svg>
               </div>
             </div>
 
             {/* Step 2 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 2
               </div>
@@ -229,7 +226,7 @@ export default async function HomePage() {
                 style={{ perspective: "1000px" }}
               >
                 <div
-                  className="relative w-[90%] h-full transition-all duration-500 hover:scale-105"
+                  className="relative w-full scale-[1.05] h-full transition-all duration-500 hover:scale-[1.1]"
                   style={{
                     transform: "rotateY(15deg) rotateX(5deg) rotateZ(-2deg)",
                     transformStyle: "preserve-3d",
@@ -242,40 +239,38 @@ export default async function HomePage() {
                   />
                 </div>
               </div>
-              <div className="text-center px-4 space-y-2.5">
-                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
-                  AI phân tích và chấm điểm
-                </h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  AI phân tích kỹ năng, kinh nghiệm và chấm điểm mức độ phù hợp
-                  của bạn với thị trường.
-                </p>
+              <div className="text-center px-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug mb-2">
+                    AI phân tích và chấm điểm
+                  </h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    AI phân tích kỹ năng, kinh nghiệm và chấm điểm mức độ phù
+                    hợp của bạn với thị trường.
+                  </p>
+                </div>
               </div>
-              {/* Step Connector */}
-              <div className="hidden md:flex absolute top-[30%] left-full w-12 items-center justify-center z-20 pointer-events-none -translate-x-1">
+
+              {/* Mobile Connector 2 */}
+              <div className="flex md:hidden absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-20 items-center justify-center pointer-events-none">
                 <svg
-                  className="w-10 h-6 text-[#103580]/60"
+                  className="w-6 h-6 text-[#103580]"
                   fill="none"
-                  viewBox="0 0 40 24"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={2.5}
+                  strokeWidth={3}
                 >
                   <path
                     strokeLinecap="round"
-                    d="M2 12H32"
-                    strokeDasharray="4 4"
-                  />
-                  <path
-                    strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M28 7l5 5-5 5"
+                    d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
                   />
                 </svg>
               </div>
             </div>
 
             {/* Step 3 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 3
               </div>
@@ -297,15 +292,51 @@ export default async function HomePage() {
                   />
                 </div>
               </div>
-              <div className="text-center px-4 space-y-2.5">
-                <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug">
-                  Gợi ý việc làm phù hợp
-                </h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Nhận danh sách việc làm phù hợp nhất với hồ sơ và mục tiêu của
-                  bạn.
-                </p>
+              <div className="text-center px-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#103580] leading-snug mb-2">
+                    Gợi ý việc làm phù hợp
+                  </h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    Nhận danh sách việc làm phù hợp nhất với hồ sơ và mục tiêu
+                    của bạn.
+                  </p>
+                </div>
               </div>
+            </div>
+
+            {/* Desktop Connector 1 */}
+            <div className="hidden md:flex absolute top-[35%] -translate-y-1/2 left-[33.33%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
+              <svg
+                className="w-6 h-6 text-[#103580]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </div>
+
+            {/* Desktop Connector 2 */}
+            <div className="hidden md:flex absolute top-[35%] -translate-y-1/2 left-[66.66%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
+              <svg
+                className="w-6 h-6 text-[#103580]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
             </div>
           </div>
         </div>

@@ -114,7 +114,6 @@ export type JobMatchResponse = {
     careerCategoryMatch: number;
     experienceMatch: number;
     titleKeywordSimilarity: number;
-    preferenceMatch: number;
   };
   matchedSkills: Array<{
     name: string;

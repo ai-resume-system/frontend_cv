@@ -115,7 +115,7 @@ export function JobCard({ job, showSkills = false }: JobCardProps) {
             </div>
           </div>
 
-          {/* Hiển thị kỹ năng nổi bật nếu có cấu hình */}
+          {/* Hiển thị kỹ năng cần thiết nếu có cấu hình */}
           {showSkills && job.skills?.length ? (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {job.skills.slice(0, 3).map((skill) => (

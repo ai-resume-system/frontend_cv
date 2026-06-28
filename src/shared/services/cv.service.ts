@@ -12,7 +12,13 @@ import type {
   TempCvUploadResult,
   TempCvPreviewResult,
   TempCvSaveResult,
+  CvAnalysisSkill,
+  CvAnalysisOtherSkill,
+  CvAnalysisEducation,
+  CvAnalysisExperience,
+  CvAnalysisConfidenceFlags,
 } from "@/shared/types/cv-analysis";
+import type { EProcessingStatus } from "@/shared/constants/enums/cv.enum";
 import type {
   CvDownloadResponse,
   CvItem,
@@ -161,18 +167,39 @@ export async function queueCvAnalysis(id: string): Promise<CvAnalyzeResponse> {
   return response.data;
 }
 
-function mapBackendAnalysisToFrontend(data: any): CvAnalysisResponse {
+interface CvAnalysisBackendResponse {
+  cvId: string;
+  parsedDataId: string | null;
+  processingStatus: EProcessingStatus;
+  summary: string | null;
+  resumeQualityScore: number | null;
+  matchedSkills: CvAnalysisSkill[];
+  otherDetectedSkills: CvAnalysisOtherSkill[];
+  education: CvAnalysisEducation[];
+  experience: CvAnalysisExperience[];
+  improvementSuggestions: string[];
+  rawText: string | null;
+  provider: string | null;
+  model: string | null;
+  confidenceFlags: CvAnalysisConfidenceFlags | null;
+  promptVersion: string | null;
+  analyzedAt: string | null;
+  updatedAt: string;
+}
+
+function mapBackendAnalysisToFrontend(data: CvAnalysisBackendResponse): CvAnalysisResponse {
   if (!data) return data;
   return {
     ...data,
     skills: data.matchedSkills ?? [],
     suggestions: data.improvementSuggestions ?? [],
     score: data.resumeQualityScore ?? 0,
+    otherDetectedSkills: data.otherDetectedSkills ?? [],
   };
 }
 
 export async function fetchCvAnalysis(id: string): Promise<CvAnalysisResponse> {
-  const response = await apiService.get<IResponseApiItem<any>>(
+  const response = await apiService.get<IResponseApiItem<CvAnalysisBackendResponse>>(
     API_ROUTES.CV.ANALYSIS(id),
     { auth: true, cache: "no-store" },
   );
@@ -200,7 +227,13 @@ export async function uploadTempCv(file: File): Promise<TempCvUploadResult> {
 }
 
 export async function previewTempCv(tempFileKey: string): Promise<TempCvPreviewResult> {
-  const response = await apiService.post<IResponseApiItem<any>>(
+  const response = await apiService.post<IResponseApiItem<{
+    tempFileKey: string;
+    fileName: string;
+    fileExtension: "pdf" | "docx" | "doc";
+    expiresInSeconds: number;
+    analysis: CvAnalysisBackendResponse;
+  }>>(
     API_ROUTES.CV_ANALYSIS_PREVIEW.PREVIEW,
     { tempFileKey },
     { auth: true }
@@ -211,14 +244,16 @@ export async function previewTempCv(tempFileKey: string): Promise<TempCvPreviewR
   };
 }
 
-export async function saveTempCv(tempFileKey: string, title?: string): Promise<any> {
-  const response = await apiService.post<IResponseApiItem<any>>(
+export async function saveTempCv(tempFileKey: string, title?: string): Promise<TempCvSaveResult & { savedCvId: string }> {
+  const response = await apiService.post<IResponseApiItem<CvAnalysisBackendResponse & { savedCvId: string }>>(
     API_ROUTES.CV_ANALYSIS_PREVIEW.SAVE_PREVIEW,
     { tempFileKey, title },
     { auth: true }
   );
+  
+  const mappedAnalysis = mapBackendAnalysisToFrontend(response.data);
   return {
-    ...response.data,
-    analysis: mapBackendAnalysisToFrontend(response.data?.analysis),
+    ...mappedAnalysis,
+    savedCvId: response.data?.savedCvId ?? "",
   };
 }

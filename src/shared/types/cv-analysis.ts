@@ -14,6 +14,16 @@ export interface CvAnalysisSkill {
   normalizedName: string | null;
   confidence: number | null;
   skillId: string | null;
+  systemSkillSlug?: string | null;
+  level?: string | null;
+  evidence?: string | null;
+}
+
+export interface CvAnalysisOtherSkill {
+  name: string;
+  normalizedName: string;
+  confidence?: number | null;
+  evidence?: string | null;
 }
 
 export interface CvAnalysisEducation {
@@ -50,6 +60,10 @@ export interface CvAnalysisResponse {
   promptVersion: string | null;
   analyzedAt: string | null;
   updatedAt: string;
+  resumeQualityScore?: number | null;
+  matchedSkills?: CvAnalysisSkill[] | null;
+  otherDetectedSkills?: CvAnalysisOtherSkill[] | null;
+  improvementSuggestions?: string[] | null;
 }
 
 export interface CvAnalyzeResponse {

@@ -360,12 +360,12 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </div>
             </div>
 
-            {analysis.skills.length > 0 ? (
+            {analysis.skills && analysis.skills.length > 0 ? (
               <div className="rounded-[28px] bg-surface-container-low p-6 border border-surface-container-high">
                 <div className="flex items-center gap-2 mb-4">
                   <Bolt className="h-5 w-5 text-primary" />
                   <h5 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
-                    Kỹ năng được nhận diện
+                    Kỹ năng đã khớp hệ thống
                   </h5>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -378,6 +378,27 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                           ? "bg-secondary-fixed text-on-secondary-fixed-variant"
                           : "bg-white text-on-surface-variant border border-outline-variant/30",
                       )}
+                    >
+                      {skill.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {analysis.otherDetectedSkills && analysis.otherDetectedSkills.length > 0 ? (
+              <div className="rounded-[28px] bg-surface-container-low p-6 border border-surface-container-high">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h5 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
+                    Kỹ năng AI phát hiện thêm
+                  </h5>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.otherDetectedSkills.map((skill) => (
+                    <span
+                      key={skill.normalizedName ?? skill.name}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-on-surface-variant border border-outline-variant/30"
                     >
                       {skill.name}
                     </span>

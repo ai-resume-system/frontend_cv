@@ -6,9 +6,7 @@ import {
   CheckCircle2,
   Download,
   Eye,
-  FileText,
   LoaderCircle,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,7 +21,6 @@ import {
   queueCvAnalysis,
   fetchCvDetail,
 } from "@/shared/services/cv.service";
-import type { CvAnalysisResponse } from "@/shared/types/cv-analysis";
 
 type ProcessingStage =
   | "queueing"
@@ -32,7 +29,7 @@ type ProcessingStage =
   | "completed"
   | "failed";
 
-const POLL_INTERVAL_MS = 2000;
+const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 60;
 
 const STAGE_CONFIG: Record<
@@ -54,8 +51,6 @@ export function CvAnalysisProcessingPage() {
 
   const [cvTitle, setCvTitle] = useState<string>("");
   const [stage, setStage] = useState<ProcessingStage>("queueing");
-  const [analysisResult, setAnalysisResult] =
-    useState<CvAnalysisResponse | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const attemptsRef = useRef(0);
 
@@ -75,10 +70,16 @@ export function CvAnalysisProcessingPage() {
     const id = cvId;
 
     let cancelled = false;
+    const queuedKey = `cv-analysis-queued:${id}`;
 
     async function startAnalysis() {
       try {
-        await queueCvAnalysis(id);
+        if (typeof window === "undefined") return;
+
+        if (!window.sessionStorage.getItem(queuedKey)) {
+          window.sessionStorage.setItem(queuedKey, new Date().toISOString());
+          await queueCvAnalysis(id);
+        }
         if (cancelled) return;
         setStage("analyzing");
         attemptsRef.current = 0;
@@ -89,6 +90,7 @@ export function CvAnalysisProcessingPage() {
 
           if (attemptsRef.current > MAX_POLL_ATTEMPTS) {
             if (pollingRef.current) clearInterval(pollingRef.current);
+            window.sessionStorage.removeItem(queuedKey);
             if (!cancelled) {
               setStage("failed");
               await showErrorAlert(
@@ -108,7 +110,7 @@ export function CvAnalysisProcessingPage() {
 
             if (result.processingStatus === "completed") {
               if (pollingRef.current) clearInterval(pollingRef.current);
-              setAnalysisResult(result);
+              window.sessionStorage.removeItem(queuedKey);
               setStage("completed");
 
               setTimeout(() => {
@@ -118,6 +120,7 @@ export function CvAnalysisProcessingPage() {
               }, 1500);
             } else if (result.processingStatus === "failed") {
               if (pollingRef.current) clearInterval(pollingRef.current);
+              window.sessionStorage.removeItem(queuedKey);
               setStage("failed");
               await showErrorAlert("Phân tích CV thất bại. Vui lòng thử lại.");
             } else if (result.processingStatus === "processing") {
@@ -129,6 +132,9 @@ export function CvAnalysisProcessingPage() {
         }, POLL_INTERVAL_MS);
       } catch (error) {
         if (cancelled) return;
+        if (typeof window !== "undefined") {
+          window.sessionStorage.removeItem(queuedKey);
+        }
         setStage("failed");
         await showErrorAlert(
           error instanceof Error
