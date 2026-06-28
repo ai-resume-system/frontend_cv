@@ -50,6 +50,7 @@ export function TopSearchBar({
     selectedDraftCount,
     selectedFilterCount,
     setActiveCategoryId,
+    setActiveParentSkillId,
     setAddress,
     toggleDraftCategory,
     toggleDraftParentSkill,
@@ -286,10 +287,12 @@ export function TopSearchBar({
                   ) : (
                     filteredCategories.map((item) => {
                       const isActive = item.id === activeCategory?.id;
-                      const isSelected = isCategoryFullySelected(
-                        item.id,
-                        draftSkillSlugs,
-                      );
+                      const isSelected =
+                        draftCategory === item.slug ||
+                        isCategoryFullySelected(
+                          item.id,
+                          draftSkillSlugs,
+                        );
 
                       return (
                         <button
@@ -367,6 +370,7 @@ export function TopSearchBar({
                           onClick={() => {
                             toggleDraftParentSkill(item);
                           }}
+                          onMouseEnter={() => setActiveParentSkillId(item.id)}
                           type="button"
                         >
                           <span
@@ -438,30 +442,6 @@ export function TopSearchBar({
             </div>
           )}
 
-          {/* Danh sách Badge/Chip các kỹ năng đã chọn */}
-          {draftSkillSlugs.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-100 rounded-xl max-h-21.25 overflow-y-auto">
-              {draftSkillSlugs.map((slug) => {
-                const skillItem = allSkills.find((s) => s.slug === slug);
-                if (!skillItem) return null;
-                return (
-                  <span
-                    key={slug}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-xs font-semibold text-blue-600 shadow-xs"
-                  >
-                    <span>{skillItem.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => toggleDraftSkill(slug)}
-                      className="rounded-full p-0.5 text-blue-400 hover:bg-blue-100 hover:text-blue-600 transition-all cursor-pointer"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
 
           <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs font-medium text-slate-500">

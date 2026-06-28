@@ -65,46 +65,66 @@ export function useSearch({
   const searchParamsHook = useSearchParams();
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const initialSkillSlugsRef = useRef(initialSkillSlugs);
+
+  const defaultKeyword = initialKeyword || searchParamsHook?.get("q") || "";
+  const defaultAddress = initialAddress || searchParamsHook?.get("address") || "";
+  const defaultCategory = initialCategory || searchParamsHook?.get("careerCategorySlug") || searchParamsHook?.get("category") || "";
+  const defaultSkillSlugs = useMemo(() => {
+    if (initialSkillSlugs && initialSkillSlugs.length > 0) {
+      return initialSkillSlugs;
+    }
+    const slugsParam = searchParamsHook?.get("skillSlugs");
+    return slugsParam ? slugsParam.split(",").filter(Boolean) : EMPTY_SKILL_SLUGS;
+  }, [initialSkillSlugs, searchParamsHook]);
+
+  const initialSkillSlugsRef = useRef(defaultSkillSlugs);
   const { categories, loading: categoriesLoading } = useCareerCategories({
     page: 1,
     limit: 1000,
   });
 
-  const [keyword, setKeyword] = useState(initialKeyword);
-  const [address, setAddress] = useState(initialAddress);
-  const [category, setCategory] = useState(initialCategory);
-  const [skillSlugs, setSkillSlugs] = useState<string[]>(initialSkillSlugs);
+  const [keyword, setKeyword] = useState(defaultKeyword);
+  const [address, setAddress] = useState(defaultAddress);
+  const [category, setCategory] = useState(defaultCategory);
+  const [skillSlugs, setSkillSlugs] = useState<string[]>(defaultSkillSlugs);
   const [allSkills, setAllSkills] = useState<SkillApiItem[]>([]);
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skillsError, setSkillsError] = useState("");
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [draftCategory, setDraftCategory] = useState(initialCategory);
+  const [draftCategory, setDraftCategory] = useState(defaultCategory);
   const [draftSkillSlugs, setDraftSkillSlugs] =
-    useState<string[]>(initialSkillSlugs);
+    useState<string[]>(defaultSkillSlugs);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [activeParentSkillId, setActiveParentSkillId] = useState<string | null>(
     null,
   );
 
   const initialSkillSlugsKey = useMemo(
-    () => initialSkillSlugs.join(","),
-    [initialSkillSlugs],
+    () => defaultSkillSlugs.join(","),
+    [defaultSkillSlugs],
   );
 
   useEffect(() => {
-    initialSkillSlugsRef.current = initialSkillSlugs;
-  }, [initialSkillSlugs, initialSkillSlugsKey]);
+    initialSkillSlugsRef.current = defaultSkillSlugs;
+  }, [defaultSkillSlugs, initialSkillSlugsKey]);
 
   useEffect(() => {
-    setKeyword(initialKeyword);
-    setAddress(initialAddress);
-    setCategory(initialCategory);
-    setSkillSlugs([...initialSkillSlugsRef.current]);
-    setDraftCategory(initialCategory);
-    setDraftSkillSlugs([...initialSkillSlugsRef.current]);
-  }, [initialAddress, initialCategory, initialKeyword, initialSkillSlugsKey]);
+    const nextKeyword = initialKeyword || searchParamsHook?.get("q") || "";
+    const nextAddress = initialAddress || searchParamsHook?.get("address") || "";
+    const nextCategory = initialCategory || searchParamsHook?.get("careerCategorySlug") || searchParamsHook?.get("category") || "";
+    const slugsParam = searchParamsHook?.get("skillSlugs");
+    const nextSkillSlugs = (initialSkillSlugs && initialSkillSlugs.length > 0)
+      ? initialSkillSlugs
+      : (slugsParam ? slugsParam.split(",").filter(Boolean) : EMPTY_SKILL_SLUGS);
+
+    setKeyword(nextKeyword);
+    setAddress(nextAddress);
+    setCategory(nextCategory);
+    setSkillSlugs(nextSkillSlugs);
+    setDraftCategory(nextCategory);
+    setDraftSkillSlugs(nextSkillSlugs);
+  }, [initialAddress, initialCategory, initialKeyword, initialSkillSlugsKey, searchParamsHook]);
 
   useEffect(() => {
     let cancelled = false;
@@ -306,27 +326,12 @@ export function useSearch({
     );
   }, [activeParentSkill, searchLowercase, searchNormalized]);
 
-  const selectedSkillItems = useMemo(() => {
-    const selectedSlugs = new Set(skillSlugs);
-
-    return flatSkills.filter(
-      (item) => item.slug && selectedSlugs.has(item.slug),
-    );
-  }, [flatSkills, skillSlugs]);
-
   const categoryDisplayLabel = useMemo(() => {
-    const parts: string[] = [];
-
     if (category) {
-      parts.push(categoryBySlug.get(category)?.name ?? "Danh mục nghề");
+      return categoryBySlug.get(category)?.name ?? "Lĩnh vực nghề nghiệp";
     }
-
-    if (selectedSkillItems.length) {
-      parts.push(...selectedSkillItems.map((item) => item.name));
-    }
-
-    return parts.length ? parts.join(", ") : "Danh mục nghề";
-  }, [category, categoryBySlug, selectedSkillItems]);
+    return "Lĩnh vực nghề nghiệp";
+  }, [category, categoryBySlug]);
 
   const getDescendantSkillSlugs = useCallback((skill: SkillNode): string[] => {
     const nextSlugs = new Set<string>();
@@ -379,57 +384,36 @@ export function useSearch({
     [areAllSlugsSelected, getDescendantSkillSlugs],
   );
 
-  const selectedDraftCategoryCount = useMemo(() => {
-    if (!draftCategory) {
-      return 0;
+  const selectedFilterCount = useMemo(() => {
+    if (skillSlugs.length > 0) {
+      return skillSlugs.length;
     }
+    return category ? 1 : 0;
+  }, [category, skillSlugs]);
 
-    const draftCategoryItem = categories.find((item) => item.slug === draftCategory);
-
-    if (!draftCategoryItem) {
-      return 0;
+  const selectedDraftCount = useMemo(() => {
+    if (draftSkillSlugs.length > 0) {
+      return draftSkillSlugs.length;
     }
-
-    return isCategoryFullySelected(draftCategoryItem.id, draftSkillSlugs) ? 1 : 0;
-  }, [categories, draftCategory, draftSkillSlugs, isCategoryFullySelected]);
-
-  const selectedFilterCategoryCount = useMemo(() => {
-    if (!category) {
-      return 0;
-    }
-
-    const categoryItem = categories.find((item) => item.slug === category);
-
-    if (!categoryItem) {
-      return 0;
-    }
-
-    return isCategoryFullySelected(categoryItem.id, skillSlugs) ? 1 : 0;
-  }, [categories, category, isCategoryFullySelected, skillSlugs]);
-
-  const selectedFilterCount = selectedFilterCategoryCount + skillSlugs.length;
-  const selectedDraftCount = selectedDraftCategoryCount + draftSkillSlugs.length;
+    return draftCategory ? 1 : 0;
+  }, [draftCategory, draftSkillSlugs]);
 
   const toggleDraftCategory = useCallback(
     (nextCategory: CategoryOption) => {
       const categorySkillSlugs = getCategorySkillSlugs(nextCategory.id);
 
-      setDraftCategory((currentCategory) => {
-        const isSameCategory = currentCategory === nextCategory.slug;
+      setDraftSkillSlugs((currentSkillSlugs) => {
+        const hasAllCategorySlugs = categorySkillSlugs.length > 0 && categorySkillSlugs.every((slug) =>
+          currentSkillSlugs.includes(slug),
+        );
 
-        setDraftSkillSlugs((currentSkillSlugs) => {
-          const hasAllCategorySlugs = categorySkillSlugs.every((slug) =>
-            currentSkillSlugs.includes(slug),
-          );
-
-          if (isSameCategory && hasAllCategorySlugs) {
-            return [];
-          }
-
-          return categorySkillSlugs;
-        });
-
-        return isSameCategory ? "" : nextCategory.slug;
+        if (hasAllCategorySlugs) {
+          setDraftCategory((currentCategory) => currentCategory === nextCategory.slug ? "" : currentCategory);
+          return currentSkillSlugs.filter((slug) => !categorySkillSlugs.includes(slug));
+        } else {
+          setDraftCategory(nextCategory.slug);
+          return Array.from(new Set([...currentSkillSlugs, ...categorySkillSlugs]));
+        }
       });
 
       setActiveCategoryId(nextCategory.id);
@@ -469,7 +453,7 @@ export function useSearch({
       const relatedSlugs = getDescendantSkillSlugs(skill);
 
       setDraftSkillSlugs((currentSkillSlugs) => {
-        const hasAllRelatedSlugs = relatedSlugs.every((slug) =>
+        const hasAllRelatedSlugs = relatedSlugs.length > 0 && relatedSlugs.every((slug) =>
           currentSkillSlugs.includes(slug),
         );
 
