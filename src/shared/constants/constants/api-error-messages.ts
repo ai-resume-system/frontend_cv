@@ -113,10 +113,14 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   "internal server error": "Hệ thống đang gặp sự cố nội bộ.",
   "invalid input data": "Dữ liệu nhập vào không hợp lệ.",
   "system busy, try again later": "Hệ thống đang bận. Vui lòng thử lại sau.",
-  "please wait before analyzing another cv": "Vui lòng đợi một lát trước khi thực hiện phân tích CV khác.",
-  "temporary cv file not found or expired": "Không tìm thấy tệp CV tạm thời hoặc tệp đã hết hạn.",
-  "temporary cv analysis preview not found or expired": "Không tìm thấy kết quả phân tích CV tạm thời hoặc kết quả đã hết hạn.",
-  "cv analysis result is not ready": "Kết quả phân tích CV chưa sẵn sàng. Vui lòng thử lại sau.",
+  "please wait before analyzing another cv":
+    "Vui lòng đợi một lát trước khi thực hiện phân tích CV khác.",
+  "temporary cv file not found or expired":
+    "Không tìm thấy tệp CV tạm thời hoặc tệp đã hết hạn.",
+  "temporary cv analysis preview not found or expired":
+    "Không tìm thấy kết quả phân tích CV tạm thời hoặc kết quả đã hết hạn.",
+  "cv analysis result is not ready":
+    "Kết quả phân tích CV chưa sẵn sàng. Vui lòng thử lại sau.",
 };
 
 export const API_STATUS_FALLBACK_MESSAGES: Record<number, string> = {

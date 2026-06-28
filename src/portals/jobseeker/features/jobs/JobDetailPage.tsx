@@ -830,7 +830,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                               onClick={() => setShowBreakdown(!showBreakdown)}
                               className="flex w-full items-center justify-between text-xs font-bold text-slate-500 hover:text-slate-800 transition"
                             >
-                              <span>CHI TIẾT ĐIỂM THÀ THÀNH PHẦN</span>
+                              <span>CHI TIẾT ĐIỂM THÀNH PHẦN</span>
                               {showBreakdown ? (
                                 <ChevronUp className="h-4 w-4" />
                               ) : (
@@ -846,7 +846,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                                     val: matchResult.breakdown.skillMatch,
                                   },
                                   {
-                                    label: "Lĩnh vực chuyên môn",
+                                    label: "Lĩnh vực nghề nghiệp",
                                     val: matchResult.breakdown
                                       .careerCategoryMatch,
                                   },

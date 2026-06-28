@@ -276,7 +276,7 @@ export function TopSearchBar({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="flex flex-col border-b border-slate-100 pb-4 md:border-b-0 md:border-r md:pb-0 md:pr-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Lĩnh vực nghề nghiệp
+                  Danh mục ngành nghề
                 </p>
                 <div className="h-60 space-y-1 overflow-y-auto pr-1 text-sm">
                   {categoriesLoading ? (
@@ -336,12 +336,12 @@ export function TopSearchBar({
 
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Nhóm Kỹ Năng Chuyên Môn
+                  Nhóm Kỹ Năng
                 </p>
                 <div className="h-75 space-y-1 overflow-y-auto pr-1 text-sm">
                   {skillsLoading ? (
                     <p className="text-sm text-slate-500">
-                      Đang tải nhóm kỹ năng chuyên môn...
+                      Đang tải nhóm kỹ năng...
                     </p>
                   ) : skillsError ? (
                     <p className="p-3 text-xs italic text-error">
@@ -385,8 +385,7 @@ export function TopSearchBar({
                     })
                   ) : (
                     <p className="p-3 text-xs italic text-slate-400">
-                      Chưa có kỹ năng chuyên môn phù hợp với lĩnh vực nghề ngiệp
-                      này.
+                      Chưa có nhóm kỹ năng phù hợp với danh mục ngành nghề này.
                     </p>
                   )}
                 </div>
@@ -431,7 +430,7 @@ export function TopSearchBar({
                     </div>
                   ) : (
                     <p className="p-3 text-xs italic text-slate-400">
-                      Chưa có kỹ năng phù hợp với nhóm kỹ năng chuyên môn này.
+                      Chưa có kỹ năng phù hợp với nhóm kỹ năng này.
                     </p>
                   )}
                 </div>

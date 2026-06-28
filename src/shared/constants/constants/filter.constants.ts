@@ -1,4 +1,11 @@
-import { EJobType, EJobTypeLabels, EJobEducationLevel, EJobEducationLevelLabels, EJobWorkArrangement, EJobWorkArrangementLabels } from "@/shared/constants/enums/job.enum";
+import {
+  EJobType,
+  EJobTypeLabels,
+  EJobEducationLevel,
+  EJobEducationLevelLabels,
+  EJobWorkArrangement,
+  EJobWorkArrangementLabels,
+} from "@/shared/constants/enums/job.enum";
 import type { FetchJobsParams } from "@/shared/services/job.service";
 import type { CareerCategory } from "@/shared/types/career-category";
 
@@ -32,11 +39,7 @@ export interface JobFilterState {
   sort: JobFilterSortValue;
 }
 
-export type HotJobFilterKey =
-  | "salary"
-  | "address"
-  | "experience"
-  | "category";
+export type HotJobFilterKey = "salary" | "address" | "experience" | "category";
 
 export type JobFilterEmptyValues = Partial<Record<JobFilterKey, string>>;
 
@@ -91,17 +94,38 @@ export const JOB_TYPE_OPTIONS: FilterOption[] = [
 
 export const JOB_EDUCATION_LEVEL_OPTIONS: FilterOption[] = [
   { label: "Tất cả trình độ", value: "" },
-  { label: EJobEducationLevelLabels[EJobEducationLevel.NONE], value: EJobEducationLevel.NONE },
-  { label: EJobEducationLevelLabels[EJobEducationLevel.COLLEGE], value: EJobEducationLevel.COLLEGE },
-  { label: EJobEducationLevelLabels[EJobEducationLevel.UNIVERSITY], value: EJobEducationLevel.UNIVERSITY },
-  { label: EJobEducationLevelLabels[EJobEducationLevel.POSTGRADUATE], value: EJobEducationLevel.POSTGRADUATE },
+  {
+    label: EJobEducationLevelLabels[EJobEducationLevel.NONE],
+    value: EJobEducationLevel.NONE,
+  },
+  {
+    label: EJobEducationLevelLabels[EJobEducationLevel.COLLEGE],
+    value: EJobEducationLevel.COLLEGE,
+  },
+  {
+    label: EJobEducationLevelLabels[EJobEducationLevel.UNIVERSITY],
+    value: EJobEducationLevel.UNIVERSITY,
+  },
+  {
+    label: EJobEducationLevelLabels[EJobEducationLevel.POSTGRADUATE],
+    value: EJobEducationLevel.POSTGRADUATE,
+  },
 ];
 
 export const JOB_WORK_ARRANGEMENT_OPTIONS: FilterOption[] = [
   { label: "Tất cả hình thức", value: "" },
-  { label: EJobWorkArrangementLabels[EJobWorkArrangement.ONSITE], value: EJobWorkArrangement.ONSITE },
-  { label: EJobWorkArrangementLabels[EJobWorkArrangement.HYBRID], value: EJobWorkArrangement.HYBRID },
-  { label: EJobWorkArrangementLabels[EJobWorkArrangement.REMOTE], value: EJobWorkArrangement.REMOTE },
+  {
+    label: EJobWorkArrangementLabels[EJobWorkArrangement.ONSITE],
+    value: EJobWorkArrangement.ONSITE,
+  },
+  {
+    label: EJobWorkArrangementLabels[EJobWorkArrangement.HYBRID],
+    value: EJobWorkArrangement.HYBRID,
+  },
+  {
+    label: EJobWorkArrangementLabels[EJobWorkArrangement.REMOTE],
+    value: EJobWorkArrangement.REMOTE,
+  },
 ];
 
 export const JOB_SORT_OPTIONS: FilterOption<JobFilterSortValue>[] = [
