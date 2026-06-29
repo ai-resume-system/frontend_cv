@@ -453,9 +453,7 @@ export function useAuth({ mode, role }: UseAuthFormControllerOptions) {
       setOtpExpiryCountdown(OTP_EXPIRES_IN_SECONDS);
     } catch (error) {
       showErrorAlert(
-        error instanceof Error
-          ? error.message
-          : "KhÃ´ng thá»ƒ gá»­i láº¡i OTP.",
+        error instanceof Error ? error.message : "Không thể gửi lại OTP.",
       );
     }
   }

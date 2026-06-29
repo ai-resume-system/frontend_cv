@@ -9,14 +9,15 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import {
-  EJobApplicationStatus,
-} from "@/shared/constants/enums/job-application.enum";
+import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 
 interface RecruiterApplicantRowProps {
   application: RecruiterApplicationApiItem;
-  onUpdateStatusClick: (application: RecruiterApplicationApiItem, targetStatus: EJobApplicationStatus) => void;
+  onUpdateStatusClick: (
+    application: RecruiterApplicationApiItem,
+    targetStatus: EJobApplicationStatus,
+  ) => void;
   onViewCv: (id: string) => void;
   showJobColumn?: boolean;
 }
@@ -74,7 +75,8 @@ export function RecruiterApplicantRow({
       ) : null}
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          {application.matchingScore != null && application.matchingScore > 0 ? (
+          {application.matchingScore != null &&
+          application.matchingScore > 0 ? (
             <svg className="h-10 w-10 shrink-0" viewBox="0 0 36 36">
               <circle
                 cx="18"
@@ -113,7 +115,9 @@ export function RecruiterApplicantRow({
               </text>
             </svg>
           ) : (
-            <span className="text-xs font-semibold text-slate-400">Chưa có điểm</span>
+            <span className="text-xs font-semibold text-slate-400">
+              Chưa có điểm
+            </span>
           )}
         </div>
       </td>
@@ -125,7 +129,9 @@ export function RecruiterApplicantRow({
         </span>
       </td>
       <td className="px-6 py-4 text-xs text-on-surface-variant">
-        {new Intl.DateTimeFormat("vi-VN").format(new Date(application.createdAt))}
+        {new Intl.DateTimeFormat("vi-VN").format(
+          new Date(application.createdAt),
+        )}
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center gap-2">
@@ -144,7 +150,12 @@ export function RecruiterApplicantRow({
             <>
               <button
                 type="button"
-                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.INTERVIEW)}
+                onClick={() =>
+                  onUpdateStatusClick(
+                    application,
+                    EJobApplicationStatus.INTERVIEW,
+                  )
+                }
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
                 title="Lên lịch phỏng vấn"
               >
@@ -152,7 +163,12 @@ export function RecruiterApplicantRow({
               </button>
               <button
                 type="button"
-                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
+                onClick={() =>
+                  onUpdateStatusClick(
+                    application,
+                    EJobApplicationStatus.REJECTED,
+                  )
+                }
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
                 title="Từ chối hồ sơ"
               >
@@ -166,15 +182,25 @@ export function RecruiterApplicantRow({
             <>
               <button
                 type="button"
-                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.ACCEPTED)}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-tertiary"
+                onClick={() =>
+                  onUpdateStatusClick(
+                    application,
+                    EJobApplicationStatus.ACCEPTED,
+                  )
+                }
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-on-tertiary-fixed-variant"
                 title="Đồng ý tuyển - Nhận việc"
               >
                 <UserCheck className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                onClick={() => onUpdateStatusClick(application, EJobApplicationStatus.REJECTED)}
+                onClick={() =>
+                  onUpdateStatusClick(
+                    application,
+                    EJobApplicationStatus.REJECTED,
+                  )
+                }
                 className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error"
                 title="Từ chối hồ sơ"
               >

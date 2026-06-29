@@ -7,6 +7,7 @@ import type {
 import type { Job, JobApiItem, JobListResponse, JobMatchResponse } from "@/shared/types/job";
 
 export interface FetchJobsParams {
+  auth?: boolean;
   page?: number;
   limit?: number;
   q?: string;
@@ -37,6 +38,7 @@ export interface FetchJobsResult {
 
 export interface FetchRelatedJobsParams {
   limit?: number;
+  auth?: boolean;
 }
 
 function buildJobsPath({
@@ -226,9 +228,11 @@ export function mapJobApiItemToJob(job: JobApiItem): Job {
 export async function fetchJobs(
   params?: FetchJobsParams,
 ): Promise<FetchJobsResult> {
+  const { auth, ...queryParams } = params ?? {};
   const response = await apiService.get<JobListResponse>(
-    buildJobsPath(params),
+    buildJobsPath(queryParams),
     {
+      auth,
       cache: "no-store",
     },
   );
@@ -254,9 +258,11 @@ export async function fetchRelatedJobs(
   slug: string,
   params?: FetchRelatedJobsParams,
 ): Promise<Job[]> {
+  const { auth, ...queryParams } = params ?? {};
   const response = await apiService.get<IResponseApiItem<JobApiItem[]>>(
-    buildRelatedJobsPath(slug, params),
+    buildRelatedJobsPath(slug, queryParams),
     {
+      auth,
       cache: "no-store",
     },
   );

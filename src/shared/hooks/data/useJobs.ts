@@ -6,6 +6,7 @@ import {
   fetchJobs,
   type FetchJobsParams,
 } from "@/shared/services/job.service";
+import { useAuth } from "@/shared/hooks/ui/useAuthState";
 import type { IResponseApiPagination } from "@/shared/types/api";
 import type { Job } from "@/shared/types/job";
 
@@ -34,6 +35,7 @@ export function useJobs({
   sortOrder,
   q,
 }: UseJobsOptions = {}) {
+  const { isLoggedIn } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [pagination, setPagination] = useState<IResponseApiPagination | undefined>(
     undefined,
@@ -49,6 +51,7 @@ export function useJobs({
         setLoading(true);
         setError(null);
         const data = await fetchJobs({
+          auth: isLoggedIn,
           page,
           limit,
           address,
@@ -100,6 +103,7 @@ export function useJobs({
     experienceYears,
     experienceYearsMax,
     experienceYearsMin,
+    isLoggedIn,
     jobType,
     educationLevel,
     workArrangement,

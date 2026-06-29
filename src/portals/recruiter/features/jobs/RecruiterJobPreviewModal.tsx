@@ -20,6 +20,7 @@ import { useState } from "react";
 
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { cn } from "@/shared/lib/utils/cn";
+import { BaseModal } from "@/shared/components/ui/BaseModal";
 import {
   EJobEducationLevelLabels,
   EJobStatus,
@@ -90,30 +91,15 @@ export function RecruiterJobPreviewModal({
   onCloseJob,
 }: RecruiterJobPreviewModalProps) {
   const [closing, setClosing] = useState(false);
+  const [showCloseReasonModal, setShowCloseReasonModal] = useState(false);
+  const [closeReason, setCloseReason] = useState("");
   const mapsUrl = buildGoogleMapsUrl(job);
   const companyName = getCompanyLabel(job);
 
-  const handleCloseJobAction = async () => {
+  const handleCloseJobAction = () => {
     if (!onCloseJob) return;
-    const reason = window.prompt("Nhập lý do đóng tin tuyển dụng:");
-    if (reason === null) return;
-    if (!reason.trim()) {
-      showErrorToast("Lý do đóng tin là bắt buộc.");
-      return;
-    }
-
-    setClosing(true);
-    try {
-      await onCloseJob(job.id, reason.trim());
-      showSuccessToast("Đóng tuyển dụng thành công.");
-      onClose();
-    } catch (err) {
-      showErrorToast(
-        err instanceof Error ? err.message : "Không thể đóng tin tuyển dụng.",
-      );
-    } finally {
-      setClosing(false);
-    }
+    setShowCloseReasonModal(true);
+    setCloseReason("");
   };
 
   return (
@@ -210,7 +196,7 @@ export function RecruiterJobPreviewModal({
                       disabled
                       className="flex items-center justify-center gap-2 rounded-xl bg-primary/70 px-6 py-2.5 font-bold text-white shadow-md cursor-not-allowed text-sm"
                     >
-                      <Send className="h-4 w-4" /> Ứng tuyển ngay (Giả lập)
+                      <Send className="h-4 w-4" /> Ứng tuyển ngay
                     </button>
 
                     <button
@@ -473,6 +459,86 @@ export function RecruiterJobPreviewModal({
           <BaseButton onClick={onClose}>Đóng lại</BaseButton>
         </div>
       </div>
+
+      {/* Modal Nhập lý do đóng tin */}
+      <BaseModal
+        isOpen={showCloseReasonModal}
+        onClose={() => {
+          if (!closing) {
+            setShowCloseReasonModal(false);
+            setCloseReason("");
+          }
+        }}
+        title="Đóng tin tuyển dụng"
+        size="sm"
+        footer={
+          <>
+            <BaseButton
+              variant="secondary"
+              onClick={() => {
+                setShowCloseReasonModal(false);
+                setCloseReason("");
+              }}
+              size="sm"
+              disabled={closing}
+            >
+              Hủy bỏ
+            </BaseButton>
+            <BaseButton
+              variant="danger-filled"
+              size="sm"
+              loading={closing}
+              onClick={async () => {
+                if (!closeReason.trim()) {
+                  showErrorToast("Lý do đóng tin là bắt buộc.");
+                  return;
+                }
+                if (!onCloseJob) return;
+                setClosing(true);
+                try {
+                  await onCloseJob(job.id, closeReason.trim());
+                  showSuccessToast("Đóng tuyển dụng thành công.");
+                  setShowCloseReasonModal(false);
+                  setCloseReason("");
+                  onClose();
+                } catch (err) {
+                  showErrorToast(
+                    err instanceof Error
+                      ? err.message
+                      : "Không thể đóng tin tuyển dụng."
+                  );
+                } finally {
+                  setClosing(false);
+                }
+              }}
+            >
+              Xác nhận đóng
+            </BaseButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-on-surface-variant">
+            Bạn có chắc chắn muốn đóng tin tuyển dụng{" "}
+            <span className="font-bold text-on-surface text-slate-800">
+              {job.title}
+            </span>
+            ? Ứng viên sẽ không thể tiếp tục ứng tuyển vào vị trí này.
+          </p>
+          <div className="flex flex-col gap-1.5 text-left">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Lý do đóng tin <span className="text-error">*</span>
+            </label>
+            <textarea
+              rows={3}
+              value={closeReason}
+              onChange={(e) => setCloseReason(e.target.value)}
+              placeholder="Nhập lý do đóng tin (ví dụ: đã tuyển đủ người, thay đổi kế hoạch tuyển dụng...)"
+              className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200 resize-none"
+            />
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 }

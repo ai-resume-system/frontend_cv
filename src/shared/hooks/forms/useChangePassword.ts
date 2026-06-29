@@ -33,19 +33,19 @@ function validateChangePasswordForm(
   const errors: ChangePasswordFormErrors = {};
 
   if (!values.currentPassword) {
-    errors.currentPassword = "Vui lÃ²ng nháº­p máº­t kháº©u hiá»‡n táº¡i";
+    errors.currentPassword = "Vui lòng nhập mật khẩu hiện tại";
   }
 
   if (!values.newPassword) {
-    errors.newPassword = "Vui lÃ²ng nháº­p máº­t kháº©u má»›i";
+    errors.newPassword = "Vui lòng nhập mật khẩu mới";
   } else if (values.newPassword.length < 6) {
-    errors.newPassword = "Máº­t kháº©u má»›i cáº§n tá»‘i thiá»ƒu 6 kÃ½ tá»±";
+    errors.newPassword = "Mật khẩu mới cần tối thiểu 6 ký tự";
   }
 
   if (!values.confirmNewPassword) {
-    errors.confirmNewPassword = "Vui lÃ²ng xÃ¡c nháº­n máº­t kháº©u má»›i";
+    errors.confirmNewPassword = "Vui lòng xác nhận mật khẩu mới";
   } else if (values.newPassword !== values.confirmNewPassword) {
-    errors.confirmNewPassword = "Máº­t kháº©u xÃ¡c nháº­n khÃ´ng khá»›p";
+    errors.confirmNewPassword = "Mật khẩu xác nhận không khớp";
   }
 
   if (
@@ -53,8 +53,7 @@ function validateChangePasswordForm(
     values.newPassword &&
     values.currentPassword === values.newPassword
   ) {
-    errors.newPassword =
-      "Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i";
+    errors.newPassword = "Mật khẩu mới phải khác mật khẩu hiện tại";
   }
 
   return errors;
@@ -173,9 +172,7 @@ export function useChangePassword({ onClose }: UseChangePasswordOptions) {
 
       if (!hasFieldErrors) {
         showErrorAlert(
-          error instanceof Error
-            ? error.message
-            : "KhÃ´ng thá»ƒ Ä‘á»•i máº­t kháº©u.",
+          error instanceof Error ? error.message : "Không thể đổi mật khẩu.",
         );
       }
     } finally {

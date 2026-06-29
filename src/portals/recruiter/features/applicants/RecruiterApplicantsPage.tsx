@@ -239,7 +239,7 @@ export function RecruiterApplicantsPage() {
                   setSelectedApplication(app);
                   setTargetStatus(EJobApplicationStatus.ACCEPTED);
                 }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary cursor-pointer"
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-on-tertiary-fixed-variant cursor-pointer"
                 title="Đồng ý tuyển - Nhận việc"
               >
                 <UserCheck className="h-4 w-4" />

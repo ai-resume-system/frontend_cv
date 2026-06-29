@@ -21,6 +21,7 @@ import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/Recruite
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { BaseTable, BaseTableColumn } from "@/shared/components/ui/BaseTable";
 import { RecruiterJobPreviewModal } from "@/portals/recruiter/features/jobs/RecruiterJobPreviewModal";
+import { BaseModal } from "@/shared/components/ui/BaseModal";
 import {
   EJobStatus,
   EJobStatusLabels,
@@ -91,6 +92,9 @@ export function RecruiterJobListPage() {
   const salaryMax = searchParams.get("salaryMax") ?? "";
 
   const [previewJob, setPreviewJob] = useState<Job | null>(null);
+  const [closingJob, setClosingJob] = useState<Job | null>(null);
+  const [closeReason, setCloseReason] = useState("");
+  const [submittingClose, setSubmittingClose] = useState(false);
 
   // State cục bộ cho ô tìm kiếm chữ (để debounce tránh giật lag khi gõ)
   const [tempSearchQuery, setTempSearchQuery] = useState(searchQuery);
@@ -370,23 +374,9 @@ export function RecruiterJobListPage() {
           {job.status === EJobStatus.OPEN && (
             <button
               type="button"
-              onClick={async () => {
-                const reason = window.prompt("Nhập lý do đóng tin tuyển dụng:");
-                if (reason === null) return;
-                if (!reason.trim()) {
-                  showErrorToast("Lý do đóng tin là bắt buộc.");
-                  return;
-                }
-                try {
-                  await handleClose(job.id, reason.trim());
-                  showSuccessToast("Đóng tuyển dụng thành công.");
-                } catch (err) {
-                  showErrorToast(
-                    err instanceof Error
-                      ? err.message
-                      : "Không thể đóng tin tuyển dụng.",
-                  );
-                }
+              onClick={() => {
+                setClosingJob(job);
+                setCloseReason("");
               }}
               className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-warning/10 hover:text-warning cursor-pointer"
               title="Đóng tuyển dụng"
@@ -731,6 +721,88 @@ export function RecruiterJobListPage() {
           onCloseJob={handleClose}
         />
       )}
+
+      {/* Modal Nhập lý do đóng tin */}
+      <BaseModal
+        isOpen={!!closingJob}
+        onClose={() => {
+          if (!submittingClose) {
+            setClosingJob(null);
+            setCloseReason("");
+          }
+        }}
+        title="Đóng tin tuyển dụng"
+        size="sm"
+        footer={
+          <>
+            <BaseButton
+              variant="secondary"
+              onClick={() => {
+                setClosingJob(null);
+                setCloseReason("");
+              }}
+              size="sm"
+              disabled={submittingClose}
+            >
+              Hủy bỏ
+            </BaseButton>
+            <BaseButton
+              variant="danger-filled"
+              size="sm"
+              loading={submittingClose}
+              onClick={async () => {
+                if (!closeReason.trim()) {
+                  showErrorToast("Lý do đóng tin là bắt buộc.");
+                  return;
+                }
+                if (!closingJob) return;
+                setSubmittingClose(true);
+                try {
+                  await handleClose(closingJob.id, closeReason.trim());
+                  showSuccessToast("Đóng tuyển dụng thành công.");
+                  setClosingJob(null);
+                  setCloseReason("");
+                  if (previewJob?.id === closingJob.id) {
+                    setPreviewJob(null);
+                  }
+                } catch (err) {
+                  showErrorToast(
+                    err instanceof Error
+                      ? err.message
+                      : "Không thể đóng tin tuyển dụng."
+                  );
+                } finally {
+                  setSubmittingClose(false);
+                }
+              }}
+            >
+              Xác nhận đóng
+            </BaseButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-on-surface-variant">
+            Bạn có chắc chắn muốn đóng tin tuyển dụng{" "}
+            <span className="font-bold text-on-surface text-slate-800">
+              {closingJob?.title}
+            </span>
+            ? Ứng viên sẽ không thể tiếp tục ứng tuyển vào vị trí này.
+          </p>
+          <div className="flex flex-col gap-1.5 text-left">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Lý do đóng tin <span className="text-error">*</span>
+            </label>
+            <textarea
+              rows={3}
+              value={closeReason}
+              onChange={(e) => setCloseReason(e.target.value)}
+              placeholder="Nhập lý do đóng tin (ví dụ: đã tuyển đủ người, thay đổi kế hoạch tuyển dụng...)"
+              className="w-full border border-outline-variant/35 bg-surface px-3 py-2 text-sm text-on-surface rounded-xl focus:border-primary focus:outline-none transition-all duration-200 resize-none"
+            />
+          </div>
+        </div>
+      </BaseModal>
     </RecruiterWorkspaceShell>
   );
 }

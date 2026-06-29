@@ -61,10 +61,13 @@ interface RecruiterApplicantsByJobPageProps {
 export function RecruiterApplicantsByJobPage({
   jobId,
 }: RecruiterApplicantsByJobPageProps) {
-  const { jobs } = useRecruiterJobList();
-  const job = jobs.find((j) => j.id === jobId);
+  const { allJobsForCounts } = useRecruiterJobList();
   const { applications, loading, error, handleUpdateStatus, handleViewCv } =
     useRecruiterApplications({ jobId });
+
+  const jobFromList = allJobsForCounts.find((j) => j.id === jobId);
+  const jobFromApps = applications.length > 0 ? applications[0].job : undefined;
+  const job = jobFromList || jobFromApps;
 
   const searchParams = useSearchParams();
   const backUrl = searchParams.get("backUrl") || RECRUITER_ROUTES.JOBS;
@@ -221,7 +224,7 @@ export function RecruiterApplicantsByJobPage({
                   setSelectedApplication(app);
                   setTargetStatus(EJobApplicationStatus.ACCEPTED);
                 }}
-                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-soft hover:text-tertiary cursor-pointer"
+                className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-tertiary-fixed/20 hover:text-on-tertiary-fixed-variant cursor-pointer"
                 title="Đồng ý tuyển - Nhận việc"
               >
                 <UserCheck className="h-4 w-4" />

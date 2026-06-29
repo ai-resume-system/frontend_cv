@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  ArrowRight,
   Box,
   Briefcase,
   Building2,
-  CheckCircle2,
   ClipboardClock,
   Clock,
   Coins,
@@ -38,6 +36,7 @@ import { useCvList } from "@/shared/hooks/data/useCvList";
 import {
   fetchJobMatch,
   calculateJobMatch,
+  fetchRelatedJobs,
 } from "@/shared/services/job.service";
 import { StateLayout } from "@/shared/components/ui/StateLayout";
 import { showAppAlert, showErrorAlert } from "@/shared/lib/ui/alert";
@@ -115,13 +114,14 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
   const { isFavourite, isFavouritePending, toggleFavourite } =
     useFavouriteJobs();
 
-  // AI Match Score states
   const { cvList, isLoading: isCvLoading } = useCvList({ enabled: isLoggedIn });
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [matchResult, setMatchResult] = useState<JobMatchResponse | null>(null);
   const [isMatching, setIsMatching] = useState<boolean>(false);
   const [matchError, setMatchError] = useState<string | null>(null);
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
+  const [visibleRelatedJobs, setVisibleRelatedJobs] =
+    useState<Job[]>(relatedJobs);
 
   // Sắp xếp CV, đưa isDefault lên đầu
   const sortedCvList = [...cvList].sort((a, b) => {
@@ -145,6 +145,7 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
     if (!selectedCvId || !isLoggedIn) return;
     setIsMatching(true);
     setMatchError(null);
+    setMatchResult(null);
     try {
       const result = await fetchJobMatch(job.slug ?? job.id, selectedCvId);
       setMatchResult(result);
@@ -178,12 +179,37 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
 
   // Tự động kiểm tra điểm khi đổi CV hoặc khi trang được load
   useEffect(() => {
-    setMatchResult(null);
-    setMatchError(null);
     if (selectedCvId && isLoggedIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void handleCheckMatch();
     }
   }, [selectedCvId, isLoggedIn]);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      return;
+    }
+
+    let cancelled = false;
+    const slug = job.slug ?? job.id;
+
+    async function loadRelatedJobs() {
+      try {
+        const jobs = await fetchRelatedJobs(slug, { limit: 3, auth: true });
+        if (!cancelled) {
+          setVisibleRelatedJobs(jobs);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải việc làm liên quan:", error);
+      }
+    }
+
+    void loadRelatedJobs();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, job.id, job.slug, relatedJobs]);
 
   const isAnalysisNotReady =
     matchError &&
@@ -416,8 +442,8 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                 </div>
 
                 <div className="space-y-6">
-                  {relatedJobs.length ? (
-                    relatedJobs.map((relatedJob) => (
+                  {visibleRelatedJobs.length ? (
+                    visibleRelatedJobs.map((relatedJob) => (
                       <JobCard key={relatedJob.id} job={relatedJob} />
                     ))
                   ) : (
@@ -974,8 +1000,8 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                   </h2>
                   <div className="text-center space-y-4 py-4">
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Đăng nhập tài khoản "Người tìm việc" để xem mức độ phù hợp
-                      với công việc của bạn.
+                      Đăng nhập tài khoản &quot;Người tìm việc&quot; để xem mức
+                      độ phù hợp với công việc của bạn.
                     </p>
                     <Link
                       href={ROUTES.JOB_SEEKER_LOGIN}
