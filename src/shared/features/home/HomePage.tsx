@@ -306,9 +306,9 @@ export default async function HomePage() {
             </div>
 
             {/* Desktop Connector 1 */}
-            <div className="hidden md:flex absolute top-[35%] -translate-y-1/2 left-[33.33%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
+            <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-[32%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
               <svg
-                className="w-6 h-6 text-[#103580]"
+                className="w-8 h-8 text-[#103580]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -323,9 +323,9 @@ export default async function HomePage() {
             </div>
 
             {/* Desktop Connector 2 */}
-            <div className="hidden md:flex absolute top-[35%] -translate-y-1/2 left-[66.66%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
+            <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-[68%] -translate-x-1/2 items-center justify-center z-20 pointer-events-none">
               <svg
-                className="w-6 h-6 text-[#103580]"
+                className="w-8 h-8 text-[#103580]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -393,8 +393,7 @@ export default async function HomePage() {
                 Bảo mật tuyệt đối
               </h3>
               <p className="mt-2 text-xs text-gray-500 font-semibold leading-relaxed">
-                Hồ sơ và thông tin cá nhân của bạn được bảo mật an toàn, chỉ
-                tiết lộ khi bạn nộp hồ sơ.
+                Hồ sơ và thông tin cá nhân của bạn được bảo mật an toàn.
               </p>
             </div>
 
