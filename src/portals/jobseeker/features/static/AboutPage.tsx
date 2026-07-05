@@ -1,19 +1,8 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { ROUTES } from "@/shared/constants/constants/routes";
-
 export default function AboutPage() {
   return (
-    <section className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-slate-100">
-        <Link
-          href={ROUTES.HOME}
-          className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary-hover"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại Trang chủ</span>
-        </Link>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6">
+    <section className="bg-slate-50 min-h-screen py-5 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl bg-white p-8 sm:p-12 shadow-sm border border-slate-100">
+        <h1 className="text-3xl text-center font-bold tracking-tight text-slate-900 sm:text-4xl mb-6">
           Giới thiệu FUSE
         </h1>
         <div className="prose prose-slate max-w-none text-slate-600 space-y-6 text-sm sm:text-base leading-relaxed">

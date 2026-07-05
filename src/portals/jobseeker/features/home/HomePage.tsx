@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { HomeSlideshow } from "@/portals/jobseeker/components/layouts/HomeSlideshow";
+import { HomeSlideshow } from "@/portals/jobseeker/components/home/HomeSlideshow";
 import { CompanyCard } from "@/portals/jobseeker/features/company/CompanyCard";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
@@ -18,9 +18,8 @@ import {
 } from "@/shared/services/category.service";
 import { fetchCompanies } from "@/shared/services/company.service";
 import { fetchJobs } from "@/shared/services/job.service";
-import { SearchStatsDashboard } from "./SearchStatsDashboard";
-
-import { HotJobsSection } from "./HotJobsSection";
+import { HotJobsSection } from "../../components/home/HotJobsSection";
+import { SearchStatsDashboard } from "../../components/home/SearchStatsDashboard";
 
 export default async function HomePage() {
   const [
@@ -165,7 +164,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 lg:gap-20 relative w-full items-stretch">
             {/* Step 1 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-95 w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 1
               </div>
@@ -217,7 +216,7 @@ export default async function HomePage() {
             </div>
 
             {/* Step 2 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-95 w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 2
               </div>
@@ -270,7 +269,7 @@ export default async function HomePage() {
             </div>
 
             {/* Step 3 */}
-            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-[380px] w-full mx-auto">
+            <div className="relative flex flex-col items-center text-center p-6 bg-white rounded-3xl border border-slate-200/80 pt-8 shadow-sm hover:shadow-md transition-shadow duration-300 max-w-95 w-full mx-auto">
               <div className="absolute top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-[#103580] text-white font-extrabold text-sm shadow-sm">
                 3
               </div>

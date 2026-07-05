@@ -19,6 +19,8 @@ import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { AccountChoicePage } from "@/shared/features/auth/AccountChoicePage";
 import { type AuthMode, useAuth } from "@/shared/hooks/forms/useAuthForm";
 
+import { JobSeekerShowcase } from "./function";
+
 interface JobSeekerAuthFormProps {
   mode: AuthMode;
 }
@@ -71,7 +73,7 @@ export function JobSeekerAuthForm({ mode }: JobSeekerAuthFormProps) {
   return (
     <>
       <AuthLayout
-        role={EUserRole.JOB_SEEKER}
+        showcase={<JobSeekerShowcase />}
         showProgress={isRegister}
         stepLabel={
           isRegister ? (isRegisterStepOtp ? "Bước 2/2" : "Bước 1/2") : undefined

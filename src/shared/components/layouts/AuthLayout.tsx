@@ -1,43 +1,38 @@
 "use client";
 
-import { JobSeekerShowcase } from "@/portals/jobseeker/features/auth/function";
-import { RecruiterShowcase } from "@/portals/recruiter/features/auth/function";
 import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
-import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface AuthLayoutProps {
-  role: EUserRole;
   stepLabel?: string;
   stepProgress?: string;
   showProgress?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
+  showcase: ReactNode;
   showcasePosition?: "left" | "right";
 }
 
 export function AuthLayout({
-  role,
   stepLabel,
   stepProgress,
   showProgress = false,
   children,
-  showcasePosition,
+  showcase,
+  showcasePosition = "left",
 }: AuthLayoutProps) {
-  const isJobSeeker = role === EUserRole.JOB_SEEKER;
-  const position = showcasePosition ?? (isJobSeeker ? "left" : "right");
-
   const showcaseEl = (
     <div className="sticky top-0 hidden self-start lg:flex lg:h-screen lg:w-1/2">
-      {isJobSeeker ? <JobSeekerShowcase /> : <RecruiterShowcase />}
+      {showcase}
     </div>
   );
 
   return (
     <div className="custom-scroll flex min-h-screen flex-col lg:flex-row overflow-hidden lg:h-screen bg-slate-50">
-      {position === "left" && showcaseEl}
+      {showcasePosition === "left" && showcaseEl}
 
       <div className="flex w-full flex-1 lg:w-1/2 lg:min-h-0 lg:overflow-y-auto bg-white flex-col">
         <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-4 xl:px-12 xl:py-6 2xl:px-16 justify-between">
@@ -101,7 +96,7 @@ export function AuthLayout({
         </div>
       </div>
 
-      {position === "right" && showcaseEl}
+      {showcasePosition === "right" && showcaseEl}
     </div>
   );
 }

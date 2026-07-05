@@ -1,23 +1,18 @@
 "use client";
 
-import Image from "next/image";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
+import type {
+  ClipboardEvent,
+  FormEvent,
+  KeyboardEvent,
+  ReactNode,
+} from "react";
 import { useEffect, useState } from "react";
-import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  CircleQuestionMark,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-} from "lucide-react";
 
 import { AuthLayout } from "@/shared/components/layouts/AuthLayout";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
 import { BaseField } from "@/shared/components/ui/BaseField";
-import { INFOMATION_WEB } from "@/shared/constants/constants/infomation-web";
 import { ROUTES } from "@/shared/constants/constants/routes";
 import { EOtpType } from "@/shared/constants/enums/otp.enum";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
@@ -32,6 +27,8 @@ type PasswordFieldName = "password" | "confirmPassword";
 
 interface ForgotPasswordFlowProps {
   role: EUserRole;
+  showcase: ReactNode;
+  showcasePosition: "left" | "right";
 }
 
 function getLoginRoute(role: EUserRole): string {
@@ -113,7 +110,11 @@ function validatePasswordFields(
   return nextErrors;
 }
 
-export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
+export function ForgotPasswordFlow({
+  role,
+  showcase,
+  showcasePosition,
+}: ForgotPasswordFlowProps) {
   const [step, setStep] = useState<IForgotPasswordStep>("email");
   const [email, setEmail] = useState("");
   const [otpValue, setOtpValue] = useState<string[]>(Array(6).fill(""));
@@ -412,7 +413,11 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
               </p>
             </div>
 
-            <form className="space-y-3 sm:space-y-4" noValidate onSubmit={handleSendEmail}>
+            <form
+              className="space-y-3 sm:space-y-4"
+              noValidate
+              onSubmit={handleSendEmail}
+            >
               <BaseField
                 error={emailTouched || emailSubmitted ? emailError : undefined}
                 id="email"
@@ -459,7 +464,11 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
               </button>
             </div>
 
-            <form className="space-y-3 sm:space-y-4" noValidate onSubmit={handleVerifyOtp}>
+            <form
+              className="space-y-3 sm:space-y-4"
+              noValidate
+              onSubmit={handleVerifyOtp}
+            >
               <div className="grid w-full grid-cols-6 gap-3">
                 {otpValue.map((char, index) => (
                   <input
@@ -619,7 +628,8 @@ export function ForgotPasswordFlow({ role }: ForgotPasswordFlowProps) {
 
   return (
     <AuthLayout
-      role={role}
+      showcase={showcase}
+      showcasePosition={showcasePosition}
       showProgress={true}
       stepLabel={getStepLabel(step)}
       stepProgress={getStepProgress(step)}

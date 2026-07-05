@@ -20,6 +20,8 @@ import { ROUTES } from "@/shared/constants/constants/routes";
 import { EUserRole } from "@/shared/constants/enums/user.enum";
 import { type AuthMode, useAuth } from "@/shared/hooks/forms/useAuthForm";
 
+import { RecruiterShowcase } from "./function";
+
 interface RecruiterAuthFormProps {
   mode: AuthMode;
 }
@@ -68,7 +70,7 @@ export function RecruiterAuthForm({ mode }: RecruiterAuthFormProps) {
 
   return (
     <AuthLayout
-      role={EUserRole.RECRUITER}
+      showcase={<RecruiterShowcase />}
       showProgress={isRegister}
       stepLabel={
         isRegister ? (isRegisterStepOtp ? "Bước 2/2" : "Bước 1/2") : undefined
