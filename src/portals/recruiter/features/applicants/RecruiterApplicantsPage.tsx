@@ -5,7 +5,6 @@ import {
   UsersRound,
   Eye,
   CircleX,
-  Download,
   Calendar,
   Award,
   UserCheck,
@@ -17,10 +16,12 @@ import { useRecruiterApplications } from "@/portals/recruiter/features/applicant
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { BaseTable, BaseTableColumn } from "@/shared/components/ui/BaseTable";
 import { BaseButton } from "@/shared/components/ui/BaseButton";
+import { BaseSearch } from "@/shared/components/ui/BaseSearch";
 import { RECRUITER_ROUTES } from "@/shared/constants/constants/routes";
 import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.enum";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 import { StatusUpdateModal } from "./components/StatusUpdateModal";
+import { ApplicationDetailModal } from "./components/ApplicationDetailModal";
 
 function getStatusLabel(status: EJobApplicationStatus): string {
   switch (status) {
@@ -46,7 +47,7 @@ function getStatusClass(status: EJobApplicationStatus): string {
     case EJobApplicationStatus.REJECTED:
       return "bg-error/10 text-error";
     case EJobApplicationStatus.ACCEPTED:
-      return "bg-tertiary-soft text-tertiary";
+      return "bg-tertiary-fixed/20 text-tertiary";
     case EJobApplicationStatus.WITHDRAWN:
       return "bg-outline/10 text-on-surface-variant";
   }
@@ -56,13 +57,32 @@ export function RecruiterApplicantsPage() {
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
     undefined,
   );
-
-  const { jobs } = useRecruiterJobList();
-  const { applications, loading, error, handleUpdateStatus, handleViewCv } =
-    useRecruiterApplications({ jobId: selectedJobId });
-
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState<EJobApplicationStatus | "">("");
+  const [sortBy, setSortBy] = useState<"createdAt" | "matchingScore">(
+    "createdAt",
+  );
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  const { jobs } = useRecruiterJobList();
+  const {
+    applications,
+    totalItems,
+    totalPages,
+    loading,
+    error,
+    handleUpdateStatus,
+  } = useRecruiterApplications({
+    jobId: selectedJobId,
+    status: status || undefined,
+    q: q || undefined,
+    sortBy,
+    sortOrder,
+    page,
+    limit,
+  });
 
   // Reset page khi thay đổi bộ lọc công việc
   const handleJobFilterChange = (jobId: string | undefined) => {
@@ -76,17 +96,10 @@ export function RecruiterApplicantsPage() {
   const [targetStatus, setTargetStatus] =
     useState<EJobApplicationStatus | null>(null);
 
-  const handleUpdateStatusClick = (
-    app: RecruiterApplicationApiItem,
-    status: EJobApplicationStatus,
-  ) => {
-    setSelectedApplication(app);
-    setTargetStatus(status);
-  };
-
-  // Phân trang
-  const startIndex = (page - 1) * limit;
-  const pagedApplications = applications.slice(startIndex, startIndex + limit);
+  // State quản lý Modal chi tiết
+  const [selectedAppForDetail, setSelectedAppForDetail] =
+    useState<RecruiterApplicationApiItem | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Định nghĩa các cột cho BaseTable
   const columns: BaseTableColumn<RecruiterApplicationApiItem>[] = [
@@ -116,6 +129,7 @@ export function RecruiterApplicantsPage() {
     {
       key: "matchingScore",
       header: "Độ phù hợp",
+      sortable: true,
       render: (app) => (
         <div className="flex items-center gap-3">
           {app.matchingScore != null && app.matchingScore > 0 ? (
@@ -180,6 +194,7 @@ export function RecruiterApplicantsPage() {
     {
       key: "createdAt",
       header: "Ngày ứng tuyển",
+      sortable: true,
       render: (app) => (
         <span className="text-xs text-on-surface-variant font-medium">
           {new Intl.DateTimeFormat("vi-VN").format(new Date(app.createdAt))}
@@ -192,12 +207,15 @@ export function RecruiterApplicantsPage() {
       className: "text-right",
       render: (app) => (
         <div className="flex items-center justify-end gap-2">
-          {/* Nút Xem CV */}
+          {/* Nút Xem Chi Tiết */}
           <button
             type="button"
-            onClick={() => handleViewCv(app.id)}
+            onClick={() => {
+              setSelectedAppForDetail(app);
+              setIsDetailOpen(true);
+            }}
             className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary cursor-pointer"
-            title="Xem CV"
+            title="Xem chi tiết đơn ứng tuyển"
           >
             <Eye className="h-4 w-4" />
           </button>
@@ -257,32 +275,28 @@ export function RecruiterApplicantsPage() {
               </button>
             </>
           )}
-
-          {/* Nút Tải CV */}
-          {app.cv?.fileUrl && (
-            <a
-              href={app.cv.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-secondary-soft hover:text-secondary cursor-pointer"
-              title="Tải tệp CV"
-            >
-              <Download className="h-4 w-4" />
-            </a>
-          )}
         </div>
       ),
     },
   ];
 
+  const handleSort = (key: string, order: "ASC" | "DESC") => {
+    if (key === "matchingScore" || key === "createdAt") {
+      setSortBy(key);
+      setSortOrder(order);
+      setPage(1);
+    }
+  };
+
   return (
     <RecruiterWorkspaceShell
       heading="Danh sách ứng viên ứng tuyển"
+      subheading="Quản lý và theo dõi các ứng viên đã ứng tuyển vào các tin tuyển dụng"
       action={
         selectedJobId ? (
           <Link href={RECRUITER_ROUTES.APPLICANTS_BY_JOB(selectedJobId)}>
             <BaseButton variant="secondary" size="sm">
-              Xem chi tiết
+              Xem chi tiết chiến dịch
             </BaseButton>
           </Link>
         ) : null
@@ -295,16 +309,55 @@ export function RecruiterApplicantsPage() {
           </div>
         ) : null}
 
+        {/* Filter bar */}
+        <div className="flex flex-col md:flex-row flex-wrap gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-outline-variant/15">
+          <div className="w-full md:w-72">
+            <BaseSearch
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              onClear={() => {
+                setQ("");
+                setPage(1);
+              }}
+              placeholder="Tìm kiếm ứng viên..."
+            />
+          </div>
+
+          {/* Lọc Trạng thái */}
+          <select
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value as any);
+              setPage(1);
+            }}
+            className="w-full sm:w-auto rounded-2xl border border-outline-variant/35 bg-surface px-4 py-2 text-sm text-on-surface focus:border-primary focus:outline-none transition-all duration-200 outline-none cursor-pointer"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value={EJobApplicationStatus.APPLIED}>Mới ứng tuyển</option>
+            <option value={EJobApplicationStatus.INTERVIEW}>
+              Lịch phỏng vấn
+            </option>
+            <option value={EJobApplicationStatus.ACCEPTED}>Nhận việc</option>
+            <option value={EJobApplicationStatus.REJECTED}>Đã từ chối</option>
+          </select>
+        </div>
+
         <BaseTable
           columns={columns}
-          data={pagedApplications}
+          data={applications}
           loading={loading}
-          emptyMessage="Chưa có ứng viên nào cho tin tuyển dụng này."
+          emptyMessage="Chưa có ứng viên nào khớp với bộ lọc tìm kiếm."
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={handleSort}
           pagination={{
             page,
             limit,
-            total: applications.length,
-            totalPages: Math.ceil(applications.length / limit),
+            total: totalItems,
+            totalPages: totalPages,
             onPageChange: (newPage) => setPage(newPage),
           }}
         />
@@ -322,6 +375,15 @@ export function RecruiterApplicantsPage() {
               await handleUpdateStatus(selectedApplication.id, payload);
             }
           }}
+        />
+
+        <ApplicationDetailModal
+          isOpen={isDetailOpen}
+          onClose={() => {
+            setIsDetailOpen(false);
+            setSelectedAppForDetail(null);
+          }}
+          application={selectedAppForDetail}
         />
       </div>
     </RecruiterWorkspaceShell>

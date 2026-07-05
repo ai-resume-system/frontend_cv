@@ -10,6 +10,10 @@ import {
   fetchRecruiterInterviews,
 } from "@/shared/services/recruiter-job-application.service";
 import { fetchRecruiterJobs } from "@/shared/services/recruiter-job.service";
+import {
+  fetchRecruiterAnalyticsOverview,
+  fetchRecruiterAnalyticsTrend,
+} from "@/shared/services/recruiter-analytics.service";
 import type { AuthUser } from "@/shared/types/account";
 import type { RecruiterApplicationApiItem } from "@/shared/types/application";
 import type { RecruiterDashboardMetrics } from "@/shared/types/dashboard";
@@ -107,6 +111,7 @@ function buildRecentTrend(
 }
 
 export function useRecruiterDashboard() {
+  const [groupBy, setGroupBy] = useState<"week" | "month" | "quarter" | "year">("week");
   const [state, setState] = useState<RecruiterDashboardState>({
     applications: [],
     error: null,
@@ -145,13 +150,13 @@ export function useRecruiterDashboard() {
         const [
           recruiter,
           jobsResult,
-          allAppsResult,
           newApplicants,
           interviewsResult,
+          overviewResult,
+          trendResult,
         ] = await Promise.all([
           fetchCurrentUser(),
           fetchRecruiterJobs({ page: 1, limit: 12 }),
-          fetchAllRecruiterJobApplications({ page: 1, limit: 100 }),
           fetchRecruiterNewApplicants({ limit: 6 }),
           fetchRecruiterInterviews({
             page: 1,
@@ -160,6 +165,8 @@ export function useRecruiterDashboard() {
             to: endOfToday,
             sortOrder: "ASC",
           }),
+          fetchRecruiterAnalyticsOverview(),
+          fetchRecruiterAnalyticsTrend(groupBy),
         ]);
 
         const sortedJobs = [...jobsResult.jobs].sort(
@@ -185,9 +192,6 @@ export function useRecruiterDashboard() {
         }
 
         const applications = newApplicants.map(mapApplicationSummary);
-        const allApplications = allAppsResult.applications.map(
-          mapApplicationSummary,
-        );
 
         const jobOverviews = applicationSnapshots.map((snapshot) => {
           const scores = snapshot.applications
@@ -217,20 +221,13 @@ export function useRecruiterDashboard() {
           jobOverviews,
           loading: false,
           metrics: {
-            totalJobs: sortedJobs.length,
-            openJobs: sortedJobs.filter((job) => job.status === EJobStatus.OPEN)
-              .length,
-            totalApplications:
-              allAppsResult.pagination?.totalItems || allApplications.length,
-            interviewApplications: allApplications.filter(
-              (application) =>
-                application.status === EJobApplicationStatus.INTERVIEW,
-            ).length,
+            totalJobs: overviewResult.totalJobs,
+            openJobs: overviewResult.openJobs,
+            totalApplications: overviewResult.totalApplications,
+            interviewApplications: overviewResult.upcomingInterviews,
           },
           recruiter,
-          trend: allApplications.length
-            ? buildRecentTrend(allApplications)
-            : EMPTY_TREND,
+          trend: trendResult.items || EMPTY_TREND,
           todayInterviews: interviewsResult.applications,
         });
       } catch (error) {
@@ -243,7 +240,7 @@ export function useRecruiterDashboard() {
           error:
             error instanceof Error
               ? error.message
-              : "Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c dashboard recruiter.",
+              : "Không tải được dashboard recruiter.",
           loading: false,
         }));
       }
@@ -256,5 +253,35 @@ export function useRecruiterDashboard() {
     };
   }, []);
 
-  return state;
+  // Tải lại trend khi thay đổi groupBy
+  useEffect(() => {
+    if (state.loading) return;
+    let cancelled = false;
+
+    async function loadTrendOnly() {
+      try {
+        const trendResult = await fetchRecruiterAnalyticsTrend(groupBy);
+        if (!cancelled) {
+          setState((prev) => ({
+            ...prev,
+            trend: trendResult.items || EMPTY_TREND,
+          }));
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải dữ liệu xu hướng:", err);
+      }
+    }
+
+    void loadTrendOnly();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupBy]);
+
+  return {
+    ...state,
+    groupBy,
+    setGroupBy,
+  };
 }

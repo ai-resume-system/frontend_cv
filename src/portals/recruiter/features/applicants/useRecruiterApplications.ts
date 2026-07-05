@@ -14,13 +14,25 @@ import { EJobApplicationStatus } from "@/shared/constants/enums/job-application.
 interface UseRecruiterApplicationsOptions {
   jobId?: string;
   status?: EJobApplicationStatus;
+  q?: string;
+  sortBy?: "createdAt" | "matchingScore";
+  sortOrder?: "ASC" | "DESC";
+  page?: number;
+  limit?: number;
 }
 
 export function useRecruiterApplications({
   jobId,
   status,
+  q,
+  sortBy,
+  sortOrder,
+  page = 1,
+  limit = 10,
 }: UseRecruiterApplicationsOptions = {}) {
   const [applications, setApplications] = useState<RecruiterApplicationApiItem[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,21 +40,25 @@ export function useRecruiterApplications({
     setLoading(true);
     setError(null);
     try {
-      const params: { page?: number; limit?: number; status?: EJobApplicationStatus } = {
-        page: 1,
-        limit: 100,
+      const params: any = {
+        page,
+        limit,
       };
       if (status) params.status = status;
+      if (q) params.q = q;
+      if (sortBy) params.sortBy = sortBy;
+      if (sortOrder) params.sortOrder = sortOrder;
 
-      if (status === EJobApplicationStatus.INTERVIEW) {
-        const result = await fetchRecruiterInterviews({ ...params, jobId });
-        setApplications(result.applications);
-      } else if (jobId) {
+      if (jobId) {
         const result = await fetchApplicationsByJobId(jobId, params);
         setApplications(result.applications);
+        setTotalItems(result.pagination?.totalItems ?? result.applications.length);
+        setTotalPages(result.pagination?.totalPages ?? 1);
       } else {
         const result = await fetchAllRecruiterJobApplications(params);
         setApplications(result.applications);
+        setTotalItems(result.pagination?.totalItems ?? result.applications.length);
+        setTotalPages(result.pagination?.totalPages ?? 1);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải danh sách ứng viên.");
@@ -53,7 +69,7 @@ export function useRecruiterApplications({
 
   useEffect(() => {
     void loadApplications();
-  }, [jobId, status]);
+  }, [jobId, status, q, sortBy, sortOrder, page, limit]);
 
   async function handleReject(id: string) {
     try {
@@ -91,6 +107,8 @@ export function useRecruiterApplications({
 
   return {
     applications,
+    totalItems,
+    totalPages,
     loading,
     error,
     reload: loadApplications,

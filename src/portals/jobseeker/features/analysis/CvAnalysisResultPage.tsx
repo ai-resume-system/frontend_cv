@@ -365,7 +365,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                 <div className="flex items-center gap-2 mb-4">
                   <Bolt className="h-5 w-5 text-primary" />
                   <h5 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
-                    Kỹ năng đã khớp hệ thống
+                    Kỹ năng chính
                   </h5>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -386,7 +386,8 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
               </div>
             ) : null}
 
-            {analysis.otherDetectedSkills && analysis.otherDetectedSkills.length > 0 ? (
+            {analysis.otherDetectedSkills &&
+            analysis.otherDetectedSkills.length > 0 ? (
               <div className="rounded-[28px] bg-surface-container-low p-6 border border-surface-container-high">
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="h-5 w-5 text-primary" />

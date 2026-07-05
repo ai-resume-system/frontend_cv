@@ -81,6 +81,8 @@ export function RecruiterDashboardPage() {
     metrics,
     trend,
     todayInterviews,
+    groupBy,
+    setGroupBy,
   } = useRecruiterDashboard();
 
   const { user } = useCurrentUser();
@@ -225,7 +227,7 @@ export function RecruiterDashboardPage() {
                   {loading ? "..." : metrics.interviewApplications}
                 </p>
                 <Link
-                  href={RECRUITER_ROUTES.APPLICANTS}
+                  href={RECRUITER_ROUTES.INTERVIEWS}
                   className="group flex items-center text-xs font-bold text-tertiary transition-colors hover:opacity-80"
                 >
                   <span>Xem chi tiết</span>
@@ -239,16 +241,30 @@ export function RecruiterDashboardPage() {
         <section className="grid gap-6 items-stretch xl:grid-cols-[1.6fr_1fr]">
           {/* Biểu đồ xu hướng ứng tuyển */}
           <div className="rounded-3xl border border-gray-300 bg-white p-6 shadow-md flex flex-col h-full">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
-                THỐNG KÊ 6 TUẦN GẦN NHẤT
-              </p>
-              <h2 className="mt-1 text-xl font-bold text-on-surface">
-                Xu hướng ứng tuyển
-              </h2>
-              <p className="mt-1 text-xs text-on-surface-variant">
-                Biểu đồ thể hiện sự biến động số lượng hồ sơ nộp vào hệ thống
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
+                  THỐNG KÊ CHI TIẾT
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-on-surface">
+                  Xu hướng ứng tuyển
+                </h2>
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Biểu đồ thể hiện sự biến động số lượng hồ sơ nộp vào hệ thống
+                </p>
+              </div>
+              <div>
+                <select
+                  value={groupBy}
+                  onChange={(e) => setGroupBy(e.target.value as any)}
+                  className="rounded-2xl border border-outline-variant/35 bg-surface px-4 py-2 text-sm text-on-surface focus:border-primary focus:outline-none transition-all duration-200 outline-none cursor-pointer"
+                >
+                  <option value="week">Xem theo Tuần</option>
+                  <option value="month">Xem theo Tháng</option>
+                  <option value="quarter">Xem theo Quý</option>
+                  <option value="year">Xem theo Năm</option>
+                </select>
+              </div>
             </div>
 
             <div className="mt-6 w-full h-72 flex-1 min-h-70">
@@ -441,7 +457,9 @@ export function RecruiterDashboardPage() {
                           type="button"
                           onClick={() => {
                             const fullJob = jobs?.find((j) => j.id === job.id);
-                            setPreviewJob(fullJob || jobOverviewToJobShape(job));
+                            setPreviewJob(
+                              fullJob || jobOverviewToJobShape(job),
+                            );
                           }}
                           className="shrink-0 rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-primary-soft hover:text-primary"
                           title="Xem bài đăng"

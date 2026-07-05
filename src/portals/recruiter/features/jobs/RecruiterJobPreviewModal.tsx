@@ -111,7 +111,7 @@ export function RecruiterJobPreviewModal({
             <h2 className="text-xl font-bold text-on-surface">
               Bản xem trước tin tuyển dụng
             </h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">
+            <p className="text-sm text-on-surface-variant mt-0.5">
               Hiển thị chính xác cách ứng viên nhìn thấy bài đăng của bạn trên
               hệ thống.
             </p>
@@ -505,7 +505,7 @@ export function RecruiterJobPreviewModal({
                   showErrorToast(
                     err instanceof Error
                       ? err.message
-                      : "Không thể đóng tin tuyển dụng."
+                      : "Không thể đóng tin tuyển dụng.",
                   );
                 } finally {
                   setClosing(false);

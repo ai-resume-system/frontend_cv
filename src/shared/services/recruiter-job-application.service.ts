@@ -13,6 +13,7 @@ export interface FetchRecruiterJobApplicationsParams {
   page?: number;
   limit?: number;
   status?: EJobApplicationStatus;
+  q?: string;
   sortBy?: "createdAt" | "matchingScore";
   sortOrder?: "ASC" | "DESC";
 }
@@ -54,6 +55,7 @@ function buildRecruiterJobApplicationsPath(
     page = 1,
     limit = 20,
     status,
+    q,
     sortBy,
     sortOrder,
   }: FetchRecruiterJobApplicationsParams = {},
@@ -64,6 +66,7 @@ function buildRecruiterJobApplicationsPath(
   });
 
   if (status) searchParams.set("status", status);
+  if (q) searchParams.set("q", q);
   if (sortBy) searchParams.set("sortBy", sortBy);
   if (sortOrder) searchParams.set("sortOrder", sortOrder);
 

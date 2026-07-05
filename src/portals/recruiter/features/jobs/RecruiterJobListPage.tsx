@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { showSuccessToast, showErrorToast } from "@/shared/lib/ui/toast";
+import { showConfirmAlert } from "@/shared/lib/ui/alert";
 import { RecruiterWorkspaceShell } from "@/portals/recruiter/components/RecruiterWorkspaceShell";
 import { useRecruiterJobList } from "@/portals/recruiter/features/jobs/useRecruiterJobList";
 import { BaseTable, BaseTableColumn } from "@/shared/components/ui/BaseTable";
@@ -335,7 +336,15 @@ export function RecruiterJobListPage() {
       className: "text-right",
       render: (job) => (
         <div className="flex items-center justify-end gap-2">
-          {/* Nút Xem ứng viên - Truyền kèm backUrl chứa đầy đủ các bộ lọc hiện tại */}
+          <button
+            type="button"
+            onClick={() => setPreviewJob(job)}
+            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+            title="Xem bài đăng"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+
           <Link
             href={`${RECRUITER_ROUTES.APPLICANTS_BY_JOB(job.id)}?backUrl=${encodeURIComponent(
               searchParams.toString()
@@ -348,17 +357,6 @@ export function RecruiterJobListPage() {
             <BriefcaseBusiness className="h-4 w-4" />
           </Link>
 
-          {/* Nút Xem preview bài đăng */}
-          <button
-            type="button"
-            onClick={() => setPreviewJob(job)}
-            className="rounded-xl border border-outline-variant/30 p-2 text-on-surface-variant transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-            title="Xem bài đăng"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-
-          {/* Nút Chỉnh sửa */}
           {job.status !== EJobStatus.CLOSED &&
             job.status !== EJobStatus.REJECTED && (
               <Link
@@ -370,7 +368,6 @@ export function RecruiterJobListPage() {
               </Link>
             )}
 
-          {/* Nút Đóng tin */}
           {job.status === EJobStatus.OPEN && (
             <button
               type="button"
@@ -385,16 +382,17 @@ export function RecruiterJobListPage() {
             </button>
           )}
 
-          {/* Nút Xóa tin */}
           {job.status === EJobStatus.DRAFT && (
             <button
               type="button"
               onClick={async () => {
-                if (
-                  window.confirm(
-                    "Bạn có chắc chắn muốn xóa tin tuyển dụng này?",
-                  )
-                ) {
+                const result = await showConfirmAlert({
+                  title: "Xác nhận xóa tin tuyển dụng?",
+                  text: "Bạn có chắc chắn muốn xóa tin tuyển dụng này không? Thao tác này không thể hoàn tác.",
+                  confirmButtonText: "Xóa",
+                  cancelButtonText: "Hủy",
+                });
+                if (result.isConfirmed) {
                   try {
                     await handleDelete(job.id);
                     showSuccessToast("Xóa tin tuyển dụng thành công.");
@@ -421,6 +419,7 @@ export function RecruiterJobListPage() {
   return (
     <RecruiterWorkspaceShell
       heading="Danh sách tin tuyển dụng"
+      subheading="Quản lý và theo dõi các tin tuyển dụng của công ty"
       action={
         <Link href={RECRUITER_ROUTES.JOB_CREATE}>
           <BaseButton startIcon={<Plus className="h-4 w-4" />}>
@@ -436,7 +435,6 @@ export function RecruiterJobListPage() {
           </div>
         ) : null}
 
-        {/* 3 Thẻ chỉ số trạng thái tin */}
         <section className="grid gap-4 md:grid-cols-3">
           <div className="rounded-3xl border border-white/80 bg-white/85 p-5 shadow-sm flex items-center gap-4 transition hover:shadow-md">
             <div className="rounded-2xl bg-green-200 p-3.5 text-green-600">
@@ -769,7 +767,7 @@ export function RecruiterJobListPage() {
                   showErrorToast(
                     err instanceof Error
                       ? err.message
-                      : "Không thể đóng tin tuyển dụng."
+                      : "Không thể đóng tin tuyển dụng.",
                   );
                 } finally {
                   setSubmittingClose(false);

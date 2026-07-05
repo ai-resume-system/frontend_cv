@@ -134,8 +134,8 @@ export function RecruiterSidebar({
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="flex h-12 w-12 items-center justify-center border border-outline-variant/60 bg-white rounded-full overflow-hidden shrink-0 shadow-xs">
               <img
                 src={user?.company?.logoUrl ?? "/logo.png"}
@@ -155,7 +155,7 @@ export function RecruiterSidebar({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center text-white/70 hover:text-white shrink-0"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white transition duration-150 shrink-0"
           >
             <X className="h-5 w-5" />
           </button>
