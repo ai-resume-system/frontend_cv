@@ -41,7 +41,7 @@ function isHotJob(createdAt?: Date | string | null): boolean {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = diffMs / 86400000;
-  return diffDays <= 14; // Trong vòng 14 ngày (2 tuần)
+  return diffDays <= 14; // 14 ngày
 }
 
 function formatRelativeTime(value?: Date | string | null): string {
