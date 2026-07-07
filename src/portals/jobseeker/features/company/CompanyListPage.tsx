@@ -141,7 +141,7 @@ export function CompanyListPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase">
-            DANH SÁCH CÁC CÔNG TY NỔI BẬT ({totalItems} công ty)
+            DANH SÁCH CÁC CÔNG TY ({totalItems} công ty)
           </h2>
           <div className="flex items-center gap-2">
             <button
