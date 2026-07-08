@@ -77,7 +77,7 @@ export function SearchStatsDashboard({
             <Search className="absolute left-4 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Vị trí tuyển dụng, tên công ty..."
+              placeholder="Tin tuyển dụng, tên công ty..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full bg-transparent py-3 pl-12 pr-10 font-sans text-sm text-gray-800 focus:outline-none placeholder:text-gray-400"

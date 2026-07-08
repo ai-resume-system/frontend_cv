@@ -534,7 +534,7 @@ export function CvAnalysisResultPage({ cvId }: CvAnalysisResultPageProps) {
                   Việc làm phù hợp cho bạn
                 </h5>
                 <p className="text-xs text-slate-400 mt-1">
-                  Dựa trên lịch sử tìm kiếm và phân tích năng lực cá nhân.
+                  Dựa trên yêu cầu của công việc và kinh nghiệm của bạn.
                 </p>
               </div>
               <Link
