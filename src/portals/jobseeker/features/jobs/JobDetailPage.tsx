@@ -265,9 +265,11 @@ export function JobDetailPage({ job, relatedJobs }: JobDetailPageProps) {
                       icon: ClipboardClock,
                       label: "Kinh nghiệm",
                       value:
-                        job.experienceYears === 0
-                          ? "Không yêu cầu"
-                          : `${job.experienceYears} năm`,
+                        job.experienceYears &&
+                        job.experienceYears !== 0 &&
+                        job.experienceYears !== null
+                          ? `${job.experienceYears} năm`
+                          : "Không yêu cầu",
                     },
                   ].map((item, idx) => (
                     <div
